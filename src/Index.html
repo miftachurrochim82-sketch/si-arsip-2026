@@ -140,9 +140,10 @@
   <script src="https://cdn.jsdelivr.net/gh/miftachurrochim82-sketch/frontend-cdn@v2.8.1/frontend/app-core.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/miftachurrochim82-sketch/frontend-cdn@v2.8.1/frontend/app-modules.min.js"></script>
 
-  <!-- Logika aplikasi: modul J_* (urutan WAJIB: State -> Api -> App) -->
+  <!-- Logika aplikasi: modul J_* (urutan WAJIB: State -> Api -> Actions -> App) -->
   <?!= include('J_State'); ?>
   <?!= include('J_Api'); ?>
+  <?!= include('J_Actions'); ?>
   <?!= include('J_App'); ?>
 </body>
 </html>
