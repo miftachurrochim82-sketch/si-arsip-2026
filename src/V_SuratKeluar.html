@@ -1,0 +1,93 @@
+<!-- ============================================================
+     SI-ARSIP - V_SuratKeluar.html (tahap 2b, 2026-09-20)
+     Register surat keluar: nomor auto <kode_klas>/<urut:3>/
+     <kode_unit>/<tahun>, status flow draft→review→terkirim
+     (sk_ubah_status), penandatangan dari M_PEJABAT.
+     ============================================================ -->
+<section v-if="currentPage === 'surat_keluar'" class="space-y-4 animate-fade-in">
+
+  <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+    <div>
+      <h2 class="text-2xl font-bold tracking-tight flex items-center gap-2 text-slate-800 dark:text-white">
+        <i class="fa-solid fa-paper-plane text-emerald-600 dark:text-emerald-400"></i> Surat Keluar
+      </h2>
+      <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+        Penomoran otomatis, penandatangan pejabat, dan alur draft → review → terkirim.
+      </p>
+    </div>
+    <button class="btn btn-primary" @click="skOpenForm(null)">
+      <i class="fa-solid fa-plus"></i> Surat Keluar Baru
+    </button>
+  </div>
+
+  <app-filter-bar :filters="[
+    { key: 'search', label: 'Pencarian', type: 'text', placeholder: 'Cari nomor, tujuan, perihal...', span: 2 },
+    { key: 'tanggal_dari', label: 'Tanggal dari', type: 'date' },
+    { key: 'tanggal_sampai', label: 'Tanggal sampai', type: 'date' },
+    { key: 'kode_klasifikasi', label: 'Klasifikasi', type: 'select',
+      options: (klasifikasiList || []).map(k => ({ value: k.kode_klasifikasi, label: k.kode_klasifikasi + ' — ' + (k.uraian || '') })) },
+    { key: 'status_surat', label: 'Status', type: 'select',
+      options: [{ value: 'draft', label: 'Draft' }, { value: 'review', label: 'Review' }, { value: 'terkirim', label: 'Terkirim' }] }
+  ]" v-model="skFilters" @change="onSkFilterChange" @reset="loadSk(1)"></app-filter-bar>
+
+  <div class="card overflow-hidden !p-0">
+    <app-skeleton v-if="skLoading && !skList.length" type="table"></app-skeleton>
+    <app-empty-state v-else-if="!skList.length"
+                     icon="fa-solid fa-paper-plane"
+                     title="Belum ada surat keluar"
+                     subtitle="Nomor surat keluar dihasilkan otomatis saat draft pertama disimpan.">
+    </app-empty-state>
+    <div v-else class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Nomor / Tanggal</th>
+            <th>Tujuan & Perihal</th>
+            <th>Klasifikasi</th>
+            <th>Penandatangan</th>
+            <th>Status</th>
+            <th class="text-right">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="r in skList" :key="r.id">
+            <td class="whitespace-nowrap">
+              <div class="font-black text-slate-800 dark:text-slate-100">{{ r.nomor_surat }}</div>
+              <div class="text-[11px] text-slate-400">{{ fmtTgl(r.tanggal_surat) }}</div>
+            </td>
+            <td>
+              <div class="font-semibold text-slate-700 dark:text-slate-200">{{ r.tujuan }}</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">{{ r.perihal }}</div>
+              <app-badge v-if="r.sifat && r.sifat !== 'biasa'" size="sm"
+                         :status="r.sifat === 'rahasia' ? 'ditolak' : 'menunggu'" :label="r.sifat"></app-badge>
+            </td>
+            <td class="text-xs">{{ smLabelKlasifikasi(r.kode_klasifikasi) }}</td>
+            <td class="text-xs">{{ labelPejabat(r.penandatangan_id) }}</td>
+            <td>
+              <app-badge size="sm"
+                         :status="r.status_surat === 'terkirim' ? 'disetujui' : (r.status_surat === 'review' ? 'menunggu' : '')"
+                         :label="r.status_surat || 'draft'"></app-badge>
+            </td>
+            <td class="text-right whitespace-nowrap">
+              <button v-if="r.status_surat === 'draft'" class="btn-icon" title="Ajukan ke review"
+                      @click="skTransisi(r, 'review')"><i class="fa-solid fa-eye"></i></button>
+              <button v-if="r.status_surat === 'review'" class="btn-icon" title="Tandai terkirim"
+                      @click="skTransisi(r, 'terkirim')"><i class="fa-solid fa-envelope-circle-check"></i></button>
+              <button v-if="r.status_surat !== 'terkirim'" class="btn-icon" title="Ubah"
+                      @click="skOpenForm(r)"><i class="fa-solid fa-pen-to-square"></i></button>
+              <button class="btn-icon-danger" title="Hapus" @click="skDelete(r)"><i class="fa-solid fa-trash-can"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div v-if="skTotalPages > 1" class="flex items-center justify-between px-4 py-3 border-t border-slate-100 dark:border-slate-800 text-xs">
+      <span class="text-slate-500 dark:text-slate-400">Halaman {{ skPage }} / {{ skTotalPages }} — {{ skTotalData }} surat</span>
+      <div class="flex gap-1">
+        <button class="btn-icon" :disabled="skPage <= 1" @click="loadSk(skPage - 1)"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="btn-icon" :disabled="skPage >= skTotalPages" @click="loadSk(skPage + 1)"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+</section>
