@@ -1,0 +1,314 @@
+<!-- ============================================================
+     SI-ARSIP - V_Modals.html (tahap 2b, 2026-09-20)
+     Enam modal form satu aplikasi (pola si-lahar): surat masuk,
+     disposisi, surat keluar, klasifikasi, pejabat, template.
+     Semua <app-modal> dengan footer built-in (@confirm).
+     ============================================================ -->
+
+<!-- ========== 1. MODAL FORM SURAT MASUK ========== -->
+<app-modal :show="showSmForm"
+           :title="smForm.id ? 'Ubah Surat Masuk' : 'Registrasi Surat Masuk'"
+           subtitle="Nomor agenda masuk dihasilkan otomatis oleh server (format Permendagri 78/2012)."
+           icon="fa-solid fa-inbox" size="2xl" :loading="smSaving"
+           confirm-text="Simpan Surat" cancel-text="Batal"
+           @close="showSmForm = false" @confirm="smSave()">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label class="form-label">Nomor surat asli *</label>
+      <input class="input w-full" v-model.trim="smForm.nomor_surat" placeholder="mis. 005/1234/VII/2026">
+    </div>
+    <div>
+      <label class="form-label">Asal surat *</label>
+      <input class="input w-full" v-model.trim="smForm.asal" placeholder="instansi / perorangan pengirim">
+    </div>
+    <div>
+      <label class="form-label">Tanggal surat</label>
+      <input class="input w-full" type="date" v-model="smForm.tanggal_surat">
+    </div>
+    <div>
+      <label class="form-label">Tanggal diterima</label>
+      <input class="input w-full" type="date" v-model="smForm.tanggal_terima">
+    </div>
+    <div class="md:col-span-2">
+      <label class="form-label">Perihal *</label>
+      <input class="input w-full" v-model.trim="smForm.perihal" placeholder="ringkasan isi surat">
+    </div>
+    <div>
+      <label class="form-label">Kode klasifikasi ANRI *</label>
+      <select class="input w-full" v-model="smForm.kode_klasifikasi">
+        <option value="">— pilih —</option>
+        <option v-for="k in klasifikasiList" :key="k.id" :value="k.kode_klasifikasi">
+          {{ k.kode_klasifikasi }} — {{ k.uraian }}
+        </option>
+      </select>
+    </div>
+    <div>
+      <label class="form-label">Sifat</label>
+      <select class="input w-full" v-model="smForm.sifat">
+        <option value="biasa">Biasa</option>
+        <option value="segera">Segera</option>
+        <option value="rahasia">Rahasia</option>
+      </select>
+    </div>
+    <div>
+      <label class="form-label">Jumlah lampiran</label>
+      <input class="input w-full" type="number" min="0" v-model.number="smForm.jumlah_lampiran">
+    </div>
+    <div>
+      <label class="form-label">Status</label>
+      <select class="input w-full" v-model="smForm.status_surat" :disabled="!smForm.id">
+        <option value="baru">Baru</option>
+        <option value="didiposisi">Didisposisi</option>
+        <option value="selesai">Selesai</option>
+      </select>
+      <p v-if="!smForm.id" class="text-[11px] text-slate-400 mt-1">
+        Surat baru selalu berstatus awal "baru"; transisi lewat aksi disposisi.
+      </p>
+    </div>
+    <div class="md:col-span-2">
+      <label class="form-label">Tautan lampiran (opsional — fase 1 berupa link)</label>
+      <input class="input w-full" v-model.trim="smForm.lampiran_link" placeholder="https://drive.google.com/...">
+    </div>
+    <div class="md:col-span-2">
+      <label class="form-label">Catatan</label>
+      <textarea class="input w-full" rows="3" v-model.trim="smForm.catatan"></textarea>
+    </div>
+  </div>
+</app-modal>
+
+<!-- ========== 2. MODAL FORM DISPOSISI ========== -->
+<app-modal :show="showDpForm"
+           :title="dpForm.id ? 'Ubah Disposisi' : 'Disposisikan Surat'"
+           subtitle="Disposisi baru otomatis berstatus 'diteruskan' dan surat induk jadi 'didiposisi'."
+           icon="fa-solid fa-share-nodes" size="lg" :loading="dpSaving"
+           confirm-text="Kirim Disposisi" cancel-text="Batal"
+           @close="showDpForm = false" @confirm="dpSave()">
+  <div class="space-y-4">
+    <div class="rounded-lg bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800 px-3 py-2 text-xs text-sky-800 dark:text-sky-200">
+      <i class="fa-solid fa-inbox mr-1"></i> Surat induk: <b>{{ labelSurat(dpForm.surat_id) }}</b>
+    </div>
+    <div>
+      <label class="form-label">Pejabat tujuan *</label>
+      <select class="input w-full" v-model="dpForm.ke_pejabat_id">
+        <option value="">— pilih pejabat —</option>
+        <option v-for="p in pejabatList.filter(x => String(x.aktif) !== 'false')" :key="p.id" :value="p.id">
+          {{ labelPejabat(p.id) }}
+        </option>
+      </select>
+    </div>
+    <div>
+      <label class="form-label">Instruksi *</label>
+      <textarea class="input w-full" rows="3" v-model.trim="dpForm.instruksi"
+                placeholder="mis. Telaah dan siapkan bahan jawaban, laporkan sebelum tenggat."></textarea>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="form-label">Jatuh tempo (SLA)</label>
+        <input class="input w-full" type="date" v-model="dpForm.jatuh_tempo">
+        <p class="text-[11px] text-slate-400 mt-1">Kosongkan = tanpa tenggat; SLA bawaan 2 hari kerja (Pengaturan).</p>
+      </div>
+      <div>
+        <label class="form-label">Catatan internal</label>
+        <input class="input w-full" v-model.trim="dpForm.catatan">
+      </div>
+    </div>
+  </div>
+</app-modal>
+
+<!-- ========== 3. MODAL FORM SURAT KELUAR ========== -->
+<app-modal :show="showSkForm"
+           :title="skForm.id ? 'Ubah Surat Keluar' : 'Surat Keluar Baru'"
+           subtitle="Nomor keluar otomatis: <kode_klas>/<urut:3>/<kode_unit>/<tahun>."
+           icon="fa-solid fa-paper-plane" size="2xl" :loading="skSaving"
+           confirm-text="Simpan Draft" cancel-text="Batal"
+           @close="showSkForm = false" @confirm="skSave()">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label class="form-label">Tujuan *</label>
+      <input class="input w-full" v-model.trim="skForm.tujuan" placeholder="instansi / perorangan penerima">
+    </div>
+    <div>
+      <label class="form-label">Tanggal surat</label>
+      <input class="input w-full" type="date" v-model="skForm.tanggal_surat">
+    </div>
+    <div class="md:col-span-2">
+      <label class="form-label">Perihal *</label>
+      <input class="input w-full" v-model.trim="skForm.perihal" placeholder="ringkasan isi surat">
+    </div>
+    <div>
+      <label class="form-label">Kode klasifikasi ANRI *</label>
+      <select class="input w-full" v-model="skForm.kode_klasifikasi">
+        <option value="">— pilih —</option>
+        <option v-for="k in klasifikasiList" :key="k.id" :value="k.kode_klasifikasi">
+          {{ k.kode_klasifikasi }} — {{ k.uraian }}
+        </option>
+      </select>
+    </div>
+    <div>
+      <label class="form-label">Penandatangan *</label>
+      <select class="input w-full" v-model="skForm.penandatangan_id">
+        <option value="">— pilih pejabat —</option>
+        <option v-for="p in pejabatList.filter(x => String(x.aktif) !== 'false')" :key="p.id" :value="p.id">
+          {{ labelPejabat(p.id) }}
+        </option>
+      </select>
+    </div>
+    <div>
+      <label class="form-label">Sifat</label>
+      <select class="input w-full" v-model="skForm.sifat">
+        <option value="biasa">Biasa</option>
+        <option value="segera">Segera</option>
+        <option value="rahasia">Rahasia</option>
+      </select>
+    </div>
+    <div>
+      <label class="form-label">Jumlah lampiran</label>
+      <input class="input w-full" type="number" min="0" v-model.number="skForm.jumlah_lampiran">
+    </div>
+    <div class="md:col-span-2">
+      <label class="form-label">Tautan lampiran (opsional)</label>
+      <input class="input w-full" v-model.trim="skForm.lampiran_link" placeholder="https://drive.google.com/...">
+    </div>
+    <div class="md:col-span-2">
+      <label class="form-label">Catatan</label>
+      <textarea class="input w-full" rows="3" v-model.trim="skForm.catatan"></textarea>
+    </div>
+  </div>
+</app-modal>
+
+<!-- ========== 4. MODAL FORM KLASIFIKASI (M1) ========== -->
+<app-modal :show="showRefForm"
+           :title="refForm.id ? 'Ubah Kode Klasifikasi' : 'Tambah Kode Klasifikasi'"
+           subtitle="Kode mengikuti format ANRI; simpan sebagai teks (mis. 015, bukan 15)."
+           icon="fa-solid fa-tags" size="lg" :loading="refSaving"
+           confirm-text="Simpan Kode" cancel-text="Batal"
+           @close="showRefForm = false" @confirm="refSave()">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label class="form-label">Kode klasifikasi *</label>
+      <input class="input w-full" v-model.trim="refForm.kode_klasifikasi" placeholder="mis. 015">
+    </div>
+    <div>
+      <label class="form-label">Status</label>
+      <select class="input w-full" v-model="refForm.status_aktif">
+        <option value="true">Aktif</option>
+        <option value="false">Nonaktif</option>
+      </select>
+    </div>
+    <div class="md:col-span-2">
+      <label class="form-label">Uraian *</label>
+      <input class="input w-full" v-model.trim="refForm.uraian" placeholder="mis. Surat Perintah Kerja (SPK)">
+    </div>
+    <div>
+      <label class="form-label">Retensi aktif (tahun)</label>
+      <input class="input w-full" type="number" min="0" v-model.number="refForm.retensi_aktif_th">
+    </div>
+    <div>
+      <label class="form-label">Retensi inaktif (tahun)</label>
+      <input class="input w-full" type="number" min="0" v-model.number="refForm.retensi_inaktif_th">
+    </div>
+    <div>
+      <label class="form-label">Tindakan akhir</label>
+      <select class="input w-full" v-model="refForm.tindakan_akhir">
+        <option value="musnah">Musnah</option>
+        <option value="permanen">Permanen (diserahkan)</option>
+      </select>
+    </div>
+    <div class="md:col-span-2">
+      <label class="form-label">Keterangan</label>
+      <input class="input w-full" v-model.trim="refForm.keterangan">
+    </div>
+  </div>
+</app-modal>
+
+<!-- ========== 5. MODAL FORM PEJABAT (M2) ========== -->
+<app-modal :show="showPjbForm"
+           :title="pjbForm.id ? 'Ubah Pejabat' : 'Tambah Pejabat'"
+           subtitle="Pegawai diambil dari SIMPEG (read-only); hierarki 1 = tertinggi."
+           icon="fa-solid fa-user-tie" size="lg" :loading="pjbSaving"
+           confirm-text="Simpan Pejabat" cancel-text="Batal"
+           @close="showPjbForm = false" @confirm="pjbSave()">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="md:col-span-2">
+      <label class="form-label">Pegawai (SIMPEG) *</label>
+      <select class="input w-full" v-model="pjbForm.pegawai_id">
+        <option value="">— pilih pegawai —</option>
+        <option v-for="p in (simpegLookup && simpegLookup.pegawai) || []" :key="p.pegawai_id || p.id"
+                :value="p.pegawai_id || p.id">
+          {{ p.nama || p.nama_lengkap || p.pegawai_id }} {{ p.nip ? '(' + p.nip + ')' : '' }}
+        </option>
+      </select>
+    </div>
+    <div>
+      <label class="form-label">Jabatan (SIMPEG)</label>
+      <select class="input w-full" v-model="pjbForm.jabatan_id">
+        <option value="">— tanpa jabatan —</option>
+        <option v-for="j in (simpegLookup && simpegLookup.jabatan) || []" :key="j.jabatan_id || j.id"
+                :value="j.jabatan_id || j.id">
+          {{ j.nama_jabatan || j.nama || j.jabatan || j.jabatan_id || j.id }}
+        </option>
+      </select>
+    </div>
+    <div>
+      <label class="form-label">Urutan hierarki</label>
+      <input class="input w-full" type="number" min="1" v-model.number="pjbForm.urutan_hierarki">
+    </div>
+    <div>
+      <label class="form-label">Status</label>
+      <select class="input w-full" v-model="pjbForm.aktif">
+        <option value="true">Aktif</option>
+        <option value="false">Nonaktif</option>
+      </select>
+    </div>
+    <div class="md:col-span-2">
+      <label class="form-label">Keterangan</label>
+      <input class="input w-full" v-model.trim="pjbForm.keterangan">
+    </div>
+  </div>
+</app-modal>
+
+<!-- ========== 6. MODAL FORM TEMPLATE (M3) ========== -->
+<app-modal :show="showTplForm"
+           :title="tplForm.id ? 'Ubah Template' : 'Tambah Template'"
+           subtitle="Template naskah dipakai fase lanjut (pembuatan naskah dari contoh)."
+           icon="fa-solid fa-file-lines" size="lg" :loading="tplSaving"
+           confirm-text="Simpan Template" cancel-text="Batal"
+           @close="showTplForm = false" @confirm="tplSave()">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label class="form-label">Kode template *</label>
+      <input class="input w-full" v-model.trim="tplForm.kode_template" placeholder="mis. TPL-ST-01">
+    </div>
+    <div>
+      <label class="form-label">Jenis naskah *</label>
+      <select class="input w-full" v-model="tplForm.jenis_naskah">
+        <option value="surat_masuk">Surat masuk</option>
+        <option value="surat_keluar">Surat keluar</option>
+        <option value="nota_dinas">Nota dinas</option>
+        <option value="memo">Memo</option>
+        <option value="laporan">Laporan</option>
+        <option value="lainnya">Lainnya</option>
+      </select>
+    </div>
+    <div class="md:col-span-2">
+      <label class="form-label">Nama template *</label>
+      <input class="input w-full" v-model.trim="tplForm.nama_template" placeholder="mis. Surat Tugas Patroli">
+    </div>
+    <div class="md:col-span-2">
+      <label class="form-label">Format default (teks/JSON)</label>
+      <textarea class="input w-full" rows="3" v-model.trim="tplForm.format_default"
+                placeholder='mis. { "kop": "PEMERINTAH KAB. ...", "footer": "..." }'></textarea>
+    </div>
+    <div>
+      <label class="form-label">Status</label>
+      <select class="input w-full" v-model="tplForm.status_aktif">
+        <option value="true">Aktif</option>
+        <option value="false">Nonaktif</option>
+      </select>
+    </div>
+    <div>
+      <label class="form-label">Keterangan</label>
+      <input class="input w-full" v-model.trim="tplForm.keterangan">
+    </div>
+  </div>
+</app-modal>
