@@ -136,6 +136,24 @@ function buildLocalHandlers_() {
   h['tpl_save']     = function (d, u) { return masterTemplateSave_(d || {}, u); };
   h['tpl_delete']   = function (d, u) { return masterTemplateDelete_(d || {}, u); };
 
+  // ---------- Fase 2: Naskah Dinas (06_NaskahApi.gs) ----------
+  h['nd_get_list']    = function (d, u) { return ndGetList_(d || {}, u); };
+  h['nd_get_detail']  = function (d, u) { return ndGetDetail_(d || {}, u); };
+  h['nd_save']        = function (d, u) { return ndSave_(d || {}, u); };
+  h['nd_ubah_status'] = function (d, u) { return ndUbahStatus_(d || {}, u); };
+  h['nd_delete']      = function (d, u) { return ndDelete_(d || {}, u); };
+
+  // ---------- Fase 2: Kearsipan (07_KearsipanApi.gs) ----------
+  h['ar_get_list']        = function (d, u) { return arGetList_(d || {}, u); };
+  h['ar_get_detail']      = function (d, u) { return arGetDetail_(d || {}, u); };
+  h['ar_get_akan_musnah'] = function (d, u) { return arGetAkanMusnah_(d || {}, u); };
+  h['ar_ubah_lokasi']     = function (d, u) { return arUbahLokasi_(d || {}, u); };
+  h['ar_tandai_musnah']   = function (d, u) { return arTandaiMusnah_(d || {}, u); };
+  h['ar_tandai_serah']    = function (d, u) { return arTandaiSerah_(d || {}, u); };
+
+  // ---------- Fase 2: Pencarian lintas (08_PencarianApi.gs) ----------
+  h['search_all'] = function (d, u) { return searchAll_(d || {}, u); };
+
   // ---------- Konfigurasi (Script Properties) ----------
   h['get_config']         = function () { return getConfigList_(); };
   h['get_config_list']    = function () { return getConfigList_(); };
