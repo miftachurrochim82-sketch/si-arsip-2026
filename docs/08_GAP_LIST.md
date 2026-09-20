@@ -1,7 +1,10 @@
 # 08 — GAP LIST (as-is → to-be) [SI-ARSIP] — 2026-09-20
 
-> **Status per 2026-09-20**: aplikasi **baru dimulai** — semua fitur di BRD/PRD/FRD
-> berstatus **RENCANA** atau **BACKLOG** (belum ada kode). Dokumen ini adalah
+> **Status per 2026-09-20 (amendemen malam)**: backend **sebagian dimulai** —
+> API Surat Masuk/Keluar/Disposisi/Dashboard/Master/Config + `99_TestSuite.gs`
+> sudah ada; frontend **belum dimulai** (nol berkas HTML); `appsscript.json`
+> ditambahkan 2026-09-20 (CoreLib pin 15). Fitur yang belum berkode tetap
+> berstatus **RENCANA/BACKLOG** pada tabel di bawah. Dokumen ini adalah
 > **baseline tracking** untuk seluruh roadmap SI-ARSIP.
 >
 > **Riwayat**:
