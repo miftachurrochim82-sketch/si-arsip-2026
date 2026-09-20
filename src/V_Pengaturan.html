@@ -1,0 +1,17 @@
+<!-- ============================================================
+     SI-ARSIP - V_Pengaturan.html (v1 shell, 2026-09-20)
+     Wrapper modul kit <app-settings> (app-modules.js CDN v2.8.1).
+     Self-contained: mounted() auto load get_config; CRUD config
+     via CoreLib gateway, dikunci admin. Pola identik si-lahar &
+     si-kompetensi (mazhab config = sheet KONFIGURASI).
+     ============================================================ -->
+<section v-if="currentPage === 'pengaturan'" class="space-y-6 animate-fade-in">
+  <app-settings v-if="isAdmin"></app-settings>
+
+  <!-- Fallback non-admin (seharusnya tak muncul — menu adminOnly) -->
+  <app-empty-state v-else
+                   icon="fa-solid fa-shield-halved"
+                   title="Akses Terbatas"
+                   subtitle="Halaman Pengaturan hanya dapat diakses oleh Administrator SI-ARSIP.">
+  </app-empty-state>
+</section>
