@@ -267,7 +267,85 @@
   </div>
 </app-modal>
 
-<!-- ========== 6. MODAL FORM TEMPLATE (M3) ========== -->
+<!-- ========== 6. MODAL FORM NASKAH DINAS ========== -->
+<app-modal :show="showNdForm"
+           :title="ndForm.id ? 'Ubah Naskah Dinas' : 'Naskah Dinas Baru'"
+           subtitle="Nomor otomatis per jenis (ND/MEMO/LAP/NSK). Final = otomatis terarsipkan."
+           icon="fa-solid fa-file-pen" size="2xl" :loading="ndSaving"
+           confirm-text="Simpan Naskah" cancel-text="Batal"
+           @close="showNdForm = false" @confirm="ndSave()">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label class="form-label">Jenis naskah</label>
+      <select class="input w-full" v-model="ndForm.jenis_naskah" :disabled="!!ndForm.id">
+        <option value="nota_dinas">Nota dinas</option>
+        <option value="memo">Memo</option>
+        <option value="laporan">Laporan</option>
+        <option value="lainnya">Lainnya</option>
+      </select>
+    </div>
+    <div>
+      <label class="form-label">Tanggal</label>
+      <input class="input w-full" type="date" v-model="ndForm.tanggal" :disabled="!!ndForm.id">
+    </div>
+    <div class="md:col-span-2">
+      <label class="form-label">Perihal *</label>
+      <input class="input w-full" v-model.trim="ndForm.perihal" placeholder="ringkasan isi naskah">
+    </div>
+    <div>
+      <label class="form-label">Tujuan (unit/pejabat)</label>
+      <input class="input w-full" v-model.trim="ndForm.tujuan" placeholder="mis. Kabid Trantib">
+    </div>
+    <div>
+      <label class="form-label">Kode klasifikasi ANRI *</label>
+      <select class="input w-full" v-model="ndForm.kode_klasifikasi">
+        <option value="">— pilih —</option>
+        <option v-for="k in klasifikasiList" :key="k.id" :value="k.kode_klasifikasi">
+          {{ k.kode_klasifikasi }} — {{ k.uraian }}
+        </option>
+      </select>
+    </div>
+    <div class="md:col-span-2">
+      <label class="form-label">Isi naskah</label>
+      <textarea class="input w-full" rows="6" v-model.trim="ndForm.isi"
+                placeholder="Tulis isi nota/memo/laporan di sini..."></textarea>
+    </div>
+    <div class="md:col-span-2">
+      <label class="form-label">Tautan lampiran (opsional)</label>
+      <input class="input w-full" v-model.trim="ndForm.lampiran_link" placeholder="https://drive.google.com/...">
+    </div>
+  </div>
+</app-modal>
+
+<!-- ========== 7. MODAL AKSI ARSIP (lokasi / musnah / serah) ========== -->
+<app-modal :show="arAksiMode !== ''"
+           :title="arAksiMode === 'lokasi' ? 'Ubah Lokasi Fisik' : (arAksiMode === 'serah' ? 'Serahkan Arsip (Permanen)' : 'Musnahkan Arsip')"
+           :subtitle="arAksiMode === 'lokasi' ? 'Format: ruang-rak-box-folder.' : 'Wajib mencantumkan nomor BA / keterangan resmi (FR-33, admin).'"
+           :icon="arAksiMode === 'lokasi' ? 'fa-solid fa-location-dot' : (arAksiMode === 'serah' ? 'fa-solid fa-landmark' : 'fa-solid fa-fire')"
+           size="lg"
+           :confirm-text="arAksiMode === 'lokasi' ? 'Simpan Lokasi' : (arAksiMode === 'serah' ? 'Serahkan' : 'Musnahkan')"
+           cancel-text="Batal"
+           @close="arAksiMode = ''" @confirm="arAksiSubmit()">
+  <div class="space-y-4">
+    <div class="rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs text-slate-600 dark:text-slate-300">
+      <i class="fa-solid fa-box-archive mr-1"></i> {{ arAksiForm.judul || arAksiForm.id }}
+    </div>
+    <div v-if="arAksiMode === 'lokasi'">
+      <label class="form-label">Lokasi fisik *</label>
+      <input class="input w-full" v-model.trim="arAksiForm.lokasi_fisik" placeholder="mis. Ruang A - Rak 2 - Box 5 - Folder 1">
+    </div>
+    <div v-else>
+      <label class="form-label">Nomor BA / keterangan *</label>
+      <textarea class="input w-full" rows="3" v-model.trim="arAksiForm.catatan"
+                :placeholder="arAksiMode === 'serah' ? 'mis. BA serah terima No. 045/BA/X/2026 ke Depo Arsip' : 'mis. BA pemusnahan No. 012/BA/X/2026, saksi: ...'"></textarea>
+      <p v-if="arAksiMode === 'musnah'" class="text-[11px] text-rose-500 mt-1">
+        Aksi ini menutup siklus hidup arsip (status musnah, tidak bisa dibalik).
+      </p>
+    </div>
+  </div>
+</app-modal>
+
+<!-- ========== 8. MODAL FORM TEMPLATE (M3) ========== -->
 <app-modal :show="showTplForm"
            :title="tplForm.id ? 'Ubah Template' : 'Tambah Template'"
            subtitle="Template naskah dipakai fase lanjut (pembuatan naskah dari contoh)."
