@@ -74,6 +74,222 @@ window.ArsipApi = {
       } finally {
         this.klasifikasiLoading = false;
       }
+    },
+
+    // ---------- DISPOSISI (tahap 2b) ----------
+    async loadDp(page) {
+      this.dpLoading = true;
+      if (page) this.dpPage = page;
+      try {
+        const r = await this.callServer('dp_get_list', {
+          filters: this.dpFilters, page: this.dpPage, limit: 10
+        });
+        if (r && r.success) {
+          this.dpList = r.data || [];
+          const m = r.meta || {};
+          this.dpTotalPages = m.totalPages || 1;
+          this.dpTotalData = m.totalData || 0;
+        } else {
+          this.showToast((r && r.error) || 'Gagal memuat disposisi', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      } finally {
+        this.dpLoading = false;
+      }
+    },
+
+    // ---------- SURAT KELUAR (tahap 2b) ----------
+    async loadSk(page) {
+      this.skLoading = true;
+      if (page) this.skPage = page;
+      try {
+        const r = await this.callServer('sk_get_list', {
+          search: (this.skFilters && this.skFilters.search) || '',
+          filters: this.skFilters, page: this.skPage, limit: 10
+        });
+        if (r && r.success) {
+          this.skList = r.data || [];
+          const m = r.meta || {};
+          this.skTotalPages = m.totalPages || 1;
+          this.skTotalData = m.totalData || 0;
+        } else {
+          this.showToast((r && r.error) || 'Gagal memuat surat keluar', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      } finally {
+        this.skLoading = false;
+      }
+    },
+
+    // ---------- MASTER (tahap 2b) ----------
+    async loadRef(force) {
+      if (this.refList.length && !force) return;
+      this.refLoading = true;
+      try {
+        const r = await this.callServer('ref_get_list', {});
+        if (r && r.success) this.refList = r.data || [];
+        else this.showToast((r && r.error) || 'Gagal memuat klasifikasi', 'error');
+      } catch (e) { this.showToast(e.message, 'error'); }
+      finally { this.refLoading = false; }
+    },
+    async loadPjb(force) {
+      if (this.pjbList.length && !force) return;
+      this.pjbLoading = true;
+      try {
+        const r = await this.callServer('pjb_get_list', {});
+        if (r && r.success) this.pjbList = r.data || [];
+        else this.showToast((r && r.error) || 'Gagal memuat pejabat', 'error');
+      } catch (e) { this.showToast(e.message, 'error'); }
+      finally { this.pjbLoading = false; }
+    },
+    async loadTpl(force) {
+      if (this.tplList.length && !force) return;
+      this.tplLoading = true;
+      try {
+        const r = await this.callServer('tpl_get_list', {});
+        if (r && r.success) this.tplList = r.data || [];
+        else this.showToast((r && r.error) || 'Gagal memuat template', 'error');
+      } catch (e) { this.showToast(e.message, 'error'); }
+      finally { this.tplLoading = false; }
+    },
+
+    // ---------- LOOKUP LINTAS-MODUL ----------
+    // M_PEJABAT aktif+nonaktif (select disposisi & penandatangan sk)
+    async loadPejabat() {
+      if (this.pejabatList.length) return;
+      try {
+        const r = await this.callServer('pjb_get_list', {});
+        if (r && r.success) this.pejabatList = r.data || [];
+      } catch (e) { /* senyap: label fallback ke id */ }
+    },
+    // Referensi SIMPEG read-only (nama pegawai/jabatan untuk label)
+    async loadSimpegLookup() {
+      if (this.simpegLookup) return;
+      try {
+        const r = await this.callServer('get_simpeg_lookup', {});
+        if (r && r.success) this.simpegLookup = r.data || { pegawai: [], unit: [], jabatan: [] };
+      } catch (e) { this.simpegLookup = { pegawai: [], unit: [], jabatan: [] }; }
+    },
+    // Peta id→ringkasan surat masuk (join tabel disposisi tanpa N+1 call)
+    async ensureSmMap() {
+      if (this.smMapLoaded) return;
+      try {
+        const r = await this.callServer('sm_get_list', { search: '', filters: {}, page: 1, limit: 500 });
+        if (r && r.success) {
+          const map = {};
+          (r.data || []).forEach(s => { map[s.id] = s; });
+          this.smMap = map;
+          this.smMapLoaded = true;
+        }
+      } catch (e) { /* senyap */ }
+    },
+
+    // ---------- LABEL HELPER (template-safe) ----------
+    labelSurat(id) {
+      const s = this.smMap && this.smMap[id];
+      if (!s) return id || '—';
+      return (s.nomor_agenda_masuk || s.id) + ' · ' + (s.perihal || '');
+    },
+    labelPegawai(pegawaiId) {
+      const l = this.simpegLookup && this.simpegLookup.pegawai;
+      if (!l || !pegawaiId) return '';
+      const p = l.find(x => String(x.pegawai_id || x.id) === String(pegawaiId));
+      return p ? (p.nama || p.nama_lengkap || pegawaiId) : '';
+    },
+    labelJabatan(jabatanId) {
+      const l = this.simpegLookup && this.simpegLookup.jabatan;
+      if (!l || !jabatanId) return '';
+      const j = l.find(x => String(x.jabatan_id || x.id) === String(jabatanId));
+      return j ? (j.nama_jabatan || j.nama || j.jabatan || jabatanId) : '';
+    },
+    labelPejabat(pejabatId) {
+      const p = (this.pejabatList || []).find(x => String(x.id) === String(pejabatId));
+      if (!p) return pejabatId || '—';
+      const nama = this.labelPegawai(p.pegawai_id) || p.pegawai_id || '?';
+      const jab = this.labelJabatan(p.jabatan_id);
+      return jab ? (nama + ' — ' + jab) : nama;
+    },
+
+    // ---------- NASKAH DINAS (v1.1) ----------
+    async loadNd(page) {
+      this.ndLoading = true;
+      if (page) this.ndPage = page;
+      try {
+        const r = await this.callServer('nd_get_list', {
+          search: (this.ndFilters && this.ndFilters.search) || '',
+          filters: this.ndFilters, page: this.ndPage, limit: 10
+        });
+        if (r && r.success) {
+          this.ndList = r.data || [];
+          const m = r.meta || {};
+          this.ndTotalPages = m.totalPages || 1;
+          this.ndTotalData = m.totalData || 0;
+        } else {
+          this.showToast((r && r.error) || 'Gagal memuat naskah dinas', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      } finally {
+        this.ndLoading = false;
+      }
+    },
+
+    // ---------- KEARSIPAN (v1.1) ----------
+    async loadAr(page) {
+      this.arLoading = true;
+      if (page) this.arPage = page;
+      try {
+        const r = await this.callServer('ar_get_list', {
+          search: (this.arFilters && this.arFilters.search) || '',
+          filters: this.arFilters, page: this.arPage, limit: 10
+        });
+        if (r && r.success) {
+          this.arList = r.data || [];
+          const m = r.meta || {};
+          this.arTotalPages = m.totalPages || 1;
+          this.arTotalData = m.totalData || 0;
+        } else {
+          this.showToast((r && r.error) || 'Gagal memuat arsip', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      } finally {
+        this.arLoading = false;
+      }
+    },
+
+    async loadAkanMusnah() {
+      this.akanMusnahLoading = true;
+      try {
+        const r = await this.callServer('ar_get_akan_musnah', {});
+        if (r && r.success) this.akanMusnahList = r.data || [];
+      } catch (e) { /* panel senyap */ }
+      finally { this.akanMusnahLoading = false; }
+    },
+
+    // ---------- PENCARIAN LINTAS (v1.1) ----------
+    async runSearch() {
+      this.searching = true;
+      this.searchDone = false;
+      try {
+        const r = await this.callServer('search_all', {
+          q: this.searchQ, jenis: this.searchJenis,
+          tahun: this.searchTahun, kode_klasifikasi: this.searchKode
+        });
+        if (r && r.success) {
+          this.searchResults = r.data || [];
+          this.searchDone = true;
+          if (r.message) this.showToast(r.message, 'info');
+        } else {
+          this.showToast((r && r.error) || 'Pencarian gagal.', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      } finally {
+        this.searching = false;
+      }
     }
   }
 };
