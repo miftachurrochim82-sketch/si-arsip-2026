@@ -252,3 +252,24 @@ RINGKASAN DOMAIN: PASS=20 / FAIL=0 / SKIP=0
 | **SI-ARSIP** v1.0.0 | **~100** | 42 + 13 + 25 + 20 |
 
 **Konteks**: SI-ARSIP punya asersi lebih banyak dari si-kompetensi & si-lahar di Fase 1 karena domain surat-menyurat punya lebih banyak workflow (transisi status, ownership guard, disposisi berjenjang).
+
+## Fase 2 (v1.1, 2026-09-20) — test terhitung di `runDomainTestsSIArsip()`
+
+| TC | Fungsi test | Melindungi |
+|---|---|---|
+| TC-ND-01 | testNdStatusValid | enum status naskah = draft/final/terarsip |
+| TC-ND-02 | testNdTransisiLegal | transisi legal + larangan draft→terarsip |
+| TC-ND-03 | testNdPrefixJenis | prefix nomor ND/MEMO/LAP/NSK |
+| TC-ND-04 | testNdNomorFormat | format `<PREFIX>/<urut:3>/<kode_unit>/<tahun>` |
+| TC-ND-05 | testNdJenisWhitelist | whitelist jenis case-insensitive |
+| TC-AR-01 | testArStatusValid | enum status arsip 4 nilai |
+| TC-AR-02 | testArJenisAsalMap | map jenis_asal → sheet asal (FR-28) |
+| TC-AR-03 | testArAkanMusnahFlag | flag is_akan_musnah runtime (FR-32) |
+| TC-AR-04 | testArRetensiKodeTakDikenal | kode tak dikenal = retensi 0 (aman, bukan crash) |
+| TC-AR-05 | testArRetensiTanggalKosong | tanggal kosong = kosong |
+| TC-SR-01 | testSearchAllTanpaParamKosong | search_all tanpa param tidak membocorkan isi |
+| TC-SR-02 | testSearchAllQMustahilKosong | q tak cocok = 0 temuan |
+| TC-SR-03 | testSearchAllJenisTakDikenal | filter jenis ketat |
+
+Rekap harapan sejak v1.1: **TOTAL PASS=120 / FAIL=0 / SKIP=1**
+(CoreLib 42/0/1 + G18d 13 + routing 26 + domain 39).
