@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SI-ARSIP - Kearsipan Dinamis</title>
+
+  <meta name="theme-color" content="#0369a1">
+
+  <!-- Identitas tema SI-ARSIP (variabel --primary-* dibaca app-common.css/kit) -->
+  <style>
+    :root {
+      --primary:         #0369a1;
+      --primary-dark:    #075985;
+      --primary-light:   #f0f9ff;
+      --primary-lighter: #e0f2fe;
+      --primary-text:    #0c4a6e;
+      --primary-accent:  #38bdf8;
+      --primary-rgb:     3, 105, 161;
+    }
+  </style>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9',
+              600: '#0284c7', 700: '#0369a1', 800: '#075985', 900: '#0c4a6e'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Font Awesome (sumber disamakan dgn ekosistem: jsDelivr npm) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+
+  <!-- Kit ekosistem frontend-cdn v2.8.1 (CSS + JS on-demand via AppCore.loadLib) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/miftachurrochim82-sketch/frontend-cdn@v2.8.1/frontend/app-common.min.css">
+
+  <!-- Boot dark-mode sebelum render: kunci siarsip_dark -->
+  <script>
+    try {
+      if (localStorage.getItem('siarsip_dark') === 'true') document.documentElement.classList.add('dark');
+    } catch (e) { /* diabaikan sengaja */ }
+  </script>
+
+  <!-- v-cloak (sebelum CSS kit termuat) -->
+  <style>
+    [v-cloak] { display: none !important; }
+  </style>
+</head>
+
+<body class="h-full bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-sky-500 selection:text-white">
+
+  <div id="app" v-cloak>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" aria-live="polite">
+      <div v-for="toast in toasts" :key="toast.id" class="toast-item" :class="'toast-' + toast.type">
+        <i class="fa-solid" :class="{
+          'fa-circle-check text-emerald-400': toast.type === 'success',
+          'fa-circle-xmark text-rose-400': toast.type === 'error',
+          'fa-circle-info text-blue-400': toast.type === 'info'
+        }"></i>
+        <span class="flex-1 leading-snug">{{ toast.message }}</span>
+      </div>
+    </div>
+
+    <!-- Login SSO Gateway (komponen kit <app-login>) -->
+    <app-login v-if="!token"
+               :is-processing="isProcessing"
+               :error-message="errorMessage"
+               :app-title="appTitle"
+               app-subtitle="Sistem Informasi Kearsipan Dinamis"
+               instansi="Satpol PP & Damkar Kab. Trenggalek"
+               @login="goToPlatform">
+    </app-login>
+
+    <!-- Shell Utama (komponen kit <app-sidebar> + <app-header>) -->
+    <div v-else class="flex h-screen overflow-hidden bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans">
+
+      <app-sidebar :collapsed="sidebarCollapsed"
+                   :mobile-open="sidebarMobileOpen"
+                   :dark="isDarkMode"
+                   :current-page="currentPage"
+                   :is-admin="isAdmin"
+                   :user="currentUser"
+                   :brand="brand"
+                   :menu="menu"
+                   @navigate="navigateTo"
+                   @toggle="toggleSidebar"
+                   @close="sidebarMobileOpen = false"
+                   @logout="logout">
+      </app-sidebar>
+
+      <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <div class="px-4 sm:px-6 pt-4 shrink-0">
+          <app-header :dark="isDarkMode"
+                      :app-title="appTitle"
+                      :current-page="currentPage"
+                      :page-icons="pageIcons"
+                      :user="currentUser"
+                      @toggle-dark="toggleDarkMode"
+                      @toggle-mobile="sidebarMobileOpen = !sidebarMobileOpen"
+                      @navigate="navigateTo">
+          </app-header>
+        </div>
+
+        <!-- Konten halaman dinamis (satu tingkat include, pola starter-kit) -->
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <?!= include('V_Modals'); ?>
+          <?!= include('V_Dashboard'); ?>
+          <?!= include('V_SuratMasuk'); ?>
+          <?!= include('V_SuratKeluar'); ?>
+          <?!= include('V_NaskahDinas'); ?>
+          <?!= include('V_Disposisi'); ?>
+          <?!= include('V_Kearsipan'); ?>
+          <?!= include('V_Pencarian'); ?>
+          <?!= include('V_Master'); ?>
+          <?!= include('V_Pengaturan'); ?>
+        </main>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Vue 3 Production Build (pinned) -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.5.42/dist/vue.global.prod.js"></script>
+
+  <!-- Kit ekosistem JS v2.8.1 -->
+  <script src="https://cdn.jsdelivr.net/gh/miftachurrochim82-sketch/frontend-cdn@v2.8.1/frontend/app-components.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/miftachurrochim82-sketch/frontend-cdn@v2.8.1/frontend/app-core.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/miftachurrochim82-sketch/frontend-cdn@v2.8.1/frontend/app-modules.min.js"></script>
+
+  <!-- Logika aplikasi: modul J_* (urutan WAJIB: State -> Api -> App) -->
+  <?!= include('J_State'); ?>
+  <?!= include('J_Api'); ?>
+  <?!= include('J_App'); ?>
+</body>
+</html>

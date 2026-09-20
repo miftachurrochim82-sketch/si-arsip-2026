@@ -1,0 +1,34 @@
+<script>
+// ============================================================
+// SI-ARSIP - J_Api.html (v1 shell, 2026-09-20)
+// ------------------------------------------------------------
+// Wrapper pemanggilan server + loader per modul.
+// callServer(action, data) disediakan AppCore (bridge google.script.run
+// ke handleAction → CoreLib.dispatchAction → localHandlers 02_AppLogic).
+//
+// Loader modul transaksi (sm/sk/dp/master/kearsipan) DITAMBAHKAN bertahap
+// sesuai 08_GAP_LIST; endpoint sudah terdaftar di 06_API_FLOW.
+// ============================================================
+window.ArsipApi = {
+  methods: {
+    // Dashboard ringkas (handler get_dashboard → dashRingkas_):
+    // data = { periode, surat_masuk_bulan_ini, surat_keluar_bulan_ini,
+    //          disposisi_menunggu, disposisi_lewat_sla }
+    async loadDashboard() {
+      this.dashLoading = true;
+      try {
+        const r = await this.callServer('get_dashboard', {});
+        if (r && r.success) {
+          this.dashData = r.data;
+        } else {
+          this.showToast((r && r.error) || 'Gagal memuat dashboard', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      } finally {
+        this.dashLoading = false;
+      }
+    }
+  }
+};
+</script>

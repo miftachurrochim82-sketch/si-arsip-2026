@@ -1,0 +1,15 @@
+<!-- ============================================================
+     SI-ARSIP - V_Disposisi.html (skeleton v1 shell, 2026-09-20)
+     Antrian disposisi masuk/keluar + transisi diteruskan→diproses→
+     selesai + alert SLA. Endpoint siap: dp_get_list/dp_get_detail/
+     dp_save/dp_teruskan/dp_selesaikan (06_API_FLOW).
+     ============================================================ -->
+<section v-if="currentPage === 'disposisi'" class="space-y-4 animate-fade-in">
+  <h2 class="text-2xl font-bold tracking-tight flex items-center gap-2 text-slate-800 dark:text-white">
+    <i class="fa-solid fa-share-nodes text-sky-600 dark:text-sky-400"></i> Disposisi
+  </h2>
+  <app-empty-state icon="fa-solid fa-hammer"
+                   title="Modul dalam pembangunan"
+                   subtitle="Antrian & transisi disposisi menyusul pada tahap berikutnya sesuai GAP_LIST. Backend sudah siap.">
+  </app-empty-state>
+</section>

@@ -1,0 +1,49 @@
+<!-- ============================================================
+     SI-ARSIP - V_Dashboard.html (v1 shell, 2026-09-20)
+     KPI ringkas dari handler get_dashboard (dashRingkas_):
+     surat masuk/keluar bulan ini, disposisi menunggu, lewat SLA.
+     Chart tren/klasifikasi = tahap 2 (komponen kit <app-chart-*>).
+     ============================================================ -->
+<section v-if="currentPage === 'dashboard'" class="space-y-6 animate-fade-in">
+
+  <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+    <div>
+      <h2 class="text-2xl font-bold tracking-tight flex items-center gap-2 text-slate-800 dark:text-white">
+        <i class="fa-solid fa-gauge-high text-sky-600 dark:text-sky-400"></i> Dashboard Kearsipan
+      </h2>
+      <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+        Ringkasan surat & disposisi<span v-if="dashData"> periode {{ dashData.periode }}</span>.
+      </p>
+    </div>
+    <button class="btn btn-ghost" @click="loadDashboard()" :disabled="dashLoading">
+      <i class="fa-solid fa-rotate"></i> Segarkan
+    </button>
+  </div>
+
+  <app-skeleton v-if="dashLoading && !dashData" type="cards"></app-skeleton>
+
+  <div v-else-if="dashData" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <app-stat-card title="Surat Masuk Bulan Ini" :value="dashData.surat_masuk_bulan_ini || 0"
+                   icon="fa-solid fa-inbox" color="sky" subtext="terregistrasi agenda"></app-stat-card>
+    <app-stat-card title="Surat Keluar Bulan Ini" :value="dashData.surat_keluar_bulan_ini || 0"
+                   icon="fa-solid fa-paper-plane" color="emerald" subtext="nomor otomatis"></app-stat-card>
+    <app-stat-card title="Disposisi Menunggu" :value="dashData.disposisi_menunggu || 0"
+                   icon="fa-solid fa-share-nodes" color="amber" subtext="diteruskan / diproses"></app-stat-card>
+    <app-stat-card title="Disposisi Lewat SLA" :value="dashData.disposisi_lewat_sla || 0"
+                   icon="fa-solid fa-triangle-exclamation" color="rose" subtext="perlu tindakan atasan"></app-stat-card>
+  </div>
+
+  <app-empty-state v-else
+                   icon="fa-solid fa-chart-simple"
+                   title="Belum ada ringkasan"
+                   subtitle="Data ringkasan akan muncul setelah surat pertama teregistrasi.">
+  </app-empty-state>
+
+  <!-- Tahap 2: chart tren surat & komposisi klasifikasi (kit <app-chart-bar>/<app-chart-doughnut>) -->
+  <div class="card p-4 text-xs text-slate-400 dark:text-slate-500">
+    <i class="fa-solid fa-circle-info mr-1"></i>
+    Grafik tren & klasifikasi, surat kritis, dan daftar disposisi lewat SLA menyusul pada tahap 2
+    (endpoint <code>dash_chart_tren</code>, <code>dash_klasifikasi</code>, <code>dash_surat_kritis</code>,
+    <code>dash_disposisi_lewat_sla</code> sudah siap di backend).
+  </div>
+</section>

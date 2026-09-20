@@ -1,0 +1,32 @@
+<script>
+// ============================================================
+// SI-ARSIP - J_State.html (v1 shell, 2026-09-20)
+// ------------------------------------------------------------
+// data() khusus aplikasi. State shell/auth (token, currentUser,
+// currentPage, isDarkMode, toasts, dll.) + computed isAdmin
+// DISEDIAKAN AppCore (kunci storage siarsip_*) — JANGAN dideklarasi ulang.
+//
+// pegawaiList/unitList/jabatanList WAJIB ada di sini: AppCore.loadMasterSIMPEG
+// menulis ke field ini agar Vue reactive.
+//
+// State modul transaksi (sm/sk/dp/kearsipan) DITAMBAHKAN bertahap
+// sesuai tahap di 08_GAP_LIST (satu baris dok = satu item kode).
+// ============================================================
+window.ArsipState = {
+  data() {
+    return {
+      // ============ REFERENSI SIMPEG (wajib, diisi AppCore) ============
+      pegawaiList: [],
+      unitList: [],
+      jabatanList: [],
+
+      // ============ DASHBOARD (v1 shell) ============
+      dashData: null,
+      dashLoading: false
+    };
+  },
+
+  computed: {},
+  methods: {}
+};
+</script>

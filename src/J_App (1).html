@@ -1,0 +1,94 @@
+<script>
+// ============================================================
+// SI-ARSIP - J_App.html (v1 shell, 2026-09-20)
+// ------------------------------------------------------------
+// Bootstrap via AppCore.create (pola si-lahar/starter-kit).
+// AppCore menyediakan: data shell/auth, computed isAdmin/isVerifikator,
+// callServer, auth SSO, navigateTo/toggleSidebar/toggleDarkMode/logout/
+// goToPlatform, loadMasterSIMPEG, showToast, format*, export*, mounted SSO.
+// Logika app di J_State/J_Api (+ J_Actions/J_Export/J_Arsip menyusul
+// sesuai tahap) dan digabung lewat mixin di bawah.
+//
+// Menu mengikuti 05_UIUX: 9 halaman. Grup: Arsip Dinamis / Kearsipan /
+// Sistem. Master & Pengaturan adminOnly (guard built-in AppCore).
+// ============================================================
+
+// Gabungkan seluruh modul JavaScript ke dalam ArsipMixin
+const ArsipMixin = {
+  data() {
+    return Object.assign({}, window.ArsipState.data());
+  },
+  computed: Object.assign({}, window.ArsipState.computed),
+  methods: Object.assign(
+    {},
+    window.ArsipApi.methods
+    // window.ArsipActions.methods,  // tahap berikutnya (CRUD+transisi)
+    // window.ArsipExport.methods,   // tahap berikutnya (ekspor kit)
+    // window.ArsipKearsipan.methods // tahap v1.1 (retensi/musnah/serah)
+  )
+};
+
+// Inisialisasi Aplikasi Terpadu SI-ARSIP
+const app = AppCore.create({
+  appCode: 'SIARSIP',
+  appTitle: 'SI-ARSIP',
+  initialPage: 'dashboard',
+  storagePrefix: 'siarsip',
+  platformUrl: 'https://script.google.com/macros/s/AKfycbwh_OUVqmxLcuF81FHmPZtT33Wrm8Ce9Da1SQ3hfkSr7gM5P8ofyAlHSgW40mq3eo-PoQ/exec',
+
+  brand: {
+    title: 'SI-ARSIP',
+    subtitle: 'Satpol PP & Damkar',
+    logoIcon: 'fa-solid fa-box-archive',
+    logoChar: 'AR',
+    logoSvg: ''
+  },
+
+  // Menu sidebar (05_UIUX amendemen 2026-09-20):
+  menu: [
+    { name: 'Arsip Dinamis', items: [
+      { id: 'dashboard', label: 'Dashboard', icon: 'fa-solid fa-gauge-high' },
+      { id: 'surat_masuk', label: 'Surat Masuk', icon: 'fa-solid fa-inbox' },
+      { id: 'surat_keluar', label: 'Surat Keluar', icon: 'fa-solid fa-paper-plane' },
+      { id: 'naskah_dinas', label: 'Naskah Dinas', icon: 'fa-solid fa-file-pen' },
+      { id: 'disposisi', label: 'Disposisi', icon: 'fa-solid fa-share-nodes' }
+    ]},
+    { name: 'Kearsipan', items: [
+      { id: 'kearsipan', label: 'Kearsipan & Retensi', icon: 'fa-solid fa-box-archive' },
+      { id: 'pencarian', label: 'Pencarian Arsip', icon: 'fa-solid fa-magnifying-glass' }
+    ]},
+    { name: 'Sistem', items: [
+      { id: 'master', label: 'Master', icon: 'fa-solid fa-database', adminOnly: true },
+      { id: 'pengaturan', label: 'Pengaturan', icon: 'fa-solid fa-gear', adminOnly: true }
+    ]}
+  ],
+
+  pageIcons: {
+    dashboard: 'fa-solid fa-gauge-high',
+    surat_masuk: 'fa-solid fa-inbox',
+    surat_keluar: 'fa-solid fa-paper-plane',
+    naskah_dinas: 'fa-solid fa-file-pen',
+    disposisi: 'fa-solid fa-share-nodes',
+    kearsipan: 'fa-solid fa-box-archive',
+    pencarian: 'fa-solid fa-magnifying-glass',
+    master: 'fa-solid fa-database',
+    pengaturan: 'fa-solid fa-gear'
+  },
+
+  // Navigasi: dashboard auto-load; halaman lain masih skeleton v1
+  // (loader menyusul bersama modulnya masing-masing).
+  onNavigate(vm, page) {
+    if (page === 'dashboard') {
+      vm.loadDashboard();
+    }
+  },
+
+  async initApp(vm) {
+    await vm.loadDashboard();
+  },
+
+  mixins: [ArsipMixin]
+});
+
+app.mount('#app');
+</script>
