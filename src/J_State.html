@@ -22,7 +22,43 @@ window.ArsipState = {
 
       // ============ DASHBOARD (v1 shell) ============
       dashData: null,
-      dashLoading: false
+      dashLoading: false,
+
+      // ============ SURAT MASUK (tahap 2, 2026-09-20) ============
+      _searchTimerSm: null,
+      smList: [],
+      smPage: 1,
+      smTotalPages: 1,
+      smTotalData: 0,
+      smSearch: '',
+      smLoading: false,
+      smSaving: false,
+      smFilters: {
+        search: '',
+        tanggal_dari: '',
+        tanggal_sampai: '',
+        kode_klasifikasi: '',
+        sifat: '',
+        status_surat: ''
+      },
+      showSmForm: false,
+      smForm: {
+        id: '',
+        nomor_surat: '',
+        tanggal_surat: '',
+        tanggal_terima: '',
+        asal: '',
+        perihal: '',
+        kode_klasifikasi: '',
+        jumlah_lampiran: 0,
+        sifat: 'biasa',
+        status_surat: 'baru',
+        lampiran_link: '',
+        catatan: ''
+      },
+      // Master klasifikasi (M1) — opsi select + label tabel
+      klasifikasiList: [],
+      klasifikasiLoading: false
     };
   },
 
