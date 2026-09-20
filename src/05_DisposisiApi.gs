@@ -460,6 +460,13 @@ function dpUpdateStatusSuratInduk_(suratId, statusBaru, user) {
   } finally {
     releaseLock_(lock);
   }
+
+  // FR-28 (Fase 2 aktif): surat masuk selesai → baris arsip otomatis.
+  // Dipanggil SETELAH lock dilepas (arAutoArchive_ mengambil lock sendiri).
+  if (CoreLib.normStr(statusBaru) === 'selesai') {
+    try { arAutoArchive_('surat_masuk', suratId, user); }
+    catch (e) { Logger.log('[WARN] auto-archive sm: ' + e.message); }
+  }
 }
 
 /**
