@@ -58,7 +58,88 @@ window.ArsipState = {
       },
       // Master klasifikasi (M1) — opsi select + label tabel
       klasifikasiList: [],
-      klasifikasiLoading: false
+      klasifikasiLoading: false,
+
+      // ============ DISPOSISI (tahap 2b, 2026-09-20) ============
+      dpList: [],
+      dpPage: 1,
+      dpTotalPages: 1,
+      dpTotalData: 0,
+      dpLoading: false,
+      dpSaving: false,
+      dpFilters: { status_disposisi: '', tanggal_dari: '', tanggal_sampai: '' },
+      showDpForm: false,
+      dpForm: { id: '', surat_id: '', ke_pejabat_id: '', instruksi: '', jatuh_tempo: '', catatan: '' },
+
+      // ============ SURAT KELUAR (tahap 2b) ============
+      skList: [],
+      skPage: 1,
+      skTotalPages: 1,
+      skTotalData: 0,
+      skLoading: false,
+      skSaving: false,
+      skFilters: { search: '', tanggal_dari: '', tanggal_sampai: '', kode_klasifikasi: '', status_surat: '' },
+      showSkForm: false,
+      skForm: {
+        id: '', tujuan: '', perihal: '', kode_klasifikasi: '', jumlah_lampiran: 0,
+        sifat: 'biasa', penandatangan_id: '', tanggal_surat: '', lampiran_link: '', catatan: ''
+      },
+
+      // ============ MASTER (tahap 2b) ============
+      masterTab: 'klasifikasi',
+      refList: [], refLoading: false, refSaving: false, showRefForm: false,
+      refForm: {
+        id: '', kode_klasifikasi: '', uraian: '', retensi_aktif_th: 2,
+        retensi_inaktif_th: 3, tindakan_akhir: 'musnah', status_aktif: 'true', keterangan: ''
+      },
+      pjbList: [], pjbLoading: false, pjbSaving: false, showPjbForm: false,
+      pjbForm: { id: '', pegawai_id: '', jabatan_id: '', urutan_hierarki: 99, aktif: 'true', keterangan: '' },
+      tplList: [], tplLoading: false, tplSaving: false, showTplForm: false,
+      tplForm: {
+        id: '', kode_template: '', nama_template: '', jenis_naskah: 'surat_keluar',
+        format_default: '', status_aktif: 'true', keterangan: ''
+      },
+
+      // ============ LOOKUP LINTAS-MODUL ============
+      pejabatList: [],          // M_PEJABAT (untuk select disposisi & penandatangan)
+      simpegLookup: null,       // { pegawai, unit, jabatan } dari MASTER SIMPEG (read-only)
+      smMap: {},                // id surat masuk → ringkasan (join tabel disposisi)
+      smMapLoaded: false,
+
+      // ============ NASKAH DINAS (v1.1, 2026-09-20) ============
+      ndList: [],
+      ndPage: 1,
+      ndTotalPages: 1,
+      ndTotalData: 0,
+      ndLoading: false,
+      ndSaving: false,
+      ndFilters: { search: '', jenis_naskah: '', status_naskah: '', tanggal_dari: '', tanggal_sampai: '' },
+      showNdForm: false,
+      ndForm: {
+        id: '', jenis_naskah: 'nota_dinas', perihal: '', tujuan: '',
+        isi: '', kode_klasifikasi: '', tanggal: '', lampiran_link: ''
+      },
+
+      // ============ KEARSIPAN & RETENSI (v1.1) ============
+      arList: [],
+      arPage: 1,
+      arTotalPages: 1,
+      arTotalData: 0,
+      arLoading: false,
+      arFilters: { search: '', jenis_asal: '', status_arsip: '', tahun: '' },
+      akanMusnahList: [],
+      akanMusnahLoading: false,
+      arAksiMode: '',           // '' | 'lokasi' | 'musnah' | 'serah'
+      arAksiForm: { id: '', judul: '', lokasi_fisik: '', catatan: '' },
+
+      // ============ PENCARIAN LINTAS (v1.1) ============
+      searchQ: '',
+      searchJenis: '',
+      searchTahun: '',
+      searchKode: '',
+      searchResults: [],
+      searching: false,
+      searchDone: false
     };
   },
 
