@@ -406,16 +406,19 @@ function skUbahStatus_(data, user) {
 
       audit_(user, 'UBAH_STATUS_SURAT_KELUAR', 'T_SURAT_KELUAR', data.id, true,
              'Status: ' + statusLama + ' → ' + statusBaru);
-
-      // Fase 2 — auto-archive ke T_ARSIP saat terkirim:
-      // if (statusBaru === 'terkirim' && typeof arAutoArchive_ === 'function') {
-      //   try { arAutoArchive_('surat_keluar', data.id, user); } catch (e) { Logger.log('[WARN] auto-archive: ' + e.message); }
-      // }
-
-      return { success: true, data: rec };
     } finally {
       try { lock.releaseLock(); } catch (e) {}
     }
+
+    // FR-28 (Fase 2 aktif): auto-archive SETELAH lock dilepas —
+    // arAutoArchive_ mengambil lock sendiri; gagal archive TIDAK
+    // membatalkan transisi status.
+    if (statusBaru === 'terkirim') {
+      try { arAutoArchive_('surat_keluar', data.id, user); }
+      catch (e) { Logger.log('[WARN] auto-archive sk: ' + e.message); }
+    }
+
+    return { success: true, data: rec };
   } catch (err) {
     Logger.log('[skUbahStatus_] ' + err.message);
     return { success: false, code: 'BAD_REQUEST', error: err.message };
