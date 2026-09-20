@@ -1,0 +1,99 @@
+<!-- ============================================================
+     SI-ARSIP - V_Pencarian.html (v1.1, 2026-09-20)
+     FR-34 pencarian lintas T1/T2/T3/T5 (search_all): satu kotak
+     cari untuk seluruh isi register, filter jenis/tahun/kode,
+     hasil max 50 urut tanggal desc.
+     ============================================================ -->
+<section v-if="currentPage === 'pencarian'" class="space-y-4 animate-fade-in">
+
+  <div>
+    <h2 class="text-2xl font-bold tracking-tight flex items-center gap-2 text-slate-800 dark:text-white">
+      <i class="fa-solid fa-magnifying-glass text-teal-600 dark:text-teal-400"></i> Pencarian Arsip
+    </h2>
+    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+      Satu kotak untuk seluruh register: surat masuk, surat keluar, naskah dinas, dan arsip.
+    </p>
+  </div>
+
+  <div class="card space-y-3">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+      <div class="md:col-span-2">
+        <label class="form-label">Kata kunci</label>
+        <input class="input w-full" v-model.trim="searchQ"
+               placeholder="nomor, perihal, asal/tujuan, isi, lokasi..."
+               @keyup.enter="runSearch()">
+      </div>
+      <div>
+        <label class="form-label">Jenis register</label>
+        <select class="input w-full" v-model="searchJenis">
+          <option value="">Semua</option>
+          <option value="surat_masuk">Surat masuk</option>
+          <option value="surat_keluar">Surat keluar</option>
+          <option value="naskah_dinas">Naskah dinas</option>
+          <option value="arsip">Arsip</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Kode klasifikasi</label>
+        <select class="input w-full" v-model="searchKode">
+          <option value="">Semua</option>
+          <option v-for="k in klasifikasiList" :key="k.id" :value="k.kode_klasifikasi">
+            {{ k.kode_klasifikasi }} — {{ k.uraian }}
+          </option>
+        </select>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+      <div>
+        <label class="form-label">Tahun</label>
+        <input class="input w-full" v-model.trim="searchTahun" placeholder="mis. 2026">
+      </div>
+      <div class="md:col-span-3">
+        <button class="btn btn-primary w-full md:w-auto" :disabled="searching" @click="runSearch()">
+          <i class="fa-solid fa-magnifying-glass"></i> Cari
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card overflow-hidden !p-0">
+    <app-skeleton v-if="searching" type="table"></app-skeleton>
+    <app-empty-state v-else-if="searchDone && !searchResults.length"
+                     icon="fa-solid fa-magnifying-glass-minus"
+                     title="Tidak ada temuan"
+                     subtitle="Coba kata kunci lain atau longgarkan filter.">
+    </app-empty-state>
+    <app-empty-state v-else-if="!searchResults.length"
+                     icon="fa-solid fa-magnifying-glass"
+                     title="Mulai pencarian"
+                     subtitle="Isi kata kunci dan tekan Cari (atau Enter).">
+    </app-empty-state>
+    <div v-else class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Register</th>
+            <th>Tanggal</th>
+            <th>Judul / perihal</th>
+            <th>Keterangan</th>
+            <th>Klasifikasi</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="r in searchResults" :key="r.jenis + '-' + r.id">
+            <td><app-badge size="sm" status="proses" :label="(r.jenis || '').replace('_', ' ')"></app-badge></td>
+            <td class="text-xs whitespace-nowrap">{{ fmtTgl(r.tanggal) }}</td>
+            <td class="text-xs font-semibold text-slate-700 dark:text-slate-200">{{ r.judul || '—' }}</td>
+            <td class="text-xs text-slate-500 dark:text-slate-400">{{ r.keterangan }}</td>
+            <td class="text-xs">{{ r.kode_klasifikasi || '—' }}</td>
+            <td class="text-xs">{{ r.status || '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div v-if="searchDone" class="px-4 py-3 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
+      {{ searchResults.length }} temuan (maks 50, urut tanggal terbaru).
+    </div>
+  </div>
+</section>
