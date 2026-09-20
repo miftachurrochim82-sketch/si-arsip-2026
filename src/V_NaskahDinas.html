@@ -1,0 +1,89 @@
+<!-- ============================================================
+     SI-ARSIP - V_NaskahDinas.html (v1.1, 2026-09-20)
+     Nota/memo/laporan internal: nomor auto per jenis
+     (ND/MEMO/LAP/NSK), alur draft→final→terarsip; final memicu
+     auto-archive FR-28 (baris T_ARSIP otomatis).
+     ============================================================ -->
+<section v-if="currentPage === 'naskah_dinas'" class="space-y-4 animate-fade-in">
+
+  <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+    <div>
+      <h2 class="text-2xl font-bold tracking-tight flex items-center gap-2 text-slate-800 dark:text-white">
+        <i class="fa-solid fa-file-pen text-indigo-600 dark:text-indigo-400"></i> Naskah Dinas
+      </h2>
+      <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+        Nota dinas, memo, dan laporan internal — final = otomatis masuk arsip.
+      </p>
+    </div>
+    <button class="btn btn-primary" @click="ndOpenForm(null)">
+      <i class="fa-solid fa-plus"></i> Naskah Baru
+    </button>
+  </div>
+
+  <app-filter-bar :filters="[
+    { key: 'search', label: 'Pencarian', type: 'text', placeholder: 'Cari nomor, perihal, tujuan, isi...', span: 2 },
+    { key: 'jenis_naskah', label: 'Jenis', type: 'select',
+      options: [{ value: 'nota_dinas', label: 'Nota dinas' }, { value: 'memo', label: 'Memo' }, { value: 'laporan', label: 'Laporan' }, { value: 'lainnya', label: 'Lainnya' }] },
+    { key: 'status_naskah', label: 'Status', type: 'select',
+      options: [{ value: 'draft', label: 'Draft' }, { value: 'final', label: 'Final' }, { value: 'terarsip', label: 'Terarsip' }] }
+  ]" v-model="ndFilters" @change="onNdFilterChange" @reset="loadNd(1)"></app-filter-bar>
+
+  <div class="card overflow-hidden !p-0">
+    <app-skeleton v-if="ndLoading && !ndList.length" type="table"></app-skeleton>
+    <app-empty-state v-else-if="!ndList.length"
+                     icon="fa-solid fa-file-pen"
+                     title="Belum ada naskah dinas"
+                     subtitle="Buat nota dinas, memo, atau laporan internal pertama.">
+    </app-empty-state>
+    <div v-else class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Nomor / Tanggal</th>
+            <th>Perihal & Tujuan</th>
+            <th>Jenis</th>
+            <th>Klasifikasi</th>
+            <th>Status</th>
+            <th class="text-right">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="r in ndList" :key="r.id">
+            <td class="whitespace-nowrap">
+              <div class="font-black text-slate-800 dark:text-slate-100">{{ r.nomor_naskah }}</div>
+              <div class="text-[11px] text-slate-400">{{ fmtTgl(r.tanggal) }}</div>
+            </td>
+            <td>
+              <div class="font-semibold text-slate-700 dark:text-slate-200">{{ r.perihal }}</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">→ {{ r.tujuan || 'internal' }}</div>
+            </td>
+            <td><app-badge size="sm" status="proses" :label="(r.jenis_naskah || '').replace('_', ' ')"></app-badge></td>
+            <td class="text-xs">{{ smLabelKlasifikasi(r.kode_klasifikasi) }}</td>
+            <td>
+              <app-badge size="sm"
+                         :status="r.status_naskah === 'terarsip' ? 'disetujui' : (r.status_naskah === 'final' ? 'proses' : '')"
+                         :label="r.status_naskah || 'draft'"></app-badge>
+            </td>
+            <td class="text-right whitespace-nowrap">
+              <button v-if="r.status_naskah === 'draft'" class="btn-icon" title="Finalkan (memicu auto-archive)"
+                      @click="ndTransisi(r, 'final')"><i class="fa-solid fa-stamp"></i></button>
+              <button v-if="r.status_naskah === 'final'" class="btn-icon" title="Tandai terarsip"
+                      @click="ndTransisi(r, 'terarsip')"><i class="fa-solid fa-box-archive"></i></button>
+              <button v-if="r.status_naskah === 'draft'" class="btn-icon" title="Ubah"
+                      @click="ndOpenForm(r)"><i class="fa-solid fa-pen-to-square"></i></button>
+              <button class="btn-icon-danger" title="Hapus (admin)" @click="ndDelete(r)"><i class="fa-solid fa-trash-can"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div v-if="ndTotalPages > 1" class="flex items-center justify-between px-4 py-3 border-t border-slate-100 dark:border-slate-800 text-xs">
+      <span class="text-slate-500 dark:text-slate-400">Halaman {{ ndPage }} / {{ ndTotalPages }} — {{ ndTotalData }} naskah</span>
+      <div class="flex gap-1">
+        <button class="btn-icon" :disabled="ndPage <= 1" @click="loadNd(ndPage - 1)"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="btn-icon" :disabled="ndPage >= ndTotalPages" @click="loadNd(ndPage + 1)"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+</section>
