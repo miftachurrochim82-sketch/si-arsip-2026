@@ -1,0 +1,117 @@
+<!-- ============================================================
+     SI-ARSIP - V_Kearsipan.html (v1.1, 2026-09-20)
+     Register arsip (auto dari FR-28) + panel AKAN MUSNAH (FR-32)
+     + aksi FR-33: ubah lokasi (user), tandai musnah/serah (admin,
+     wajib BA). Baris arsip TIDAK dibuat manual — idempoten by
+     (jenis_asal+ref_id).
+     ============================================================ -->
+<section v-if="currentPage === 'kearsipan'" class="space-y-4 animate-fade-in">
+
+  <div>
+    <h2 class="text-2xl font-bold tracking-tight flex items-center gap-2 text-slate-800 dark:text-white">
+      <i class="fa-solid fa-box-archive text-amber-600 dark:text-amber-400"></i> Kearsipan & Retensi
+    </h2>
+    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+      Arsip terbentuk otomatis saat surat/naskah tuntas; retensi dihitung dari master klasifikasi.
+    </p>
+  </div>
+
+  <!-- Panel AKAN MUSNAH (FR-32) -->
+  <div v-if="akanMusnahList.length" class="card !border-rose-200 dark:!border-rose-900 !bg-rose-50/60 dark:!bg-rose-950/20">
+    <div class="flex items-center gap-2 mb-3">
+      <i class="fa-solid fa-triangle-exclamation text-rose-500"></i>
+      <h3 class="font-bold text-rose-700 dark:text-rose-300">Akan / wajib musnah — retensi habis ({{ akanMusnahList.length }})</h3>
+    </div>
+    <div class="space-y-2">
+      <div v-for="r in akanMusnahList" :key="'am-' + r.id"
+           class="flex flex-col sm:flex-row sm:items-center gap-2 rounded-lg bg-white/70 dark:bg-slate-900/40 border border-rose-100 dark:border-rose-900 px-3 py-2">
+        <div class="flex-1 text-xs">
+          <div class="font-semibold text-slate-700 dark:text-slate-200">{{ r.judul || r.id }}</div>
+          <div class="text-slate-500 dark:text-slate-400">
+            {{ r.kode_klasifikasi }} · retensi habis {{ fmtTgl(r.tgl_retensi_habis) }} · {{ (r.jenis_asal || '').replace('_', ' ') }}
+          </div>
+        </div>
+        <div class="flex gap-1">
+          <button class="btn btn-ghost" @click="arAksiOpen(r, 'serah')" title="Serahkan (permanen) dengan BA">
+            <i class="fa-solid fa-landmark"></i> Serah
+          </button>
+          <button class="btn btn-ghost !text-rose-600" @click="arAksiOpen(r, 'musnah')" title="Musnahkan dengan BA">
+            <i class="fa-solid fa-fire"></i> Musnah
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-filter-bar :filters="[
+    { key: 'search', label: 'Pencarian', type: 'text', placeholder: 'Cari judul, kode, lokasi...', span: 2 },
+    { key: 'jenis_asal', label: 'Jenis asal', type: 'select',
+      options: [{ value: 'surat_masuk', label: 'Surat masuk' }, { value: 'surat_keluar', label: 'Surat keluar' }, { value: 'naskah_dinas', label: 'Naskah dinas' }] },
+    { key: 'status_arsip', label: 'Status', type: 'select',
+      options: [{ value: 'aktif', label: 'Aktif' }, { value: 'inaktif', label: 'Inaktif' }, { value: 'permanen', label: 'Permanen' }, { value: 'musnah', label: 'Musnah' }] },
+    { key: 'tahun', label: 'Tahun arsip', type: 'text', placeholder: 'mis. 2026' }
+  ]" v-model="arFilters" @change="onArFilterChange" @reset="loadAr(1)"></app-filter-bar>
+
+  <div class="card overflow-hidden !p-0">
+    <app-skeleton v-if="arLoading && !arList.length" type="table"></app-skeleton>
+    <app-empty-state v-else-if="!arList.length"
+                     icon="fa-solid fa-box-archive"
+                     title="Belum ada arsip"
+                     subtitle="Arsip muncul otomatis: surat keluar terkirim, surat masuk selesai, naskah final.">
+    </app-empty-state>
+    <div v-else class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Judul</th>
+            <th>Asal & Klasifikasi</th>
+            <th>Tgl arsip</th>
+            <th>Retensi habis</th>
+            <th>Lokasi fisik</th>
+            <th>Status</th>
+            <th class="text-right">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="r in arList" :key="r.id">
+            <td class="max-w-[260px]">
+              <div class="text-xs font-semibold text-slate-700 dark:text-slate-200">{{ r.judul || '—' }}</div>
+              <div class="text-[11px] text-slate-400">{{ r.id }}</div>
+            </td>
+            <td class="text-xs">
+              <div>{{ (r.jenis_asal || '').replace('_', ' ') }}</div>
+              <div class="text-slate-400">{{ r.kode_klasifikasi }}</div>
+            </td>
+            <td class="text-xs whitespace-nowrap">{{ fmtTgl(r.tgl_arsip) }}</td>
+            <td class="text-xs whitespace-nowrap">
+              {{ fmtTgl(r.tgl_retensi_habis) }}
+              <app-badge v-if="r.is_akan_musnah" size="sm" status="ditolak" label="AKAN MUSNAH"></app-badge>
+            </td>
+            <td class="text-xs">{{ r.lokasi_fisik || '—' }}</td>
+            <td>
+              <app-badge size="sm"
+                         :status="r.status_arsip === 'musnah' ? 'ditolak' : (r.status_arsip === 'permanen' ? 'definitif' : (r.status_arsip === 'inaktif' ? 'inactive' : 'aktif'))"
+                         :label="r.status_arsip || 'aktif'"></app-badge>
+            </td>
+            <td class="text-right whitespace-nowrap">
+              <button v-if="r.status_arsip !== 'musnah' && r.status_arsip !== 'permanen'" class="btn-icon"
+                      title="Ubah lokasi fisik" @click="arAksiOpen(r, 'lokasi')"><i class="fa-solid fa-location-dot"></i></button>
+              <button v-if="r.status_arsip !== 'musnah' && r.status_arsip !== 'permanen'" class="btn-icon"
+                      title="Serahkan (admin, BA)" @click="arAksiOpen(r, 'serah')"><i class="fa-solid fa-landmark"></i></button>
+              <button v-if="r.status_arsip !== 'musnah' && r.status_arsip !== 'permanen'" class="btn-icon-danger"
+                      title="Musnahkan (admin, BA)" @click="arAksiOpen(r, 'musnah')"><i class="fa-solid fa-fire"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div v-if="arTotalPages > 1" class="flex items-center justify-between px-4 py-3 border-t border-slate-100 dark:border-slate-800 text-xs">
+      <span class="text-slate-500 dark:text-slate-400">Halaman {{ arPage }} / {{ arTotalPages }} — {{ arTotalData }} arsip</span>
+      <div class="flex gap-1">
+        <button class="btn-icon" :disabled="arPage <= 1" @click="loadAr(arPage - 1)"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="btn-icon" :disabled="arPage >= arTotalPages" @click="loadAr(arPage + 1)"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+</section>
