@@ -28,6 +28,52 @@ window.ArsipApi = {
       } finally {
         this.dashLoading = false;
       }
+    },
+
+    // ---------- SURAT MASUK (tahap 2) ----------
+    // sm_get_list: { search, filters{tanggal_dari,sampai,kode,sifat,status}, page, limit }
+    // → { success, data[..+is_kritis], meta{page,totalPages,totalData} }
+    async loadSm(page) {
+      this.smLoading = true;
+      if (page) this.smPage = page;
+      try {
+        const r = await this.callServer('sm_get_list', {
+          search: (this.smFilters && this.smFilters.search) || '',
+          filters: this.smFilters,
+          page: this.smPage,
+          limit: 10
+        });
+        if (r && r.success) {
+          this.smList = r.data || [];
+          const m = r.meta || {};
+          this.smTotalPages = m.totalPages || 1;
+          this.smTotalData = m.totalData || 0;
+        } else {
+          this.showToast((r && r.error) || 'Gagal memuat surat masuk', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      } finally {
+        this.smLoading = false;
+      }
+    },
+
+    // Master klasifikasi ANRI (M1) via ref_get_list — opsi select & label
+    async loadKlasifikasi() {
+      if (this.klasifikasiList.length) return;   // cache sesi
+      this.klasifikasiLoading = true;
+      try {
+        const r = await this.callServer('ref_get_list', {});
+        if (r && r.success) {
+          this.klasifikasiList = (r.data || []).filter(k => String(k.status_aktif || 'true') === 'true');
+        } else {
+          this.showToast((r && r.error) || 'Gagal memuat klasifikasi', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      } finally {
+        this.klasifikasiLoading = false;
+      }
     }
   }
 };
