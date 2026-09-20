@@ -1,0 +1,126 @@
+<!-- ============================================================
+     SI-ARSIP - V_Master.html (tahap 2b, 2026-09-20)
+     Tiga master dalam satu halaman berpola tab:
+       M1 Klasifikasi ANRI (ref_*), M2 Pejabat (pjb_*, nama dari
+       SIMPEG read-only), M3 Template naskah (tpl_*).
+     ============================================================ -->
+<section v-if="currentPage === 'master'" class="space-y-4 animate-fade-in">
+
+  <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+    <div>
+      <h2 class="text-2xl font-bold tracking-tight flex items-center gap-2 text-slate-800 dark:text-white">
+        <i class="fa-solid fa-database text-violet-600 dark:text-violet-400"></i> Master
+      </h2>
+      <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+        Klasifikasi ANRI, pejabat penandatangan/disposisi, dan template naskah.
+      </p>
+    </div>
+    <button v-if="masterTab === 'klasifikasi'" class="btn btn-primary" @click="refOpenForm(null)">
+      <i class="fa-solid fa-plus"></i> Tambah Kode
+    </button>
+    <button v-else-if="masterTab === 'pejabat'" class="btn btn-primary" @click="pjbOpenForm(null)">
+      <i class="fa-solid fa-plus"></i> Tambah Pejabat
+    </button>
+    <button v-else class="btn btn-primary" @click="tplOpenForm(null)">
+      <i class="fa-solid fa-plus"></i> Tambah Template
+    </button>
+  </div>
+
+  <!-- Tab switcher -->
+  <div class="flex flex-wrap gap-2">
+    <button class="btn" :class="masterTab === 'klasifikasi' ? 'btn-primary' : 'btn-ghost'"
+            @click="setMasterTab('klasifikasi')"><i class="fa-solid fa-tags"></i> Klasifikasi ANRI</button>
+    <button class="btn" :class="masterTab === 'pejabat' ? 'btn-primary' : 'btn-ghost'"
+            @click="setMasterTab('pejabat')"><i class="fa-solid fa-user-tie"></i> Pejabat</button>
+    <button class="btn" :class="masterTab === 'template' ? 'btn-primary' : 'btn-ghost'"
+            @click="setMasterTab('template')"><i class="fa-solid fa-file-lines"></i> Template Naskah</button>
+  </div>
+
+  <!-- ========== TAB M1: KLASIFIKASI ========== -->
+  <div v-if="masterTab === 'klasifikasi'" class="card overflow-hidden !p-0">
+    <app-skeleton v-if="refLoading && !refList.length" type="table"></app-skeleton>
+    <app-empty-state v-else-if="!refList.length" icon="fa-solid fa-tags"
+                     title="Master klasifikasi kosong"
+                     subtitle="Tambahkan kode ANRI (mis. 005.1, 015, 800) — simpan sebagai TEKS agar nol depan tidak hilang.">
+    </app-empty-state>
+    <div v-else class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Kode</th><th>Uraian</th><th>Retensi (aktif/inaktif)</th><th>Akhir</th><th>Status</th><th class="text-right">Aksi</th></tr>
+        </thead>
+        <tbody>
+          <tr v-for="r in refList" :key="r.id">
+            <td class="font-black text-slate-800 dark:text-slate-100 whitespace-nowrap">{{ r.kode_klasifikasi }}</td>
+            <td class="text-xs">{{ r.uraian }}</td>
+            <td class="text-xs text-slate-500 dark:text-slate-400">{{ r.retensi_aktif_th }} th / {{ r.retensi_inaktif_th }} th</td>
+            <td class="text-xs">{{ r.tindakan_akhir }}</td>
+            <td><app-badge size="sm" :status="String(r.status_aktif) === 'false' ? 'inactive' : 'aktif'" :label="String(r.status_aktif) === 'false' ? 'nonaktif' : 'aktif'"></app-badge></td>
+            <td class="text-right whitespace-nowrap">
+              <button class="btn-icon" title="Ubah" @click="refOpenForm(r)"><i class="fa-solid fa-pen-to-square"></i></button>
+              <button class="btn-icon-danger" title="Hapus" @click="refDelete(r)"><i class="fa-solid fa-trash-can"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ========== TAB M2: PEJABAT ========== -->
+  <div v-else-if="masterTab === 'pejabat'" class="card overflow-hidden !p-0">
+    <app-skeleton v-if="pjbLoading && !pjbList.length" type="table"></app-skeleton>
+    <app-empty-state v-else-if="!pjbList.length" icon="fa-solid fa-user-tie"
+                     title="Master pejabat kosong"
+                     subtitle="Pejabat = pegawai SIMPEG yang punya wewenang tanda tangan / menerima disposisi.">
+    </app-empty-state>
+    <div v-else class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Hierarki</th><th>Pegawai</th><th>Jabatan</th><th>Status</th><th class="text-right">Aksi</th></tr>
+        </thead>
+        <tbody>
+          <tr v-for="r in pjbList" :key="r.id">
+            <td class="font-black text-slate-800 dark:text-slate-100">{{ r.urutan_hierarki }}</td>
+            <td class="text-xs font-semibold text-slate-700 dark:text-slate-200">
+              {{ labelPegawai(r.pegawai_id) || r.pegawai_id }}
+              <div class="text-[11px] font-normal text-slate-400">{{ r.pegawai_id }}</div>
+            </td>
+            <td class="text-xs">{{ labelJabatan(r.jabatan_id) || r.jabatan_id || '—' }}</td>
+            <td><app-badge size="sm" :status="String(r.aktif) === 'false' ? 'inactive' : 'aktif'" :label="String(r.aktif) === 'false' ? 'nonaktif' : 'aktif'"></app-badge></td>
+            <td class="text-right whitespace-nowrap">
+              <button class="btn-icon" title="Ubah" @click="pjbOpenForm(r)"><i class="fa-solid fa-pen-to-square"></i></button>
+              <button class="btn-icon-danger" title="Hapus" @click="pjbDelete(r)"><i class="fa-solid fa-trash-can"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ========== TAB M3: TEMPLATE ========== -->
+  <div v-else class="card overflow-hidden !p-0">
+    <app-skeleton v-if="tplLoading && !tplList.length" type="table"></app-skeleton>
+    <app-empty-state v-else-if="!tplList.length" icon="fa-solid fa-file-lines"
+                     title="Master template kosong"
+                     subtitle="Template dipakai fase lanjut (pembuatan naskah dari contoh).">
+    </app-empty-state>
+    <div v-else class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Kode</th><th>Nama template</th><th>Jenis naskah</th><th>Status</th><th class="text-right">Aksi</th></tr>
+        </thead>
+        <tbody>
+          <tr v-for="r in tplList" :key="r.id">
+            <td class="font-black text-slate-800 dark:text-slate-100 whitespace-nowrap">{{ r.kode_template }}</td>
+            <td class="text-xs">{{ r.nama_template }}</td>
+            <td><app-badge size="sm" status="proses" :label="r.jenis_naskah"></app-badge></td>
+            <td><app-badge size="sm" :status="String(r.status_aktif) === 'false' ? 'inactive' : 'aktif'" :label="String(r.status_aktif) === 'false' ? 'nonaktif' : 'aktif'"></app-badge></td>
+            <td class="text-right whitespace-nowrap">
+              <button class="btn-icon" title="Ubah" @click="tplOpenForm(r)"><i class="fa-solid fa-pen-to-square"></i></button>
+              <button class="btn-icon-danger" title="Hapus" @click="tplDelete(r)"><i class="fa-solid fa-trash-can"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
