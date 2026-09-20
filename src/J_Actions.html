@@ -1,0 +1,400 @@
+<script>
+// ============================================================
+// SI-ARSIP - J_Actions.html (tahap 2b, 2026-09-20)
+// ------------------------------------------------------------
+// Semua aksi UI: surat masuk (sm), disposisi (dp), surat keluar
+// (sk), master (ref/pjb/tpl). Validasi klien = cermin validasi
+// backend; nomor agenda/nomor surat keluar TIDAK bisa diisi
+// manual (generator server yang berwenang).
+// ============================================================
+window.ArsipActions = {
+  methods: {
+    // ================= SURAT MASUK =================
+    smOpenForm(row) {
+      this.loadKlasifikasi();
+      if (row) {
+        this.smForm = {
+          id: row.id || '',
+          nomor_surat: row.nomor_surat || '',
+          tanggal_surat: row.tanggal_surat || '',
+          tanggal_terima: row.tanggal_terima || '',
+          asal: row.asal || '',
+          perihal: row.perihal || '',
+          kode_klasifikasi: row.kode_klasifikasi || '',
+          jumlah_lampiran: Number(row.jumlah_lampiran || 0),
+          sifat: row.sifat || 'biasa',
+          status_surat: row.status_surat || 'baru',
+          lampiran_link: row.lampiran_link || '',
+          catatan: row.catatan || ''
+        };
+      } else {
+        this.smForm = {
+          id: '', nomor_surat: '', tanggal_surat: '',
+          tanggal_terima: this.todayIso_ ? this.todayIso_() : '',
+          asal: '', perihal: '', kode_klasifikasi: '', jumlah_lampiran: 0,
+          sifat: 'biasa', status_surat: 'baru', lampiran_link: '', catatan: ''
+        };
+      }
+      this.showSmForm = true;
+    },
+
+    async smSave() {
+      const f = this.smForm;
+      if (!String(f.nomor_surat || '').trim()) return this.showToast('Nomor surat wajib diisi.', 'error');
+      if (!String(f.asal || '').trim()) return this.showToast('Asal surat wajib diisi.', 'error');
+      if (!String(f.perihal || '').trim()) return this.showToast('Perihal wajib diisi.', 'error');
+      if (!String(f.kode_klasifikasi || '').trim()) return this.showToast('Kode klasifikasi wajib dipilih.', 'error');
+      this.smSaving = true;
+      try {
+        const r = await this.callServer('sm_save', f);
+        if (r && r.success) {
+          this.showToast(f.id ? 'Surat masuk diperbarui.' : 'Surat masuk teregistrasi.', 'success');
+          this.showSmForm = false;
+          this.smMapLoaded = false;            // peta join disposisi usang
+          await this.loadSm(this.smPage);
+          await this.loadDashboard();
+        } else {
+          this.showToast((r && r.error) || 'Gagal menyimpan surat masuk.', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      } finally {
+        this.smSaving = false;
+      }
+    },
+
+    async smDelete(row) {
+      if (!window.confirm('Hapus surat "' + (row.nomor_agenda_masuk || row.id) + '"? (soft-delete, masih bisa diaudit)')) return;
+      try {
+        const r = await this.callServer('sm_delete', { id: row.id });
+        if (r && r.success) {
+          this.showToast('Surat masuk dihapus.', 'success');
+          this.smMapLoaded = false;
+          await this.loadSm(this.smPage);
+          await this.loadDashboard();
+        } else {
+          this.showToast((r && r.error) || 'Gagal menghapus.', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      }
+    },
+
+    // Tombol disposisi di tabel surat masuk = BUKA FORM disposisi
+    // (backend sm_disposisi/dp_save wajib surat_id+ke_pejabat_id+instruksi)
+    disposisiDariSurat(row) {
+      this.loadPejabat();
+      this.dpForm = {
+        id: '', surat_id: row.id, ke_pejabat_id: '',
+        instruksi: '', jatuh_tempo: '', catatan: ''
+      };
+      this.showDpForm = true;
+    },
+
+    onSmFilterChange() {
+      if (this._searchTimerSm) clearTimeout(this._searchTimerSm);
+      this._searchTimerSm = setTimeout(() => this.loadSm(1), 400);
+    },
+
+    smLabelKlasifikasi(kode) {
+      const k = (this.klasifikasiList || []).find(x => String(x.kode_klasifikasi) === String(kode));
+      return k ? (kode + ' — ' + (k.uraian || '')) : (kode || '—');
+    },
+
+    // Tanggal sheet/GAS sering tiba sebagai ISO '2026-09-19T17:00:00.000Z'
+    // (UTC) — tampilkan sebagai dd/mm/yyyy dari 10 karakter pertama (hari WIB).
+    fmtTgl(v) {
+      if (!v) return '—';
+      const p = String(v).slice(0, 10).split('-');
+      return p.length === 3 ? (p[2] + '/' + p[1] + '/' + p[0]) : String(v);
+    },
+
+    // ================= DISPOSISI =================
+    dpOpenEdit(row) {
+      this.loadPejabat();
+      this.dpForm = {
+        id: row.id || '',
+        surat_id: row.surat_id || '',
+        ke_pejabat_id: row.ke_pejabat_id || '',
+        instruksi: row.instruksi || '',
+        jatuh_tempo: row.jatuh_tempo || '',
+        catatan: row.catatan || ''
+      };
+      this.showDpForm = true;
+    },
+
+    async dpSave() {
+      const f = this.dpForm;
+      if (!f.surat_id) return this.showToast('Surat induk wajib dipilih.', 'error');
+      if (!f.ke_pejabat_id) return this.showToast('Pejabat tujuan wajib dipilih.', 'error');
+      if (!String(f.instruksi || '').trim()) return this.showToast('Instruksi wajib diisi.', 'error');
+      this.dpSaving = true;
+      try {
+        const r = await this.callServer('dp_save', { record: f });
+        if (r && r.success) {
+          this.showToast(f.id ? 'Disposisi diperbarui.' : 'Disposisi diteruskan.', 'success');
+          this.showDpForm = false;
+          await this.loadDp(this.dpPage);
+          await this.loadSm(this.smPage);
+          await this.loadDashboard();
+        } else {
+          this.showToast((r && r.error) || 'Gagal menyimpan disposisi.', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      } finally {
+        this.dpSaving = false;
+      }
+    },
+
+    // Transisi: diteruskan→diproses (dp_teruskan), diproses→selesai (dp_selesaikan)
+    async dpTransisi(row, mode) {
+      const key = mode === 'selesaikan' ? 'dp_selesaikan' : 'dp_teruskan';
+      const label = mode === 'selesaikan' ? 'menyelesaikan' : 'memproses';
+      try {
+        const r = await this.callServer(key, { id: row.id });
+        if (r && r.success) {
+          this.showToast('Disposisi berhasil di' + label + '.', 'success');
+          await this.loadDp(this.dpPage);
+          await this.loadSm(this.smPage);
+          await this.loadDashboard();
+        } else {
+          this.showToast((r && r.error) || 'Gagal ' + label + ' disposisi.', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      }
+    },
+
+    async dpDelete(row) {
+      if (!window.confirm('Hapus disposisi ini? (soft-delete, admin saja)')) return;
+      try {
+        const r = await this.callServer('dp_delete', { id: row.id });
+        if (r && r.success) {
+          this.showToast('Disposisi dihapus.', 'success');
+          await this.loadDp(this.dpPage);
+          await this.loadDashboard();
+        } else {
+          this.showToast((r && r.error) || 'Gagal menghapus disposisi.', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      }
+    },
+
+    onDpFilterChange() {
+      if (this._searchTimerDp) clearTimeout(this._searchTimerDp);
+      this._searchTimerDp = setTimeout(() => this.loadDp(1), 400);
+    },
+
+    // ================= SURAT KELUAR =================
+    skOpenForm(row) {
+      this.loadKlasifikasi();
+      this.loadPejabat();
+      if (row) {
+        this.skForm = {
+          id: row.id || '',
+          tujuan: row.tujuan || '',
+          perihal: row.perihal || '',
+          kode_klasifikasi: row.kode_klasifikasi || '',
+          jumlah_lampiran: Number(row.jumlah_lampiran || 0),
+          sifat: row.sifat || 'biasa',
+          penandatangan_id: row.penandatangan_id || '',
+          tanggal_surat: row.tanggal_surat || '',
+          lampiran_link: row.lampiran_link || '',
+          catatan: row.catatan || ''
+        };
+      } else {
+        this.skForm = {
+          id: '', tujuan: '', perihal: '', kode_klasifikasi: '', jumlah_lampiran: 0,
+          sifat: 'biasa', penandatangan_id: '',
+          tanggal_surat: this.todayIso_ ? this.todayIso_() : '',
+          lampiran_link: '', catatan: ''
+        };
+      }
+      this.showSkForm = true;
+    },
+
+    async skSave() {
+      const f = this.skForm;
+      if (!String(f.tujuan || '').trim()) return this.showToast('Tujuan wajib diisi.', 'error');
+      if (!String(f.perihal || '').trim()) return this.showToast('Perihal wajib diisi.', 'error');
+      if (!String(f.kode_klasifikasi || '').trim()) return this.showToast('Kode klasifikasi wajib dipilih.', 'error');
+      if (!String(f.penandatangan_id || '').trim()) return this.showToast('Penandatangan wajib dipilih.', 'error');
+      this.skSaving = true;
+      try {
+        const r = await this.callServer('sk_save', f);
+        if (r && r.success) {
+          this.showToast(f.id ? 'Surat keluar diperbarui.' : 'Surat keluar terdaftar (draft).', 'success');
+          this.showSkForm = false;
+          await this.loadSk(this.skPage);
+          await this.loadDashboard();
+        } else {
+          this.showToast((r && r.error) || 'Gagal menyimpan surat keluar.', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      } finally {
+        this.skSaving = false;
+      }
+    },
+
+    // Transisi draft→review→terkirim (sk_ubah_status)
+    async skTransisi(row, statusBaru) {
+      try {
+        const r = await this.callServer('sk_ubah_status', { id: row.id, status_baru: statusBaru });
+        if (r && r.success) {
+          this.showToast('Status surat keluar → ' + statusBaru + '.', 'success');
+          await this.loadSk(this.skPage);
+          await this.loadDashboard();
+        } else {
+          this.showToast((r && r.error) || 'Gagal mengubah status.', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      }
+    },
+
+    async skDelete(row) {
+      if (!window.confirm('Hapus surat keluar "' + (row.nomor_surat || row.id) + '"?')) return;
+      try {
+        const r = await this.callServer('sk_delete', { id: row.id });
+        if (r && r.success) {
+          this.showToast('Surat keluar dihapus.', 'success');
+          await this.loadSk(this.skPage);
+          await this.loadDashboard();
+        } else {
+          this.showToast((r && r.error) || 'Gagal menghapus.', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      }
+    },
+
+    onSkFilterChange() {
+      if (this._searchTimerSk) clearTimeout(this._searchTimerSk);
+      this._searchTimerSk = setTimeout(() => this.loadSk(1), 400);
+    },
+
+    // ================= MASTER =================
+    setMasterTab(tab) {
+      this.masterTab = tab;
+      if (tab === 'klasifikasi') this.loadRef();
+      if (tab === 'pejabat') { this.loadPjb(); this.loadSimpegLookup(); }
+      if (tab === 'template') this.loadTpl();
+    },
+
+    refOpenForm(row) {
+      this.refForm = row ? {
+        id: row.id || '', kode_klasifikasi: row.kode_klasifikasi || '', uraian: row.uraian || '',
+        retensi_aktif_th: Number(row.retensi_aktif_th || 0), retensi_inaktif_th: Number(row.retensi_inaktif_th || 0),
+        tindakan_akhir: row.tindakan_akhir || 'musnah', status_aktif: String(row.status_aktif || 'true'),
+        keterangan: row.keterangan || ''
+      } : {
+        id: '', kode_klasifikasi: '', uraian: '', retensi_aktif_th: 2,
+        retensi_inaktif_th: 3, tindakan_akhir: 'musnah', status_aktif: 'true', keterangan: ''
+      };
+      this.showRefForm = true;
+    },
+    async refSave() {
+      const f = this.refForm;
+      if (!String(f.kode_klasifikasi || '').trim()) return this.showToast('Kode klasifikasi wajib diisi.', 'error');
+      if (!String(f.uraian || '').trim()) return this.showToast('Uraian wajib diisi.', 'error');
+      this.refSaving = true;
+      try {
+        const r = await this.callServer('ref_save', f);
+        if (r && r.success) {
+          this.showToast('Klasifikasi tersimpan.', 'success');
+          this.showRefForm = false;
+          await this.loadRef(true);
+          this.klasifikasiList = [];           // paksa muat ulang opsi select
+        } else {
+          this.showToast((r && r.error) || 'Gagal menyimpan klasifikasi.', 'error');
+        }
+      } catch (e) { this.showToast(e.message, 'error'); }
+      finally { this.refSaving = false; }
+    },
+    async refDelete(row) {
+      if (!window.confirm('Hapus kode ' + row.kode_klasifikasi + ' dari master?')) return;
+      try {
+        const r = await this.callServer('ref_delete', { id: row.id });
+        if (r && r.success) { this.showToast('Klasifikasi dihapus.', 'success'); await this.loadRef(true); this.klasifikasiList = []; }
+        else this.showToast((r && r.error) || 'Gagal menghapus.', 'error');
+      } catch (e) { this.showToast(e.message, 'error'); }
+    },
+
+    pjbOpenForm(row) {
+      this.loadSimpegLookup();
+      this.pjbForm = row ? {
+        id: row.id || '', pegawai_id: row.pegawai_id || '', jabatan_id: row.jabatan_id || '',
+        urutan_hierarki: Number(row.urutan_hierarki || 99), aktif: String(row.aktif || 'true'),
+        keterangan: row.keterangan || ''
+      } : { id: '', pegawai_id: '', jabatan_id: '', urutan_hierarki: 99, aktif: 'true', keterangan: '' };
+      this.showPjbForm = true;
+    },
+    async pjbSave() {
+      const f = this.pjbForm;
+      if (!String(f.pegawai_id || '').trim()) return this.showToast('Pegawai wajib dipilih.', 'error');
+      this.pjbSaving = true;
+      try {
+        const r = await this.callServer('pjb_save', f);
+        if (r && r.success) {
+          this.showToast('Pejabat tersimpan.', 'success');
+          this.showPjbForm = false;
+          await this.loadPjb(true);
+          this.pejabatList = [];               // paksa muat ulang select
+        } else {
+          this.showToast((r && r.error) || 'Gagal menyimpan pejabat.', 'error');
+        }
+      } catch (e) { this.showToast(e.message, 'error'); }
+      finally { this.pjbSaving = false; }
+    },
+    async pjbDelete(row) {
+      if (!window.confirm('Hapus pejabat ini dari master?')) return;
+      try {
+        const r = await this.callServer('pjb_delete', { id: row.id });
+        if (r && r.success) { this.showToast('Pejabat dihapus.', 'success'); await this.loadPjb(true); this.pejabatList = []; }
+        else this.showToast((r && r.error) || 'Gagal menghapus.', 'error');
+      } catch (e) { this.showToast(e.message, 'error'); }
+    },
+
+    tplOpenForm(row) {
+      this.tplForm = row ? {
+        id: row.id || '', kode_template: row.kode_template || '', nama_template: row.nama_template || '',
+        jenis_naskah: row.jenis_naskah || 'surat_keluar', format_default: row.format_default || '',
+        status_aktif: String(row.status_aktif || 'true'), keterangan: row.keterangan || ''
+      } : {
+        id: '', kode_template: '', nama_template: '', jenis_naskah: 'surat_keluar',
+        format_default: '', status_aktif: 'true', keterangan: ''
+      };
+      this.showTplForm = true;
+    },
+    async tplSave() {
+      const f = this.tplForm;
+      if (!String(f.kode_template || '').trim()) return this.showToast('Kode template wajib diisi.', 'error');
+      if (!String(f.nama_template || '').trim()) return this.showToast('Nama template wajib diisi.', 'error');
+      if (!String(f.jenis_naskah || '').trim()) return this.showToast('Jenis naskah wajib dipilih.', 'error');
+      this.tplSaving = true;
+      try {
+        const r = await this.callServer('tpl_save', f);
+        if (r && r.success) {
+          this.showToast('Template tersimpan.', 'success');
+          this.showTplForm = false;
+          await this.loadTpl(true);
+        } else {
+          this.showToast((r && r.error) || 'Gagal menyimpan template.', 'error');
+        }
+      } catch (e) { this.showToast(e.message, 'error'); }
+      finally { this.tplSaving = false; }
+    },
+    async tplDelete(row) {
+      if (!window.confirm('Hapus template ' + row.kode_template + '?')) return;
+      try {
+        const r = await this.callServer('tpl_delete', { id: row.id });
+        if (r && r.success) { this.showToast('Template dihapus.', 'success'); await this.loadTpl(true); }
+        else this.showToast((r && r.error) || 'Gagal menghapus.', 'error');
+      } catch (e) { this.showToast(e.message, 'error'); }
+    }
+  }
+};
+</script>
