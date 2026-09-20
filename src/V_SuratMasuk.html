@@ -82,8 +82,8 @@
                          :label="r.status_surat || 'baru'"></app-badge>
             </td>
             <td class="text-right whitespace-nowrap">
-              <button v-if="r.status_surat === 'baru'" class="btn-icon" title="Tandai didisposisi"
-                      @click="smDisposisiQuick(r)"><i class="fa-solid fa-share-nodes"></i></button>
+              <button v-if="r.status_surat !== 'selesai'" class="btn-icon" title="Disposisikan surat ini"
+                      @click="disposisiDariSurat(r)"><i class="fa-solid fa-share-nodes"></i></button>
               <button class="btn-icon" title="Ubah" @click="smOpenForm(r)"><i class="fa-solid fa-pen-to-square"></i></button>
               <button class="btn-icon-danger" title="Hapus" @click="smDelete(r)"><i class="fa-solid fa-trash-can"></i></button>
             </td>
