@@ -83,6 +83,26 @@ const app = AppCore.create({
     } else if (page === 'surat_masuk') {
       vm.loadKlasifikasi();
       vm.loadSm(1);
+    } else if (page === 'disposisi') {
+      vm.loadPejabat();
+      vm.loadSimpegLookup();
+      vm.ensureSmMap();
+      vm.loadDp(1);
+    } else if (page === 'surat_keluar') {
+      vm.loadKlasifikasi();
+      vm.loadPejabat();
+      vm.loadSk(1);
+    } else if (page === 'master') {
+      vm.loadSimpegLookup();
+      vm.setMasterTab(vm.masterTab || 'klasifikasi');
+    } else if (page === 'naskah_dinas') {
+      vm.loadKlasifikasi();
+      vm.loadNd(1);
+    } else if (page === 'kearsipan') {
+      vm.loadAr(1);
+      vm.loadAkanMusnah();
+    } else if (page === 'pencarian') {
+      vm.loadKlasifikasi();
     }
   },
 
