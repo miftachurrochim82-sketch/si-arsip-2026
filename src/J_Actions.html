@@ -394,6 +394,116 @@ window.ArsipActions = {
         if (r && r.success) { this.showToast('Template dihapus.', 'success'); await this.loadTpl(true); }
         else this.showToast((r && r.error) || 'Gagal menghapus.', 'error');
       } catch (e) { this.showToast(e.message, 'error'); }
+    },
+
+    // ================= NASKAH DINAS (v1.1) =================
+    ndOpenForm(row) {
+      this.loadKlasifikasi();
+      this.ndForm = row ? {
+        id: row.id || '', jenis_naskah: row.jenis_naskah || 'nota_dinas',
+        perihal: row.perihal || '', tujuan: row.tujuan || '', isi: row.isi || '',
+        kode_klasifikasi: row.kode_klasifikasi || '', tanggal: row.tanggal || '',
+        lampiran_link: row.lampiran_link || ''
+      } : {
+        id: '', jenis_naskah: 'nota_dinas', perihal: '', tujuan: '', isi: '',
+        kode_klasifikasi: '', tanggal: this.todayIso_ ? this.todayIso_() : '', lampiran_link: ''
+      };
+      this.showNdForm = true;
+    },
+
+    async ndSave() {
+      const f = this.ndForm;
+      if (!String(f.perihal || '').trim()) return this.showToast('Perihal wajib diisi.', 'error');
+      if (!String(f.kode_klasifikasi || '').trim()) return this.showToast('Kode klasifikasi wajib dipilih.', 'error');
+      this.ndSaving = true;
+      try {
+        const r = await this.callServer('nd_save', f);
+        if (r && r.success) {
+          this.showToast(f.id ? 'Naskah diperbarui.' : 'Naskah tersimpan sebagai draft.', 'success');
+          this.showNdForm = false;
+          await this.loadNd(this.ndPage);
+        } else {
+          this.showToast((r && r.error) || 'Gagal menyimpan naskah.', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      } finally {
+        this.ndSaving = false;
+      }
+    },
+
+    // draft→final (memicu auto-archive) / final→terarsip
+    async ndTransisi(row, statusBaru) {
+      try {
+        const r = await this.callServer('nd_ubah_status', { id: row.id, status_baru: statusBaru });
+        if (r && r.success) {
+          this.showToast('Naskah → ' + statusBaru + (statusBaru === 'final' ? ' (otomatis terarsipkan)' : '') + '.', 'success');
+          await this.loadNd(this.ndPage);
+          await this.loadAr(1);
+          await this.loadAkanMusnah();
+        } else {
+          this.showToast((r && r.error) || 'Gagal mengubah status naskah.', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      }
+    },
+
+    async ndDelete(row) {
+      if (!window.confirm('Hapus naskah "' + (row.nomor_naskah || row.id) + '"? (admin)')) return;
+      try {
+        const r = await this.callServer('nd_delete', { id: row.id });
+        if (r && r.success) { this.showToast('Naskah dihapus.', 'success'); await this.loadNd(this.ndPage); }
+        else this.showToast((r && r.error) || 'Gagal menghapus.', 'error');
+      } catch (e) { this.showToast(e.message, 'error'); }
+    },
+
+    onNdFilterChange() {
+      if (this._searchTimerNd) clearTimeout(this._searchTimerNd);
+      this._searchTimerNd = setTimeout(() => this.loadNd(1), 400);
+    },
+
+    // ================= KEARSIPAN (v1.1) =================
+    arAksiOpen(row, mode) {
+      this.arAksiMode = mode;
+      this.arAksiForm = {
+        id: row.id, judul: row.judul || '',
+        lokasi_fisik: row.lokasi_fisik || '', catatan: ''
+      };
+    },
+
+    async arAksiSubmit() {
+      const m = this.arAksiMode;
+      const f = this.arAksiForm;
+      if (m === 'lokasi' && !String(f.lokasi_fisik || '').trim()) {
+        return this.showToast('Lokasi fisik wajib diisi.', 'error');
+      }
+      if ((m === 'musnah' || m === 'serah') && !String(f.catatan || '').trim()) {
+        return this.showToast('Catatan / nomor BA wajib diisi.', 'error');
+      }
+      const key = m === 'lokasi' ? 'ar_ubah_lokasi' : (m === 'serah' ? 'ar_tandai_serah' : 'ar_tandai_musnah');
+      const payload = m === 'lokasi'
+        ? { id: f.id, lokasi_fisik: f.lokasi_fisik }
+        : { id: f.id, catatan: f.catatan };
+      try {
+        const r = await this.callServer(key, payload);
+        if (r && r.success) {
+          this.showToast(m === 'lokasi' ? 'Lokasi arsip diperbarui.'
+            : (m === 'serah' ? 'Arsip ditandai diserahkan (permanen).' : 'Arsip ditandai musnah.'), 'success');
+          this.arAksiMode = '';
+          await this.loadAr(this.arPage);
+          await this.loadAkanMusnah();
+        } else {
+          this.showToast((r && r.error) || 'Gagal menjalankan aksi.', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      }
+    },
+
+    onArFilterChange() {
+      if (this._searchTimerAr) clearTimeout(this._searchTimerAr);
+      this._searchTimerAr = setTimeout(() => this.loadAr(1), 400);
     }
   }
 };
