@@ -1,14 +1,16 @@
 # 08 — GAP LIST (as-is → to-be) [SI-ARSIP] — 2026-09-20
 
-> **Status per 2026-09-20 (amendemen malam)**: backend **sebagian dimulai** —
-> API Surat Masuk/Keluar/Disposisi/Dashboard/Master/Config + `99_TestSuite.gs`
-> sudah ada; frontend **belum dimulai** (nol berkas HTML); `appsscript.json`
-> ditambahkan 2026-09-20 (CoreLib pin 15). Fitur yang belum berkode tetap
-> berstatus **RENCANA/BACKLOG** pada tabel di bawah. Dokumen ini adalah
-> **baseline tracking** untuk seluruh roadmap SI-ARSIP.
+> **Status per 2026-09-20 (amendemen malam-2, pasca v1.1)**: backend **lengkap
+> Fase 1 + fitur Fase 2** (12 berkas `.gs`), frontend **9 halaman + 8 modal**
+> hidup di GAS, suite **120/0/1**, repo bertag `siarsip-v1.1.0` (fitur) &
+> `siarsip-v1.1.1` (bukti test). Kolom status di bawah = **keadaan kode
+> terverifikasi**, bukan rencana. Dokumen ini tetap baseline tracking roadmap.
 >
 > **Riwayat**:
 > - 2026-09-20 — daftar gap awal dari Gate 0 (BRD/PRD/FRD/DATABASE/UIUX/API/TESTCASE).
+> - 2026-09-20 malam-2 — SWEEP STATUS: G1–G13,G15–G18 TUTUP; G14 PARTIAL;
+>   G19–G25 TUTUP; G26 PARTIAL; G27–G45 tetap backlog. Bukti: log test 120/0/1
+>   + screenshot per modul + tag rilis.
 >
 > Rujukan: SRIKANDI (ANRI), Permendagri 78/2012, Perka ANRI (JRA).
 
@@ -41,26 +43,26 @@ skop **kantor Satpol PP & Damkar**, dengan kemungkinan perluasan ke SKPD lain di
 
 | # | Item | Kategori | Status |
 |---|---|---|---|
-| G1 | Skema 10 sheet + initDatabase | Fondasi | 📋 RENCANA |
-| G2 | Bridge CoreLib + `getAppConfig_()` + hook P1/P2 | Fondasi | 📋 RENCANA |
-| G3 | Dispatcher `CoreLib.dispatchAction` + `actionLevels` | Fondasi | 📋 RENCANA |
-| G4 | Frontend shell (`Index.html` + kit CDN `@v2.8.1`) | Fondasi | 📋 RENCANA |
-| G5 | Auth SSO native CoreLib (login/logout/session) | Fondasi | 📋 RENCANA |
-| G6 | Master Klasifikasi (M1) — CRUD admin | Fitur | 📋 RENCANA |
-| G7 | Master Pejabat (M2) — CRUD admin + sinkron SIMPEG | Fitur | 📋 RENCANA |
-| G8 | Master Template (M3) — CRUD admin | Fitur | 📋 RENCANA |
-| G9 | Surat Masuk (T1) — registrasi + list + detail | Fitur | 📋 RENCANA |
-| G10 | Surat Masuk — auto-generate nomor agenda + flag kritis | Fitur | 📋 RENCANA |
-| G11 | Surat Keluar (T2) — draft + review + terbitkan | Fitur | 📋 RENCANA |
-| G12 | Surat Keluar — auto-generate nomor surat | Fitur | 📋 RENCANA |
-| G13 | Disposisi (T4) — buat + teruskan + selesaikan + SLA alert | Fitur | 📋 RENCANA |
-| G14 | Dashboard (4 KPI + 2 chart + 2 panel) | Fitur | 📋 RENCANA |
-| G15 | Pengaturan (wrapper `<app-settings>`) | Fitur | 📋 RENCANA |
-| G16 | Lampiran (T6) — v1 pakai URL manual | Fitur | 📋 RENCANA |
-| G17 | Test suite `runLibraryTests` + adopsi + routing + domain | Test | 📋 RENCANA |
-| G18 | Deploy Web App + smoke test | Deploy | 📋 RENCANA |
+| G1 | Skema 10 sheet + initDatabase | Fondasi | ✅ TUTUP (v1.0) |
+| G2 | Bridge CoreLib + `getAppConfig_()` + hook P1/P2 | Fondasi | ✅ TUTUP (v1.0) |
+| G3 | Dispatcher `CoreLib.dispatchAction` + `actionLevels` | Fondasi | ✅ TUTUP (v1.0) |
+| G4 | Frontend shell (`Index.html` + kit CDN `@v2.8.1`) | Fondasi | ✅ TUTUP (v1.0) |
+| G5 | Auth SSO native CoreLib (login/logout/session) | Fondasi | ✅ TUTUP (v1.0) |
+| G6 | Master Klasifikasi (M1) — CRUD admin | Fitur | ✅ TUTUP (v1.0) |
+| G7 | Master Pejabat (M2) — CRUD admin + sinkron SIMPEG | Fitur | ✅ TUTUP (v1.0) |
+| G8 | Master Template (M3) — CRUD admin | Fitur | ✅ TUTUP (v1.0) |
+| G9 | Surat Masuk (T1) — registrasi + list + detail | Fitur | ✅ TUTUP (v1.0) |
+| G10 | Surat Masuk — auto-generate nomor agenda + flag kritis | Fitur | ✅ TUTUP (v1.0) |
+| G11 | Surat Keluar (T2) — draft + review + terbitkan | Fitur | ✅ TUTUP (v1.0) |
+| G12 | Surat Keluar — auto-generate nomor surat | Fitur | ✅ TUTUP (v1.0) |
+| G13 | Disposisi (T4) — buat + teruskan + selesaikan + SLA alert | Fitur | ✅ TUTUP (v1.0) |
+| G14 | Dashboard (4 KPI + 2 chart + 2 panel) | Fitur | 🟡 PARTIAL — 4 KPI live; 2 chart + 2 panel: endpoint `dash_*` siap, UI tahap 2 |
+| G15 | Pengaturan (wrapper `<app-settings>`) | Fitur | ✅ TUTUP (v1.0) |
+| G16 | Lampiran (T6) — v1 pakai URL manual | Fitur | ✅ TUTUP (v1.0) |
+| G17 | Test suite `runLibraryTests` + adopsi + routing + domain | Test | ✅ TUTUP (v1.0) |
+| G18 | Deploy Web App + smoke test | Deploy | ✅ TUTUP (v1.0) |
 
-**MVP selesai bila**: G1–G18 status TUTUP (18 item).
+**MVP selesai bila**: G1–G18 status TUTUP. **Kini: 17 TUTUP + 1 PARTIAL (G14 chart/panel UI).**
 
 ---
 
@@ -68,14 +70,14 @@ skop **kantor Satpol PP & Damkar**, dengan kemungkinan perluasan ke SKPD lain di
 
 | # | Item | Kategori | Status |
 |---|---|---|---|
-| G19 | Naskah Dinas (T3) — nota/memo/laporan internal | Fitur | 🟡 BACKLOG |
-| G20 | Naskah Dinas — generator nomor + status final | Fitur | 🟡 BACKLOG |
-| G21 | Kearsipan (T5) — daftar arsip + lokasi + retensi | Fitur | 🟡 BACKLOG |
-| G22 | Kearsipan — auto-archive saat surat selesai/terkirim | Fitur | 🟡 BACKLOG |
-| G23 | Kearsipan — daftar akan musnah + BA musnah | Fitur | 🟡 BACKLOG |
-| G24 | Kearsipan — daftar permanen + BA serah | Fitur | 🟡 BACKLOG |
-| G25 | Pencarian Lintas — search 4 sheet (masuk/keluar/naskah/arsip) | Fitur | 🟡 BACKLOG |
-| G26 | Logbook (T7) — auto-log setiap aksi dokumen | Fitur | 🟡 BACKLOG |
+| G19 | Naskah Dinas (T3) — nota/memo/laporan internal | Fitur | ✅ TUTUP (v1.1) |
+| G20 | Naskah Dinas — generator nomor + status final | Fitur | ✅ TUTUP (v1.1) |
+| G21 | Kearsipan (T5) — daftar arsip + lokasi + retensi | Fitur | ✅ TUTUP (v1.1) |
+| G22 | Kearsipan — auto-archive saat surat selesai/terkirim | Fitur | ✅ TUTUP (v1.1) |
+| G23 | Kearsipan — daftar akan musnah + BA musnah | Fitur | ✅ TUTUP (v1.1) |
+| G24 | Kearsipan — daftar permanen + BA serah | Fitur | ✅ TUTUP (v1.1) |
+| G25 | Pencarian Lintas — search 4 sheet (masuk/keluar/naskah/arsip) | Fitur | ✅ TUTUP (v1.1) |
+| G26 | Logbook (T7) — auto-log setiap aksi dokumen | Fitur | 🟡 PARTIAL — aksi arsip ter-log ke T7; aksi dokumen lain masih via AUDIT_LOGS |
 | G27 | Export Excel multi-sheet (laporan bulanan) | Fitur | 🟡 BACKLOG |
 | G28 | Upload file biner ke Drive (ganti link manual) | Fitur | 🟡 BACKLOG |
 | G29 | Preview PDF inline di modal detail | UI/UX | 🟡 BACKLOG |
@@ -84,7 +86,7 @@ skop **kantor Satpol PP & Damkar**, dengan kemungkinan perluasan ke SKPD lain di
 | G32 | Quick action dropdown di tabel | UI/UX | 🟡 BACKLOG |
 | G33 | Filter rentang tanggal kalender | UI/UX | 🟡 BACKLOG |
 
-**Fase 2 selesai bila**: G19–G33 status TUTUP (15 item).
+**Fase 2 selesai bila**: G19–G33 status TUTUP. **Kini: 7 TUTUP + 1 PARTIAL (G26) + 7 BACKLOG (G27–G33).**
 
 ---
 
@@ -192,12 +194,12 @@ FASE 3 — tanpa jadwal
 
 Fase 1 selesai bila semua berikut **TERPENUHI**:
 
-**Fungsional**:
+**Fungsional** (centang = butir definisi; keterpenuhan per 2026-09-20 malam-2):
 - ✅ 6 menu aktif: Dashboard, Surat Masuk, Surat Keluar, Disposisi, Master, Pengaturan.
 - ✅ Login SSO via SI-PLATFORM berhasil.
 - ✅ Surat masuk bisa diregistrasi + disposisi + selesai.
 - ✅ Surat keluar bisa draft → review → terkirim.
-- ✅ Dashboard menampilkan 4 KPI + 2 chart + 2 panel.
+- 🟡 Dashboard menampilkan 4 KPI + 2 chart + 2 panel → **KPI terpenuhi; chart+panel = satu-satunya butir DoD Fase 1 yang belum (UI tahap 2, endpoint siap)**.
 - ✅ Master Klasifikasi/Pejabat/Template bisa CRUD.
 - ✅ Pengaturan bisa baca/tulis Script Properties.
 
@@ -226,8 +228,8 @@ Fase 1 selesai bila semua berikut **TERPENUHI**:
 
 | Fase | Total Item | Status |
 |---|---|---|
-| **Fase 1 (MVP)** | 18 (G1–G18) | 📋 RENCANA |
-| **Fase 2** | 15 (G19–G33) | 🟡 BACKLOG |
+| **Fase 1 (MVP)** | 18 (G1–G18) | ✅ 17 TUTUP + 🟡 1 PARTIAL (G14) |
+| **Fase 2** | 15 (G19–G33) | ✅ 7 TUTUP + 🟡 1 PARTIAL (G26) + 7 BACKLOG |
 | **Fase 3** | 12 (G34–G45) | 🔵 BACKLOG LANJUT |
 | **Kandidat (belum masuk PRD)** | 9 (B1–B9) | 📝 IDE |
 | **Keputusan pemilik** | 13 | ✅ DIPUTUSKAN |
@@ -238,5 +240,8 @@ Fase 1 selesai bila semua berikut **TERPENUHI**:
 - **Dokumen**: 9 dokumen `docs/` (dalam proses penulisan — 8 selesai, 1 tersisa).
 - **Test**: target ~100 asersi untuk Fase 1.
 
-**Kesimpulan**: SI-ARSIP siap masuk Fase 1 (kode). Tidak ada gap blocker. Sisa item
-adalah fitur fase lanjut (bukan gap fungsional).
+**Kesimpulan (amendemen malam-2)**: Fase 1 secara kode & test **selesai kecuali
+UI chart/panel dashboard (G14)**; fitur inti Fase 2 (naskah, kearsipan,
+pencarian, auto-archive) **sudah live lebih cepat dari jadwal**. Sisa kerja:
+UI chart/panel, kelengkapan logbook, ekspor/upload/preview (G27–G33), dan
+Fase 3 tanpa jadwal. Tidak ada gap blocker fungsional.
