@@ -287,6 +287,12 @@ function smSave_(data, user) {
            'T_SURAT_MASUK', saved.id, true,
            'Agenda: ' + saved.nomor_agenda_masuk + ' — ' + saved.perihal);
 
+    // FR-28 (Fase 2 aktif): status selesai lewat edit manual → auto-archive.
+    if (CoreLib.normStr(saved.status_surat) === 'selesai') {
+      try { arAutoArchive_('surat_masuk', saved.id, user); }
+      catch (e) { Logger.log('[WARN] auto-archive sm-save: ' + e.message); }
+    }
+
     return { success: true, data: saved };
   } catch (err) {
     Logger.log('[smSave_] ' + err.message);
