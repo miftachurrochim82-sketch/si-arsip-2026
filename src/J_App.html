@@ -21,8 +21,8 @@ const ArsipMixin = {
   computed: Object.assign({}, window.ArsipState.computed),
   methods: Object.assign(
     {},
-    window.ArsipApi.methods
-    // window.ArsipActions.methods,  // tahap berikutnya (CRUD+transisi)
+    window.ArsipApi.methods,
+    window.ArsipActions.methods
     // window.ArsipExport.methods,   // tahap berikutnya (ekspor kit)
     // window.ArsipKearsipan.methods // tahap v1.1 (retensi/musnah/serah)
   )
@@ -80,6 +80,9 @@ const app = AppCore.create({
   onNavigate(vm, page) {
     if (page === 'dashboard') {
       vm.loadDashboard();
+    } else if (page === 'surat_masuk') {
+      vm.loadKlasifikasi();
+      vm.loadSm(1);
     }
   },
 
