@@ -200,3 +200,36 @@
 
 - **FR-57** `runDomainTestsSIArsip()` — domain FIX MVP (surat masuk/keluar/disposisi + SIMPEG RO + hook) — target ≥15/0.
   - Backend: `99_TestSuite.gs`.
+
+---
+
+## Amendemen 2026-09-20 — Struktur berkas & modul (Gate 0)
+
+> Satu baris dok = satu item kode. Backend = pola starter-kit/si-lahar; frontend
+> cetak dari starter-kit (Index shell + include satu tingkat).
+
+### Backend (`src/*.gs`) — kondisi + rencana
+| Berkas | Status | Isi |
+|---|---|---|
+| `00_Utils.gs` | ADA | audit log lokal, self-check |
+| `00b_LocalHelpers.gs` | ADA | lock ber-timeout + write atomik ber-preSaveHook (kandidat CoreLib C9/C10; bertahan sampai promosi) |
+| `01_ConfigAndBridge.gs` | ADA | config, bridge CoreLib, normalisasi SIMPEG, preSaveHook prefix |
+| `02_AppLogic.gs` | ADA | doGet/handleAction + peta localHandlers (ping, profil, dashboard×5, SIMPEG×7, sm×5, sk×5, dp×6, master×9, config×3) |
+| `03_SuratMasukApi.gs` / `04_SuratKeluarApi.gs` / `05_DisposisiApi.gs` | ADA | CRUD + generator nomor + transisi + SLA |
+| `09_DashboardApi.gs` | ADA | ringkas, tren, klasifikasi, surat kritis, disposisi lewat SLA |
+| `99_TestSuite.gs` | ADA | runAllTestsSIArsip (adopsi CoreLib + registri handler + domain + guard SIMPEG + skema) |
+| `appsscript.json` | DITAMBAHKAN 2026-09-20 | manifest V8, CoreLib pin 15, timeZone Asia/Jakarta |
+| `06_KearsipanApi.gs` | RENCANA v1.1 | T5 arsip: retensi berjalan, daftar musnah/serah, pencarian global lintas T1/T2/T3 |
+
+### Frontend (`src/*.html`) — RENCANA v1 (cetak starter-kit)
+| Berkas | Tanggung jawab |
+|---|---|
+| `Index.html` | shell tipis: pin CDN v2.8.1, tema, include satu tingkat |
+| `J_State.html` | state global: token, currentPage, filter per modul, flag modal |
+| `J_Api.html` | wrapper callServer + loader per modul (sm/sk/dp/master/dash/arsip) |
+| `J_Actions.html` | aksi CRUD + transisi (sm_disposisi, sk_ubah_status, dp_teruskan/selesaikan) |
+| `J_Export.html` | exportExcel/exportPDF via AppCore.loadLib |
+| `J_Arsip.html` | logika domain kearsipan: retensi, musnah/serah, pencarian global |
+| `J_App.html` | bootstrap AppCore.create, menu, pageIcons, navigasi |
+| `V_Dashboard/SuratMasuk/SuratKeluar/NaskahDinas/Disposisi/Kearsipan/Pencarian/Master/Pengaturan.html` | 9 halaman sesuai 05_UIUX |
+| `V_Modals.html` | modal form bersama |
