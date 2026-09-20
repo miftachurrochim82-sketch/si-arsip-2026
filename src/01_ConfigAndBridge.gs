@@ -493,18 +493,19 @@ function getAppConfig_() {
       'tpl_save':             'admin',
       'tpl_delete':           'admin',
 
-      // Fase 2 — [SESUAIKAN] buka saat fitur diaktifkan
-      // 'nd_get_list':       'viewer',
-      // 'nd_save':           'user',
-      // 'nd_delete':         'admin',
-      // 'nd_ubah_status':    'user',
-      // 'ar_get_list':       'viewer',
-      // 'ar_get_detail':     'viewer',
-      // 'ar_get_akan_musnah':'viewer',
-      // 'ar_ubah_lokasi':    'user',
-      // 'ar_tandai_musnah':  'admin',
-      // 'ar_tandai_serah':   'admin',
-      // 'search_all':        'viewer',
+      // Fase 2 — AKTIF sejak v1.1.0 (2026-09-20): Naskah, Kearsipan, Pencarian
+      'nd_get_list':        'viewer',
+      'nd_get_detail':      'viewer',
+      'nd_save':            'user',
+      'nd_delete':          'admin',
+      'nd_ubah_status':     'user',
+      'ar_get_list':        'viewer',
+      'ar_get_detail':      'viewer',
+      'ar_get_akan_musnah': 'viewer',
+      'ar_ubah_lokasi':     'user',
+      'ar_tandai_musnah':   'admin',
+      'ar_tandai_serah':    'admin',
+      'search_all':         'viewer',
 
       // Generic routing
       'save':                 'admin',
