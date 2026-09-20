@@ -163,3 +163,16 @@ Untuk MVP (Fase 1), UI yang dibangun:
 - `V_NaskahDinas.html`, `V_Kearsipan.html`, `V_Pencarian.html`
 - 3 modal tambahan
 - `09_PROFIL_KINERJA.md` (analog) — jika dibutuhkan
+
+---
+
+## Amendemen 2026-09-20 — Peta modul logika `J_*`
+| Modul | Memuat | Dipakai halaman |
+|---|---|---|
+| `J_State` | state & filter per modul | semua |
+| `J_Api` | loader data (sm/sk/dp/master/dash/arsip/pencarian) | semua |
+| `J_Actions` | simpan/hapus/transisi/disposisi | SuratMasuk, SuratKeluar, NaskahDinas, Disposisi, Master |
+| `J_Export` | ekspor Excel/PDF kit | SuratMasuk, SuratKeluar, Kearsipan, Laporan |
+| `J_Arsip` | retensi, musnah/serah, pencarian global | Kearsipan, Pencarian |
+| `J_App` | bootstrap, menu, navigasi, dark-mode | shell |
+Aturan: include satu tingkat dari Index; tanpa nested include; komponen kit `<app-*>` wajib; aksi tabel `.btn-icon`/`.btn-icon-danger`.
