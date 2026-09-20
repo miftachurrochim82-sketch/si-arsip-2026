@@ -1,0 +1,104 @@
+<!-- ============================================================
+     SI-ARSIP - V_SuratMasuk.html (tahap 2, 2026-09-20)
+     Registrasi & agenda surat masuk: filter-bar kit (pencarian
+     span:2 + tanggal dari/sampai + klasifikasi/sifat/status),
+     tabel manual + btn-icon kit, paginasi server (CoreLib.paginate),
+     flag surat kritis (is_kritis runtime). Modal form di V_Modals.
+     ============================================================ -->
+<section v-if="currentPage === 'surat_masuk'" class="space-y-4 animate-fade-in">
+
+  <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+    <div>
+      <h2 class="text-2xl font-bold tracking-tight flex items-center gap-2 text-slate-800 dark:text-white">
+        <i class="fa-solid fa-inbox text-sky-600 dark:text-sky-400"></i> Surat Masuk
+      </h2>
+      <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+        Registrasi agenda, klasifikasi ANRI, dan penandaan disposisi.
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="btn btn-primary" @click="smOpenForm(null)">
+        <i class="fa-solid fa-plus"></i> Registrasi Surat
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter bar (kit v2.8.1): pencarian melebar span:2 -->
+  <app-filter-bar :filters="[
+    { key: 'search', label: 'Pencarian', type: 'text', placeholder: 'Cari agenda, nomor, asal, perihal...', span: 2 },
+    { key: 'tanggal_dari', label: 'Tanggal dari', type: 'date' },
+    { key: 'tanggal_sampai', label: 'Tanggal sampai', type: 'date' },
+    { key: 'kode_klasifikasi', label: 'Klasifikasi', type: 'select',
+      options: (klasifikasiList || []).map(k => ({ value: k.kode_klasifikasi, label: k.kode_klasifikasi + ' — ' + (k.uraian || '') })) },
+    { key: 'sifat', label: 'Sifat', type: 'select',
+      options: [{ value: 'biasa', label: 'Biasa' }, { value: 'segera', label: 'Segera' }, { value: 'rahasia', label: 'Rahasia' }] },
+    { key: 'status_surat', label: 'Status', type: 'select',
+      options: [{ value: 'baru', label: 'Baru' }, { value: 'didiposisi', label: 'Didisposisi' }, { value: 'selesai', label: 'Selesai' }] }
+  ]" v-model="smFilters" @change="onSmFilterChange" @reset="loadSm(1)"></app-filter-bar>
+
+  <!-- Tabel -->
+  <div class="card overflow-hidden !p-0">
+    <app-skeleton v-if="smLoading && !smList.length" type="table"></app-skeleton>
+    <app-empty-state v-else-if="!smList.length"
+                     icon="fa-solid fa-inbox"
+                     title="Belum ada surat masuk"
+                     subtitle="Registrasi surat pertama lewat tombol Registrasi Surat.">
+    </app-empty-state>
+    <div v-else class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Agenda / Tanggal</th>
+            <th>Asal & Perihal</th>
+            <th>Klasifikasi</th>
+            <th>Sifat</th>
+            <th>Status</th>
+            <th class="text-right">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="r in smList" :key="r.id">
+            <td class="whitespace-nowrap">
+              <div class="font-black text-slate-800 dark:text-slate-100">{{ r.nomor_agenda_masuk }}</div>
+              <div class="text-[11px] text-slate-400">{{ fmtTgl(r.tanggal_terima || r.tanggal_surat) }}</div>
+            </td>
+            <td>
+              <div class="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-200">
+                <i v-if="r.is_kritis" class="fa-solid fa-triangle-exclamation text-rose-500" title="Surat kritis (klasifikasi/sifat prioritas)"></i>
+                {{ r.asal }}
+              </div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">{{ r.perihal }}</div>
+              <div class="text-[11px] text-slate-400">Nomor asli: {{ r.nomor_surat || '—' }}</div>
+            </td>
+            <td class="text-xs">{{ smLabelKlasifikasi(r.kode_klasifikasi) }}</td>
+            <td>
+              <app-badge size="sm"
+                         :status="r.sifat === 'rahasia' ? 'ditolak' : (r.sifat === 'segera' ? 'menunggu' : '')"
+                         :label="r.sifat || 'biasa'"></app-badge>
+            </td>
+            <td>
+              <app-badge size="sm"
+                         :status="r.status_surat === 'selesai' ? 'disetujui' : (r.status_surat === 'didiposisi' ? 'menunggu' : 'proses')"
+                         :label="r.status_surat || 'baru'"></app-badge>
+            </td>
+            <td class="text-right whitespace-nowrap">
+              <button v-if="r.status_surat === 'baru'" class="btn-icon" title="Tandai didisposisi"
+                      @click="smDisposisiQuick(r)"><i class="fa-solid fa-share-nodes"></i></button>
+              <button class="btn-icon" title="Ubah" @click="smOpenForm(r)"><i class="fa-solid fa-pen-to-square"></i></button>
+              <button class="btn-icon-danger" title="Hapus" @click="smDelete(r)"><i class="fa-solid fa-trash-can"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginasi server -->
+    <div v-if="smTotalPages > 1" class="flex items-center justify-between px-4 py-3 border-t border-slate-100 dark:border-slate-800 text-xs">
+      <span class="text-slate-500 dark:text-slate-400">Halaman {{ smPage }} / {{ smTotalPages }} — {{ smTotalData }} surat</span>
+      <div class="flex gap-1">
+        <button class="btn-icon" :disabled="smPage <= 1" @click="loadSm(smPage - 1)"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="btn-icon" :disabled="smPage >= smTotalPages" @click="loadSm(smPage + 1)"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+</section>
