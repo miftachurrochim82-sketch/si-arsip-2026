@@ -5,7 +5,8 @@
 //   1. runLibraryTests()        → regresi CoreLib (delegasi CoreLib.runCoreTests)
 //   2. testAdopsiG18d()         → verifikasi util CoreLib v2.3.0 (13 asersi)
 //   3. testDispatcherRouting()  → registry handler + fail-closed (≥25 asersi)
-//   4. runDomainTestsSIArsip()  → domain SI-ARSIP (≥20 asersi)
+//   4. runDomainTestsSIArsip()  → domain SI-ARSIP (39 grup fungsi sejak v1.1:
+//      sm 5, sk 5, dp 4, SIMPEG 3, pre-save 5, skema 4, nd 5, ar 5, search 3)
 //
 // Entry-point: runAllTestsSIArsip()
 //
@@ -491,6 +492,87 @@ function runDomainTestsSIArsip() {
         _tsAssert_(ALL_SHEET_HEADERS[s] && ALL_SHEET_HEADERS[s].length > 0,
                    'header SIMPEG tidak ada: ' + s);
       });
+    }
+  ]));
+
+  // ---------- §4g Domain Naskah Dinas v1.1 (5 asersi) ----------
+  groups.push(_tsRunGroup_('Domain Naskah Dinas', [
+    function testNdStatusValid() {
+      _tsAssert_(ND_STATUS_VALID_.length === 3, '3 status valid, dapat: ' + ND_STATUS_VALID_.length);
+      ['draft', 'final', 'terarsip'].forEach(function (s) {
+        _tsAssert_(ND_STATUS_VALID_.indexOf(s) !== -1, 'status ada: ' + s);
+      });
+    },
+    function testNdTransisiLegal() {
+      _tsAssert_((ND_TRANSISI_LEGAL_['draft'] || []).indexOf('final') !== -1, 'draft → final legal');
+      _tsAssert_((ND_TRANSISI_LEGAL_['final'] || []).indexOf('terarsip') !== -1, 'final → terarsip legal');
+      _tsAssert_((ND_TRANSISI_LEGAL_['draft'] || []).indexOf('terarsip') === -1, 'draft → terarsip DILARANG');
+      _tsAssert_((ND_TRANSISI_LEGAL_['terarsip'] || []).length === 0, 'terarsip = titik akhir');
+    },
+    function testNdPrefixJenis() {
+      _tsAssert_(ND_PREFIX_JENIS_['nota_dinas'] === 'ND', 'nota_dinas = ND');
+      _tsAssert_(ND_PREFIX_JENIS_['memo'] === 'MEMO', 'memo = MEMO');
+      _tsAssert_(ND_PREFIX_JENIS_['laporan'] === 'LAP', 'laporan = LAP');
+      _tsAssert_(ND_PREFIX_JENIS_['lainnya'] === 'NSK', 'lainnya = NSK');
+    },
+    function testNdNomorFormat() {
+      var n1 = ndGenerateNomor_('nota_dinas', '2026');
+      var n2 = ndGenerateNomor_('memo', '2026');
+      _tsAssert_(/^ND\/\d{3}\/[A-Z]+\/2026$/.test(n1), 'format ND valid, dapat: ' + n1);
+      _tsAssert_(/^MEMO\/\d{3}\/[A-Z]+\/2026$/.test(n2), 'format MEMO valid, dapat: ' + n2);
+    },
+    function testNdJenisWhitelist() {
+      var v = CoreLib.whitelist('MEMO', ND_JENIS_VALID_, 'jenis_naskah');
+      _tsAssert_(v === 'memo', 'whitelist case-insensitive, dapat: ' + v);
+    }
+  ]));
+
+  // ---------- §4h Domain Kearsipan v1.1 (5 asersi) ----------
+  groups.push(_tsRunGroup_('Domain Kearsipan', [
+    function testArStatusValid() {
+      _tsAssert_(AR_STATUS_VALID_.length === 4, '4 status valid, dapat: ' + AR_STATUS_VALID_.length);
+      ['aktif', 'inaktif', 'permanen', 'musnah'].forEach(function (s) {
+        _tsAssert_(AR_STATUS_VALID_.indexOf(s) !== -1, 'status ada: ' + s);
+      });
+    },
+    function testArJenisAsalMap() {
+      _tsAssert_(AR_JENIS_ASAL_.length === 3, '3 jenis asal, dapat: ' + AR_JENIS_ASAL_.length);
+      _tsAssert_(AR_SHEET_ASAL_['surat_masuk'] === 'T_SURAT_MASUK', 'map surat_masuk');
+      _tsAssert_(AR_SHEET_ASAL_['surat_keluar'] === 'T_SURAT_KELUAR', 'map surat_keluar');
+      _tsAssert_(AR_SHEET_ASAL_['naskah_dinas'] === 'T_NASKAH_DINAS', 'map naskah_dinas');
+    },
+    function testArAkanMusnahFlag() {
+      _tsAssert_(arIsAkanMusnah_({ status_arsip: 'aktif', tgl_retensi_habis: '2020-01-01' }) === true,
+                 'aktif + retensi lewat = true');
+      _tsAssert_(arIsAkanMusnah_({ status_arsip: 'musnah', tgl_retensi_habis: '2020-01-01' }) === false,
+                 'status musnah tidak diflag');
+      _tsAssert_(arIsAkanMusnah_({ status_arsip: 'aktif', tgl_retensi_habis: '' }) === false,
+                 'retensi kosong tidak diflag');
+    },
+    function testArRetensiKodeTakDikenal() {
+      var v = arHitungRetensiHabis_('2026-09-20', 'KODE-TAK-ADA');
+      _tsAssert_(v === '2026-09-20', 'kode tak dikenal = retensi 0 th, dapat: ' + v);
+    },
+    function testArRetensiTanggalKosong() {
+      _tsAssert_(arHitungRetensiHabis_('', '015') === '', 'tanggal kosong = kosong');
+    }
+  ]));
+
+  // ---------- §4i Pencarian Lintas v1.1 (3 asersi) ----------
+  groups.push(_tsRunGroup_('Pencarian Lintas', [
+    function testSearchAllTanpaParamKosong() {
+      var r = searchAll_({}, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'sukses walau tanpa param');
+      _tsAssert_((r.data || []).length === 0, 'tanpa param = 0 baris (tidak membocorkan isi)');
+    },
+    function testSearchAllQMustahilKosong() {
+      var r = searchAll_({ q: 'zzz-tidak-mungkin-ada-xyz' }, { role: 'viewer' });
+      _tsAssert_(r && r.success === true && (r.data || []).length === 0, 'q mustahil = 0 temuan');
+    },
+    function testSearchAllJenisTakDikenal() {
+      var r = searchAll_({ q: 'a', jenis: 'register-tidak-ada' }, { role: 'viewer' });
+      _tsAssert_(r && r.success === true && (r.data || []).length === 0,
+                 'jenis tak dikenal = 0 temuan (filter ketat)');
     }
   ]));
 
