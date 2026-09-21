@@ -45,10 +45,14 @@ const app = AppCore.create({
     logoSvg: ''
   },
 
-  // Menu sidebar (05_UIUX amendemen 2026-09-20):
+  // Menu sidebar (05_UIUX amendemen 2026-09-21 v1.9: +RTL R1-R5 puncak):
   menu: [
     { name: 'Arsip Dinamis', items: [
       { id: 'dashboard', label: 'Dashboard', icon: 'fa-solid fa-gauge-high' },
+      { id: 'laporan', label: 'Laporan', icon: 'fa-solid fa-file-lines' },
+      { id: 'analisa', label: 'Analisa', icon: 'fa-solid fa-chart-line' },
+      { id: 'evaluasi', label: 'Evaluasi', icon: 'fa-solid fa-clipboard-check' },
+      { id: 'rtl', label: 'RTL', icon: 'fa-solid fa-list-check' },
       { id: 'surat_masuk', label: 'Surat Masuk', icon: 'fa-solid fa-inbox' },
       { id: 'surat_keluar', label: 'Surat Keluar', icon: 'fa-solid fa-paper-plane' },
       { id: 'naskah_dinas', label: 'Naskah Dinas', icon: 'fa-solid fa-file-pen' },
@@ -66,6 +70,10 @@ const app = AppCore.create({
 
   pageIcons: {
     dashboard: 'fa-solid fa-gauge-high',
+    laporan: 'fa-solid fa-file-lines',
+    analisa: 'fa-solid fa-chart-line',
+    evaluasi: 'fa-solid fa-clipboard-check',
+    rtl: 'fa-solid fa-list-check',
     surat_masuk: 'fa-solid fa-inbox',
     surat_keluar: 'fa-solid fa-paper-plane',
     naskah_dinas: 'fa-solid fa-file-pen',
@@ -76,11 +84,23 @@ const app = AppCore.create({
     pengaturan: 'fa-solid fa-gear'
   },
 
-  // Navigasi: dashboard auto-load; halaman lain masih skeleton v1
-  // (loader menyusul bersama modulnya masing-masing).
+  // Navigasi: dashboard auto-load; halaman lain loader per modul.
   onNavigate(vm, page) {
     if (page === 'dashboard') {
       vm.loadDashboard();
+    } else if (page === 'laporan') {
+      vm.loadKlasifikasi();
+      vm.loadPejabat();
+      vm.loadSimpegLookup();
+      vm.loadLapKlasifikasi();
+    } else if (page === 'analisa') {
+      vm.loadPejabat();
+      vm.loadSimpegLookup();
+      vm.loadAnalisaAll();
+    } else if (page === 'evaluasi') {
+      vm.loadEvaluasiAll();
+    } else if (page === 'rtl') {
+      vm.loadRtl(1);
     } else if (page === 'surat_masuk') {
       vm.loadKlasifikasi();
       vm.loadSm(1);
