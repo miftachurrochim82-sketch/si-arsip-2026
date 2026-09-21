@@ -1,0 +1,61 @@
+<script>
+// ============================================================
+// SI-ARSIP - J_Helpers.html (v1.4 — STRUCTURE ALIGNMENT G18c-2)
+// ------------------------------------------------------------
+// Helper MURNI & template-safe: lookup label (surat/pegawai/
+// jabatan/pejabat/klasifikasi) + format tanggal WIB. Dipisah dari
+// loader (J_Api) dan aksi (J_Actions) supaya satu tempat audit &
+// pola antar-app seragam (keputusan pemilik 2026-09-18).
+// Digabung ke mixin di J_App (window.ArsipHelpers.methods).
+// ============================================================
+window.ArsipHelpers = {
+  methods: {
+    smLabelKlasifikasi(kode) {
+      const k = (this.klasifikasiList || []).find(x => String(x.kode_klasifikasi) === String(kode));
+      return k ? (kode + ' — ' + (k.uraian || '')) : (kode || '—');
+    },
+
+    // Tanggal sheet/GAS tiba sebagai ISO UTC (sel 20/09 00:00 WIB =
+    // '2026-09-19T17:00:00.000Z'). NAIVE slice(0,10) = mundur sehari!
+    // Fix: parse → geser +7 jam (WIB) → ambil komponen UTC = hari WIB benar.
+    fmtTgl(v) {
+      if (!v) return '—';
+      const d = new Date(v);
+      if (isNaN(d.getTime())) {
+        const p = String(v).slice(0, 10).split('-');
+        return p.length === 3 ? (p[2] + '/' + p[1] + '/' + p[0]) : String(v);
+      }
+      const w = new Date(d.getTime() + 7 * 3600000);
+      const mm = String(w.getUTCMonth() + 1).padStart(2, '0');
+      const dd = String(w.getUTCDate()).padStart(2, '0');
+      return dd + '/' + mm + '/' + w.getUTCFullYear();
+    },
+
+    // ---------- LABEL HELPER (template-safe) ----------
+    labelSurat(id) {
+      const s = this.smMap && this.smMap[id];
+      if (!s) return id || '—';
+      return (s.nomor_agenda_masuk || s.id) + ' · ' + (s.perihal || '');
+    },
+    labelPegawai(pegawaiId) {
+      const l = this.simpegLookup && this.simpegLookup.pegawai;
+      if (!l || !pegawaiId) return '';
+      const p = l.find(x => String(x.pegawai_id || x.id) === String(pegawaiId));
+      return p ? (p.nama || p.nama_lengkap || pegawaiId) : '';
+    },
+    labelJabatan(jabatanId) {
+      const l = this.simpegLookup && this.simpegLookup.jabatan;
+      if (!l || !jabatanId) return '';
+      const j = l.find(x => String(x.jabatan_id || x.id) === String(jabatanId));
+      return j ? (j.nama_jabatan || j.nama || j.jabatan || jabatanId) : '';
+    },
+    labelPejabat(pejabatId) {
+      const p = (this.pejabatList || []).find(x => String(x.id) === String(pejabatId));
+      if (!p) return pejabatId || '—';
+      const nama = this.labelPegawai(p.pegawai_id) || p.pegawai_id || '?';
+      const jab = this.labelJabatan(p.jabatan_id);
+      return jab ? (nama + ' — ' + jab) : nama;
+    }
+  }
+};
+</script>
