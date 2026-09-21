@@ -22,8 +22,9 @@ const ArsipMixin = {
   methods: Object.assign(
     {},
     window.ArsipApi.methods,
-    window.ArsipActions.methods
-    // window.ArsipExport.methods,   // tahap berikutnya (ekspor kit)
+    window.ArsipHelpers.methods,
+    window.ArsipActions.methods,
+    window.ArsipExport.methods
     // window.ArsipKearsipan.methods // tahap v1.1 (retensi/musnah/serah)
   )
 };
