@@ -1,4 +1,6 @@
-# 07 — TESTCASE [SI-ARSIP: Sistem Informasi Kearsipan Dinamis — 2026-09-20]
+# 07 — TESTCASE [SI-ARSIP: Sistem Informasi Kearsipan Dinamis — 2026-09-21 v1.5]
+
+> Amendemen v1.5: suite 139/0/1 (routing 30 + domain 54 = +4 aksi rekap +6 asersi baru §4o).
 
 > Setiap TC dijalankan sebagai fungsi uji di `99_TestSuite.gs` (pola si-kompetensi v3.0.1
 > & si-lahar v2.1.0): actor `viewer`/`user`/`verifikator`/`admin`/`super`, assert
@@ -284,3 +286,21 @@ Rekap harapan sejak v1.3: **TOTAL PASS=127 / FAIL=0 / SKIP=1**
 (CoreLib 42/0/1 + G18d 13 + routing 26 + domain 46: +Logbook T7 2, +Laporan Bulanan 2, +Lampiran Drive 2).
 Rekap harapan sejak v1.4: **TOTAL PASS=129 / FAIL=0 / SKIP=1**
 (domain 48: +Notifikasi 2).
+Rekap harapan sejak v1.5: **TOTAL PASS=139 / FAIL=0 / SKIP=1**
+(CoreLib 42/0/1 + G18d 13 + routing 30 + domain 54: +Rekap v1.5 L4/L5/L11/L12 6).
+Bukti lapangan v1.5 (2026-09-21): 139/0/1 log (10.27–10.29), 4 tab Laporan live.
+
+## v1.5 — Laporan Rekap L4/L5/L11/L12 (FR-66..69)
+
+| TC | Fungsi test / Manual | Melindungi | Catatan |
+|---|---|---|---|
+| TC-LR-01 | `lapRekapKlasifikasi_({tahun:''})` → success + rekap array + total_all number | L4 shape full table | §4o |
+| TC-LR-02 | `lapRekapKlasifikasi_({tahun:'1990'})` → 0 data, tidak crash | L4 filter tahun kosong | §4o |
+| TC-LR-03 | `lapRekapUnit_({tahun:''})` → disposisi_per_unit + keluar_per_unit + total_disposisi | L5 shape per unit | §4o |
+| TC-LR-04 | `lapKepatuhanJra_({tahun:'2026'})` → total/patuh/pct_patuh/rincian_tidak_patuh[] | L11 % patuh JRA | §4o |
+| TC-LR-05 | `laporanKhasData_(ym)` → 7 sheet (Format Satpol PP + 4 generik + 2 rekap) persegi | L12 workbook khas | §4o |
+| TC-LR-06 | `laporanKhasData_(invalid ym)` → tidak hard-crash, ym valid tetap 7 sheet | L12 guard | §4o |
+| TC-LR-07 | Manual: Laporan → Klasifikasi → Tahun 2026 → Tampilkan → tabel kode+uraian+total+ % | UI L4 | mata-user |
+| TC-LR-08 | Manual: Laporan → Per Unit → Tampilkan → 2 tabel disposisi & keluar per unit | UI L5 | mata-user |
+| TC-LR-09 | Manual: Laporan → Kepatuhan JRA → Tampilkan → 4 stat-card + tabel tidak patuh | UI L11 | mata-user |
+| TC-LR-10 | Manual: Laporan → Bulanan Khas → month → Export KHAS → file 7 sheet di Drive | UI L12 | mata-user |
