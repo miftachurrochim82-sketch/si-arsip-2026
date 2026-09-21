@@ -446,6 +446,7 @@ function getAppConfig_() {
       'dash_klasifikasi':               'viewer',
       'dash_surat_kritis':              'viewer',
       'dash_disposisi_lewat_sla':       'viewer',
+      'dash_chart_disposisi':           'viewer',
 
       // SIMPEG read-only
       'get_simpeg_lookup':    'viewer',
@@ -455,6 +456,14 @@ function getAppConfig_() {
       'get_pegawai_list':     'viewer',
       'get_unit_list':        'viewer',
       'get_jabatan_list':     'viewer',
+
+      // Laporan & lampiran (v1.3: FR-59, FR-60)
+      'laporan_export_excel': 'user',
+      'lmp_upload':           'user',
+
+      // Notifikasi (v1.4: FR-63)
+      'get_notifikasi':       'viewer',
+      'notif_read':           'viewer',
 
       // Surat Masuk (FR-05..FR-12)
       'sm_get_list':          'viewer',
