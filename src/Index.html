@@ -111,6 +111,37 @@
                       @toggle-dark="toggleDarkMode"
                       @toggle-mobile="sidebarMobileOpen = !sidebarMobileOpen"
                       @navigate="navigateTo">
+            <template #extra-actions>
+              <div class="relative">
+                <button class="btn-icon relative" title="Notifikasi"
+                        @click="notifOpen = !notifOpen; if (notifOpen) muatNotifikasi()">
+                  <i class="fa-solid fa-bell"></i>
+                  <span v-if="notifUnread"
+                        class="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] leading-none rounded-full px-1 py-0.5 min-w-[16px] text-center">{{ notifUnread }}</span>
+                </button>
+                <div v-if="notifOpen"
+                     class="absolute right-0 mt-2 w-72 sm:w-80 card !p-0 shadow-xl z-50 overflow-hidden">
+                  <div class="flex items-center justify-between px-3 py-2 border-b border-slate-100 dark:border-slate-800">
+                    <span class="text-xs font-bold text-slate-700 dark:text-slate-200">
+                      <i class="fa-solid fa-bell text-amber-500 mr-1"></i> Notifikasi
+                    </span>
+                    <button class="text-[11px] text-emerald-600 underline" @click="notifTandaiDibaca()">Tandai dibaca</button>
+                  </div>
+                  <div v-if="!notifItems.length" class="px-3 py-6 text-center text-xs text-slate-400">
+                    Tidak ada notifikasi — semua terkendali.
+                  </div>
+                  <ul v-else class="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+                    <li v-for="n in notifItems" :key="n.ref_id + n.jenis" class="px-3 py-2 text-xs">
+                      <div class="font-semibold" :class="n.jenis === 'sla_lewat' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-200'">
+                        <i class="fa-solid" :class="n.jenis === 'sla_lewat' ? 'fa-clock' : 'fa-inbox'"></i> {{ n.judul }}
+                      </div>
+                      <div class="text-slate-500 dark:text-slate-400 truncate">{{ n.isi }}</div>
+                      <div class="text-[10px] text-slate-400 mt-0.5">{{ n.tanggal }}</div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </template>
           </app-header>
         </div>
 
@@ -142,8 +173,10 @@
 
   <!-- Logika aplikasi: modul J_* (urutan WAJIB: State -> Api -> Actions -> App) -->
   <?!= include('J_State'); ?>
+  <?!= include('J_Helpers'); ?>
   <?!= include('J_Api'); ?>
   <?!= include('J_Actions'); ?>
+  <?!= include('J_Export'); ?>
   <?!= include('J_App'); ?>
 </body>
 </html>
