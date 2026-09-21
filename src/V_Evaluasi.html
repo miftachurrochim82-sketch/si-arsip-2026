@@ -1,0 +1,178 @@
+<!-- ============================================================
+     SI-ARSIP - V_Evaluasi.html (v1.8 — E1-E8 TUTUP, piramida Evaluasi 8/8)
+     Halaman Evaluasi: 8 tab
+       E1 SLA Disposisi, E2 SLA Keluar, E3 Kelengkapan, E4 Format Nomor,
+       E5 JRA, E6 Musnah, E7 Fisik, E8 Alih Media
+     ============================================================ -->
+<section v-if="currentPage === 'evaluasi'" class="space-y-6 animate-fade-in">
+
+  <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+    <div>
+      <h2 class="text-2xl font-bold tracking-tight flex items-center gap-2 text-slate-800 dark:text-white">
+        <i class="fa-solid fa-clipboard-check text-emerald-600 dark:text-emerald-400"></i> Evaluasi
+      </h2>
+      <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+        E1 SLA Disposisi · E2 SLA Keluar · E3 Kelengkapan · E4 Format Nomor · E5 JRA · E6 Musnah · E7 Fisik · E8 Alih Media.
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <input type="text" class="input w-28" placeholder="Tahun" v-model="evaluasiTahun">
+      <button class="btn btn-ghost" @click="loadEvaluasiAll()" :disabled="evaluasiLoading">
+        <i class="fa-solid fa-rotate"></i> Segarkan
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabs row 1 -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+    <button class="btn" :class="evaluasiTab === 'sla_disposisi' ? 'btn-primary' : 'btn-ghost'" @click="evaluasiTab='sla_disposisi'; if(!evaluasiSlaDispData) loadEvaluasiSlaDisp()">
+      <i class="fa-solid fa-share-nodes"></i> E1 SLA Disp
+    </button>
+    <button class="btn" :class="evaluasiTab === 'sla_keluar' ? 'btn-primary' : 'btn-ghost'" @click="evaluasiTab='sla_keluar'; if(!evaluasiSlaKeluarData) loadEvaluasiSlaKeluar()">
+      <i class="fa-solid fa-paper-plane"></i> E2 SLA Keluar
+    </button>
+    <button class="btn" :class="evaluasiTab === 'kelengkapan' ? 'btn-primary' : 'btn-ghost'" @click="evaluasiTab='kelengkapan'; if(!evaluasiKelengkapanData) loadEvaluasiKelengkapan()">
+      <i class="fa-solid fa-list-check"></i> E3 Lengkap
+    </button>
+    <button class="btn" :class="evaluasiTab === 'format' ? 'btn-primary' : 'btn-ghost'" @click="evaluasiTab='format'; if(!evaluasiFormatData) loadEvaluasiFormat()">
+      <i class="fa-solid fa-hashtag"></i> E4 Format
+    </button>
+  </div>
+  <!-- Tabs row 2 -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+    <button class="btn" :class="evaluasiTab === 'jra' ? 'btn-primary' : 'btn-ghost'" @click="evaluasiTab='jra'; if(!evaluasiJraData) loadEvaluasiJra()">
+      <i class="fa-solid fa-scale-balanced"></i> E5 JRA
+    </button>
+    <button class="btn" :class="evaluasiTab === 'musnah' ? 'btn-primary' : 'btn-ghost'" @click="evaluasiTab='musnah'; if(!evaluasiMusnahData) loadEvaluasiMusnah()">
+      <i class="fa-solid fa-fire"></i> E6 Musnah
+    </button>
+    <button class="btn" :class="evaluasiTab === 'fisik' ? 'btn-primary' : 'btn-ghost'" @click="evaluasiTab='fisik'; if(!evaluasiFisikData) loadEvaluasiFisik()">
+      <i class="fa-solid fa-box-open"></i> E7 Fisik
+    </button>
+    <button class="btn" :class="evaluasiTab === 'alihmedia' ? 'btn-primary' : 'btn-ghost'" @click="evaluasiTab='alihmedia'; if(!evaluasiAlihMediaData) loadEvaluasiAlihMedia()">
+      <i class="fa-solid fa-cloud-arrow-up"></i> E8 Alih Media
+    </button>
+  </div>
+
+  <app-skeleton v-if="evaluasiLoading && !evaluasiSlaDispData && !evaluasiKelengkapanData" type="cards"></app-skeleton>
+
+  <!-- E1 -->
+  <div v-if="evaluasiTab === 'sla_disposisi'" class="card space-y-4">
+    <h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-share-nodes text-sky-500"></i> E1 Kepatuhan SLA Disposisi — {{ evaluasiSlaDispData ? evaluasiSlaDispData.tahun : evaluasiTahun }}</h3>
+    <div v-if="!evaluasiSlaDispData" class="text-xs text-slate-400 text-center py-6">Klik Segarkan.</div>
+    <div v-else>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs mb-3">
+        <app-stat-card title="Total" :value="evaluasiSlaDispData.total" icon="fa-solid fa-list" color="sky" subtext="disposisi"></app-stat-card>
+        <app-stat-card title="Selesai" :value="evaluasiSlaDispData.selesai" icon="fa-solid fa-check" color="emerald" :subtext="evaluasiSlaDispData.pct_patuh_selesai + '% tepat (dari selesai)'"></app-stat-card>
+        <app-stat-card title="Tepat Waktu" :value="evaluasiSlaDispData.tepat_waktu" icon="fa-solid fa-circle-check" color="emerald" subtext="selesai ≤ tenggat"></app-stat-card>
+        <app-stat-card title="Lewat" :value="evaluasiSlaDispData.lewat" icon="fa-solid fa-triangle-exclamation" color="rose" :subtext="evaluasiSlaDispData.pct_lewat + '% lewat, avg ' + evaluasiSlaDispData.avg_telat_hari + ' hari'"></app-stat-card>
+      </div>
+      <div class="card p-4">
+        <app-chart-doughnut :labels="['Tepat','Lewat']" :datasets="[{ data: [evaluasiSlaDispData.tepat_waktu, evaluasiSlaDispData.lewat] }]" title="Kepatuhan SLA Disposisi" :height="200" :colors="['#10b981','#f43f5e']"></app-chart-doughnut>
+      </div>
+    </div>
+  </div>
+
+  <!-- E2 -->
+  <div v-if="evaluasiTab === 'sla_keluar'" class="card space-y-4">
+    <h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-paper-plane text-emerald-500"></i> E2 Kepatuhan SLA Surat Keluar — SLA {{ evaluasiSlaKeluarData ? evaluasiSlaKeluarData.sla_hari : 3 }} hari</h3>
+    <div v-if="!evaluasiSlaKeluarData" class="text-xs text-slate-400 text-center py-6">Klik Segarkan.</div>
+    <div v-else>
+      <div class="grid grid-cols-3 gap-3 text-xs mb-3">
+        <app-stat-card title="Total Terkirim" :value="evaluasiSlaKeluarData.total" icon="fa-solid fa-paper-plane" color="sky" :subtext="'tahun ' + evaluasiSlaKeluarData.tahun"></app-stat-card>
+        <app-stat-card title="Patuh" :value="evaluasiSlaKeluarData.patuh" icon="fa-solid fa-check" color="emerald" :subtext="evaluasiSlaKeluarData.pct_patuh + '% patuh'"></app-stat-card>
+        <app-stat-card title="Lewat" :value="evaluasiSlaKeluarData.lewat" icon="fa-solid fa-clock" color="rose" :subtext="evaluasiSlaKeluarData.pct_lewat + '% lewat, avg ' + evaluasiSlaKeluarData.avg_telat_hari + ' hari'"></app-stat-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- E3 -->
+  <div v-if="evaluasiTab === 'kelengkapan'" class="card space-y-4">
+    <h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-list-check text-amber-500"></i> E3 Kelengkapan Metadata — {{ evaluasiKelengkapanData ? evaluasiKelengkapanData.tahun : evaluasiTahun }}</h3>
+    <div v-if="!evaluasiKelengkapanData" class="text-xs text-slate-400 text-center py-6">Klik Segarkan.</div>
+    <div v-else>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs mb-3">
+        <div class="card !p-3 text-center"><div class="text-slate-400">Masuk Total</div><div class="text-lg font-black">{{ evaluasiKelengkapanData.total_masuk }}</div><div class="text-[11px] text-emerald-600">{{ evaluasiKelengkapanData.pct_lengkap_masuk }}% lengkap</div></div>
+        <div class="card !p-3 text-center"><div class="text-slate-400">Masuk Tidak Lengkap</div><div class="text-lg font-black text-rose-600">{{ evaluasiKelengkapanData.tidak_lengkap_masuk }}</div></div>
+        <div class="card !p-3 text-center"><div class="text-slate-400">Keluar Total</div><div class="text-lg font-black">{{ evaluasiKelengkapanData.total_keluar }}</div><div class="text-[11px] text-emerald-600">{{ evaluasiKelengkapanData.pct_lengkap_keluar }}% lengkap</div></div>
+        <div class="card !p-3 text-center"><div class="text-slate-400">Keluar Tidak Lengkap</div><div class="text-lg font-black text-rose-600">{{ evaluasiKelengkapanData.tidak_lengkap_keluar }}</div></div>
+      </div>
+      <div v-if="evaluasiKelengkapanData.rincian_masuk.length" class="overflow-x-auto mb-4"><h4 class="text-xs font-bold text-rose-600 mb-1">Masuk Tidak Lengkap ({{ evaluasiKelengkapanData.rincian_masuk.length }})</h4><table class="w-full text-xs"><thead class="border-b"><tr><th class="text-left py-1 px-2">Nomor</th><th class="text-left py-1 px-2">Missing</th></tr></thead><tbody class="divide-y"><tr v-for="r in evaluasiKelengkapanData.rincian_masuk" :key="r.id"><td class="py-1 px-2">{{ r.nomor }}</td><td class="py-1 px-2 text-rose-600">{{ r.missing.join(', ') }}</td></tr></tbody></table></div>
+      <div v-if="evaluasiKelengkapanData.rincian_keluar.length" class="overflow-x-auto"><h4 class="text-xs font-bold text-rose-600 mb-1">Keluar Tidak Lengkap ({{ evaluasiKelengkapanData.rincian_keluar.length }})</h4><table class="w-full text-xs"><thead class="border-b"><tr><th class="text-left py-1 px-2">Nomor</th><th class="text-left py-1 px-2">Missing</th></tr></thead><tbody class="divide-y"><tr v-for="r in evaluasiKelengkapanData.rincian_keluar" :key="r.id"><td class="py-1 px-2">{{ r.nomor }}</td><td class="py-1 px-2 text-rose-600">{{ r.missing.join(', ') }}</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- E4 -->
+  <div v-if="evaluasiTab === 'format'" class="card space-y-4">
+    <h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-hashtag text-indigo-500"></i> E4 Format Nomor — {{ evaluasiFormatData ? evaluasiFormatData.tahun : evaluasiTahun }}</h3>
+    <div v-if="!evaluasiFormatData" class="text-xs text-slate-400 text-center py-6">Klik Segarkan.</div>
+    <div v-else>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs mb-3">
+        <div class="card !p-3 text-center"><div class="text-slate-400">Masuk Patuh</div><div class="text-lg font-black text-emerald-600">{{ evaluasiFormatData.pct_patuh_masuk }}%</div><div class="text-[11px]">{{ evaluasiFormatData.patuh_masuk }}/{{ evaluasiFormatData.total_masuk }}</div></div>
+        <div class="card !p-3 text-center"><div class="text-slate-400">Masuk Tidak Patuh</div><div class="text-lg font-black text-rose-600">{{ evaluasiFormatData.tidak_patuh_masuk }}</div></div>
+        <div class="card !p-3 text-center"><div class="text-slate-400">Keluar Patuh</div><div class="text-lg font-black text-emerald-600">{{ evaluasiFormatData.pct_patuh_keluar }}%</div><div class="text-[11px]">{{ evaluasiFormatData.patuh_keluar }}/{{ evaluasiFormatData.total_keluar }}</div></div>
+        <div class="card !p-3 text-center"><div class="text-slate-400">Keluar Tidak Patuh</div><div class="text-lg font-black text-rose-600">{{ evaluasiFormatData.tidak_patuh_keluar }}</div></div>
+      </div>
+      <div class="text-[11px] text-slate-400">Format masuk: {{ evaluasiFormatData.format_masuk }}, keluar: {{ evaluasiFormatData.format_keluar }}</div>
+      <div v-if="evaluasiFormatData.rincian_keluar.length" class="overflow-x-auto mt-2"><table class="w-full text-xs"><thead class="border-b"><tr><th class="text-left py-1 px-2">Nomor</th><th class="text-left py-1 px-2">Jenis</th></tr></thead><tbody class="divide-y"><tr v-for="r in evaluasiFormatData.rincian_keluar" :key="r.id"><td class="py-1 px-2 font-mono">{{ r.nomor }}</td><td class="py-1 px-2">{{ r.jenis }}</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- E5 -->
+  <div v-if="evaluasiTab === 'jra'" class="card space-y-4">
+    <h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-scale-balanced text-amber-600"></i> E5 Kepatuhan JRA per Klasifikasi — {{ evaluasiJraData ? evaluasiJraData.tahun : evaluasiTahun }}</h3>
+    <div v-if="!evaluasiJraData" class="text-xs text-slate-400 text-center py-6">Klik Segarkan.</div>
+    <div v-else>
+      <div class="grid grid-cols-3 gap-3 text-xs mb-3">
+        <app-stat-card title="Total Arsip" :value="evaluasiJraData.total" icon="fa-solid fa-box-archive" color="sky" :subtext="evaluasiJraData.tahun"></app-stat-card>
+        <app-stat-card title="Patuh" :value="evaluasiJraData.patuh" icon="fa-solid fa-check" color="emerald" :subtext="evaluasiJraData.pct_patuh + '%'"></app-stat-card>
+        <app-stat-card title="Tidak Patuh" :value="evaluasiJraData.tidak_patuh" icon="fa-solid fa-triangle-exclamation" color="rose" subtext="perlu perbaikan"></app-stat-card>
+      </div>
+      <div class="overflow-x-auto"><table class="w-full text-xs"><thead class="border-b"><tr><th class="text-left py-1 px-2">Kode</th><th class="text-right py-1 px-2">Total</th><th class="text-right py-1 px-2">Patuh</th><th class="text-right py-1 px-2">Tidak Patuh</th><th class="text-right py-1 px-2">% Patuh</th></tr></thead><tbody class="divide-y"><tr v-for="k in evaluasiJraData.per_klasifikasi" :key="k.kode_klasifikasi"><td class="py-1 px-2 font-mono">{{ k.kode_klasifikasi }}</td><td class="py-1 px-2 text-right">{{ k.total }}</td><td class="py-1 px-2 text-right text-emerald-600">{{ k.patuh }}</td><td class="py-1 px-2 text-right text-rose-600">{{ k.tidak_patuh }}</td><td class="py-1 px-2 text-right">{{ k.pct_patuh }}%</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- E6 -->
+  <div v-if="evaluasiTab === 'musnah'" class="card space-y-4">
+    <h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-fire text-rose-600"></i> E6 Prosedur Pemusnahan — {{ evaluasiMusnahData ? evaluasiMusnahData.tahun : evaluasiTahun }}</h3>
+    <div v-if="!evaluasiMusnahData" class="text-xs text-slate-400 text-center py-6">Klik Segarkan.</div>
+    <div v-else>
+      <div class="grid grid-cols-3 gap-3 text-xs mb-3">
+        <div class="card !p-3 text-center"><div class="text-slate-400">Total Musnah</div><div class="text-lg font-black">{{ evaluasiMusnahData.total_musnah }}</div><div class="text-[11px]">{{ evaluasiMusnahData.pct_ba_lengkap }}% BA lengkap</div></div>
+        <div class="card !p-3 text-center"><div class="text-slate-400">Tanpa BA</div><div class="text-lg font-black text-rose-600">{{ evaluasiMusnahData.musnah_tanpa_ba }}</div></div>
+        <div class="card !p-3 text-center"><div class="text-slate-400">Retensi Habis Belum Musnah</div><div class="text-lg font-black text-amber-600">{{ evaluasiMusnahData.retensi_habis_belum_musnah }}</div></div>
+      </div>
+      <div v-if="evaluasiMusnahData.rincian_tanpa_ba.length" class="overflow-x-auto"><h4 class="text-xs font-bold text-rose-600">Musnah Tanpa BA ({{ evaluasiMusnahData.rincian_tanpa_ba.length }})</h4><table class="w-full text-xs"><thead class="border-b"><tr><th class="text-left py-1 px-2">Judul</th><th class="text-left py-1 px-2">Catatan</th></tr></thead><tbody class="divide-y"><tr v-for="r in evaluasiMusnahData.rincian_tanpa_ba" :key="r.id"><td class="py-1 px-2 truncate max-w-[200px]">{{ r.judul }}</td><td class="py-1 px-2">{{ r.catatan || '—' }}</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- E7 -->
+  <div v-if="evaluasiTab === 'fisik'" class="card space-y-4">
+    <h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-box-open text-sky-600"></i> E7 Kondisi Fisik Arsip — {{ evaluasiFisikData ? evaluasiFisikData.tahun : evaluasiTahun }}</h3>
+    <div v-if="!evaluasiFisikData" class="text-xs text-slate-400 text-center py-6">Klik Segarkan.</div>
+    <div v-else>
+      <div class="grid grid-cols-3 gap-3 text-xs mb-3">
+        <div class="card !p-3 text-center"><div class="text-slate-400">Total</div><div class="text-lg font-black">{{ evaluasiFisikData.total }}</div></div>
+        <div class="card !p-3 text-center"><div class="text-slate-400">Ada Lokasi</div><div class="text-lg font-black text-emerald-600">{{ evaluasiFisikData.ada_lokasi }} ({{ evaluasiFisikData.pct_ada_lokasi }}%)</div></div>
+        <div class="card !p-3 text-center"><div class="text-slate-400">Tanpa Lokasi</div><div class="text-lg font-black text-rose-600">{{ evaluasiFisikData.tanpa_lokasi }}</div></div>
+      </div>
+      <div class="card !bg-amber-50 dark:!bg-amber-950/30 !border-amber-200"><div class="text-xs text-amber-800 dark:text-amber-200"><i class="fa-solid fa-circle-info"></i> {{ evaluasiFisikData.catatan }}</div></div>
+    </div>
+  </div>
+
+  <!-- E8 -->
+  <div v-if="evaluasiTab === 'alihmedia'" class="card space-y-4">
+    <h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-cloud-arrow-up text-indigo-600"></i> E8 Progress Alih Media — {{ evaluasiAlihMediaData ? evaluasiAlihMediaData.tahun : evaluasiTahun }}</h3>
+    <div v-if="!evaluasiAlihMediaData" class="text-xs text-slate-400 text-center py-6">Klik Segarkan.</div>
+    <div v-else>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs mb-3">
+        <app-stat-card title="Total Dokumen" :value="evaluasiAlihMediaData.total_dokumen" icon="fa-solid fa-file" color="sky" subtext="SM+SK+ND+Arsip"></app-stat-card>
+        <app-stat-card title="Sudah Digital" :value="evaluasiAlihMediaData.sudah_digital" icon="fa-solid fa-cloud" color="emerald" :subtext="evaluasiAlihMediaData.pct_digital + '% digital'"></app-stat-card>
+        <app-stat-card title="Belum Digital" :value="evaluasiAlihMediaData.belum_digital" icon="fa-solid fa-file-circle-xmark" color="rose" subtext="perlu alih media"></app-stat-card>
+        <app-stat-card title="File Drive" :value="evaluasiAlihMediaData.total_lampiran_file" icon="fa-solid fa-hard-drive" color="amber" subtext="T_LAMPIRAN file_drive"></app-stat-card>
+      </div>
+      <div class="overflow-x-auto"><table class="w-full text-xs"><thead class="border-b"><tr><th class="text-left py-1 px-2">Jenis</th><th class="text-right py-1 px-2">Total</th><th class="text-right py-1 px-2">Digital</th><th class="text-right py-1 px-2">% Digital</th></tr></thead><tbody class="divide-y"><tr><td class="py-1 px-2">Surat Masuk</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.surat_masuk.total }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.surat_masuk.digital }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.surat_masuk.pct }}%</td></tr><tr><td class="py-1 px-2">Surat Keluar</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.surat_keluar.total }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.surat_keluar.digital }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.surat_keluar.pct }}%</td></tr><tr><td class="py-1 px-2">Naskah Dinas</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.naskah_dinas.total }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.naskah_dinas.digital }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.naskah_dinas.pct }}%</td></tr><tr><td class="py-1 px-2">Arsip</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.arsip.total }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.arsip.digital }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.arsip.pct }}%</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+</section>

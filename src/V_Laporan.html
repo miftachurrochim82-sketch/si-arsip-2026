@@ -1,0 +1,197 @@
+<!-- ============================================================
+     SI-ARSIP - V_Laporan.html (v1.5 — L4/L5/L11/L12 TUTUP)
+     Halaman Laporan Rekap: 4 tab
+       - Klasifikasi (L4) — tabel lengkap per kode klasifikasi
+       - Per Unit (L5) — disposisi per bidang + surat keluar per unit
+       - Kepatuhan JRA (L11) — % patuh retensi tahunan
+       - Bulanan Khas (L12) — export format Satpol PP (7 sheet)
+     ============================================================ -->
+<section v-if="currentPage === 'laporan'" class="space-y-6 animate-fade-in">
+
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+    <div>
+      <h2 class="text-2xl font-bold tracking-tight flex items-center gap-2 text-slate-800 dark:text-white">
+        <i class="fa-solid fa-file-lines text-sky-600 dark:text-sky-400"></i> Laporan Rekap
+      </h2>
+      <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+        L4 Rekap Klasifikasi · L5 Rekap Unit · L11 Kepatuhan JRA · L12 Format Khas Satpol PP.
+      </p>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+    <button class="btn" :class="laporanTab === 'klasifikasi' ? 'btn-primary' : 'btn-ghost'" @click="laporanTab='klasifikasi'; if(!lapKlasData) loadLapKlasifikasi()">
+      <i class="fa-solid fa-layer-group"></i> Klasifikasi
+    </button>
+    <button class="btn" :class="laporanTab === 'unit' ? 'btn-primary' : 'btn-ghost'" @click="laporanTab='unit'; if(!lapUnitData) loadLapUnit()">
+      <i class="fa-solid fa-building"></i> Per Unit
+    </button>
+    <button class="btn" :class="laporanTab === 'jra' ? 'btn-primary' : 'btn-ghost'" @click="laporanTab='jra'; if(!lapJraData) loadLapJra()">
+      <i class="fa-solid fa-scale-balanced"></i> Kepatuhan JRA
+    </button>
+    <button class="btn" :class="laporanTab === 'khas' ? 'btn-primary' : 'btn-ghost'" @click="laporanTab='khas'">
+      <i class="fa-solid fa-file-excel"></i> Bulanan Khas
+    </button>
+  </div>
+
+  <!-- ========== L4 — REKAP KLASIFIKASI ========== -->
+  <div v-if="laporanTab === 'klasifikasi'" class="card space-y-4">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+      <h3 class="font-bold text-slate-700 dark:text-slate-200 mr-auto">
+        <i class="fa-solid fa-layer-group text-sky-500"></i> Rekap per Klasifikasi (L4)
+      </h3>
+      <input type="text" class="input w-28" placeholder="Tahun" v-model="lapKlasTahun">
+      <input type="text" class="input w-40" placeholder="Cari kode/uraian" v-model="lapKlasSearch" @keyup.enter="loadLapKlasifikasi()">
+      <button class="btn btn-primary" @click="loadLapKlasifikasi()" :disabled="lapKlasLoading">
+        <i class="fa-solid fa-rotate"></i> {{ lapKlasLoading ? 'Memuat...' : 'Tampilkan' }}
+      </button>
+    </div>
+
+    <app-skeleton v-if="lapKlasLoading && !lapKlasData" type="table"></app-skeleton>
+
+    <div v-else-if="lapKlasData">
+      <div class="grid grid-cols-3 gap-3 text-xs mb-3">
+        <div class="card !p-3 text-center"><div class="text-slate-400">Masuk</div><div class="text-lg font-black">{{ lapKlasData.total_masuk }}</div></div>
+        <div class="card !p-3 text-center"><div class="text-slate-400">Keluar</div><div class="text-lg font-black">{{ lapKlasData.total_keluar }}</div></div>
+        <div class="card !p-3 text-center"><div class="text-slate-400">Total</div><div class="text-lg font-black">{{ lapKlasData.total_all }}</div></div>
+      </div>
+
+      <div v-if="!lapKlasData.rekap.length" class="text-xs text-slate-400 text-center py-6">Tidak ada data untuk tahun {{ lapKlasData.tahun }}</div>
+      <div v-else class="overflow-x-auto">
+        <table class="w-full text-xs">
+          <thead class="text-slate-500 border-b">
+            <tr><th class="text-left py-2 px-2">Kode</th><th class="text-left py-2 px-2">Uraian</th><th class="text-right py-2 px-2">Masuk</th><th class="text-right py-2 px-2">Keluar</th><th class="text-right py-2 px-2">Total</th><th class="text-right py-2 px-2">%</th></tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+            <tr v-for="r in lapKlasData.rekap" :key="r.kode_klasifikasi" class="hover:bg-slate-50 dark:hover:bg-slate-900/50">
+              <td class="py-2 px-2 font-mono font-bold">{{ r.kode_klasifikasi }}</td>
+              <td class="py-2 px-2 truncate max-w-[220px]">{{ r.uraian || '—' }}</td>
+              <td class="py-2 px-2 text-right">{{ r.jml_masuk }}</td>
+              <td class="py-2 px-2 text-right">{{ r.jml_keluar }}</td>
+              <td class="py-2 px-2 text-right font-bold">{{ r.total }}</td>
+              <td class="py-2 px-2 text-right">{{ r.pct }}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <app-empty-state v-else icon="fa-solid fa-layer-group" title="Belum dimuat" subtitle="Klik Tampilkan untuk memuat rekap klasifikasi."></app-empty-state>
+  </div>
+
+  <!-- ========== L5 — REKAP PER UNIT ========== -->
+  <div v-if="laporanTab === 'unit'" class="card space-y-4">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+      <h3 class="font-bold text-slate-700 dark:text-slate-200 mr-auto">
+        <i class="fa-solid fa-building text-emerald-500"></i> Rekap per Unit (L5)
+      </h3>
+      <input type="text" class="input w-28" placeholder="Tahun" v-model="lapUnitTahun">
+      <button class="btn btn-primary" @click="loadLapUnit()" :disabled="lapUnitLoading">
+        <i class="fa-solid fa-rotate"></i> {{ lapUnitLoading ? 'Memuat...' : 'Tampilkan' }}
+      </button>
+    </div>
+
+    <app-skeleton v-if="lapUnitLoading && !lapUnitData" type="table"></app-skeleton>
+
+    <div v-else-if="lapUnitData" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div>
+        <h4 class="text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">Disposisi per Unit ({{ lapUnitData.total_disposisi }} total)</h4>
+        <div v-if="!lapUnitData.disposisi_per_unit.length" class="text-xs text-slate-400 py-4 text-center">Tidak ada disposisi tahun {{ lapUnitData.tahun }}</div>
+        <div v-else class="overflow-x-auto">
+          <table class="w-full text-xs">
+            <thead class="text-slate-500 border-b"><tr><th class="text-left py-2 px-2">Unit</th><th class="text-right py-2 px-2">Jumlah</th><th class="text-right py-2 px-2">%</th></tr></thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+              <tr v-for="u in lapUnitData.disposisi_per_unit" :key="'dp-'+u.unit_id+u.nama_unit"><td class="py-2 px-2">{{ u.nama_unit }}</td><td class="py-2 px-2 text-right font-bold">{{ u.jumlah }}</td><td class="py-2 px-2 text-right">{{ u.pct }}%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h4 class="text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">Surat Keluar per Unit Penandatangan ({{ lapUnitData.total_keluar }} total)</h4>
+        <div v-if="!lapUnitData.keluar_per_unit.length" class="text-xs text-slate-400 py-4 text-center">Tidak ada surat keluar tahun {{ lapUnitData.tahun }}</div>
+        <div v-else class="overflow-x-auto">
+          <table class="w-full text-xs">
+            <thead class="text-slate-500 border-b"><tr><th class="text-left py-2 px-2">Unit</th><th class="text-right py-2 px-2">Jumlah</th><th class="text-right py-2 px-2">%</th></tr></thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+              <tr v-for="u in lapUnitData.keluar_per_unit" :key="'sk-'+u.unit_id+u.nama_unit"><td class="py-2 px-2">{{ u.nama_unit }}</td><td class="py-2 px-2 text-right font-bold">{{ u.jumlah }}</td><td class="py-2 px-2 text-right">{{ u.pct }}%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <app-empty-state v-else icon="fa-solid fa-building" title="Belum dimuat" subtitle="Klik Tampilkan untuk rekap per unit."></app-empty-state>
+  </div>
+
+  <!-- ========== L11 — KEPATUHAN JRA ========== -->
+  <div v-if="laporanTab === 'jra'" class="card space-y-4">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+      <h3 class="font-bold text-slate-700 dark:text-slate-200 mr-auto">
+        <i class="fa-solid fa-scale-balanced text-amber-500"></i> Kepatuhan JRA Tahunan (L11)
+      </h3>
+      <input type="text" class="input w-28" placeholder="Tahun" v-model="lapJraTahun">
+      <button class="btn btn-primary" @click="loadLapJra()" :disabled="lapJraLoading">
+        <i class="fa-solid fa-rotate"></i> {{ lapJraLoading ? 'Memuat...' : 'Tampilkan' }}
+      </button>
+    </div>
+
+    <app-skeleton v-if="lapJraLoading && !lapJraData" type="cards"></app-skeleton>
+
+    <div v-else-if="lapJraData">
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+        <app-stat-card title="Total Arsip Tahun" :value="lapJraData.total" icon="fa-solid fa-box-archive" color="sky" :subtext="lapJraData.tahun"></app-stat-card>
+        <app-stat-card title="Patuh" :value="lapJraData.patuh" icon="fa-solid fa-circle-check" color="emerald" :subtext="lapJraData.pct_patuh + '% patuh'"></app-stat-card>
+        <app-stat-card title="Tidak Patuh" :value="lapJraData.tidak_patuh" icon="fa-solid fa-triangle-exclamation" color="rose" subtext="perlu perbaikan"></app-stat-card>
+        <app-stat-card title="% Kepatuhan" :value="lapJraData.pct_patuh + '%'" icon="fa-solid fa-percent" color="amber" subtext="target 100%"></app-stat-card>
+      </div>
+
+      <div v-if="!lapJraData.rincian_tidak_patuh.length" class="text-xs text-emerald-600 text-center py-4">
+        <i class="fa-solid fa-circle-check"></i> Semua arsip tahun {{ lapJraData.tahun }} patuh JRA — bagus!
+      </div>
+      <div v-else class="overflow-x-auto mt-4">
+        <h4 class="text-xs font-bold text-rose-600 mb-2">Rincian Tidak Patuh ({{ lapJraData.rincian_tidak_patuh.length }} dari {{ lapJraData.tidak_patuh }})</h4>
+        <table class="w-full text-xs">
+          <thead class="text-slate-500 border-b"><tr><th class="text-left py-2 px-2">Judul</th><th class="text-left py-2 px-2">Kode</th><th class="text-left py-2 px-2">Tgl Arsip</th><th class="text-left py-2 px-2">Retensi Habis</th><th class="text-left py-2 px-2">Status</th><th class="text-left py-2 px-2">Alasan</th></tr></thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+            <tr v-for="r in lapJraData.rincian_tidak_patuh" :key="r.id" class="hover:bg-rose-50/50 dark:hover:bg-rose-950/20">
+              <td class="py-2 px-2 truncate max-w-[180px]">{{ r.judul }}</td>
+              <td class="py-2 px-2 font-mono">{{ r.kode_klasifikasi }}</td>
+              <td class="py-2 px-2">{{ fmtTgl(r.tgl_arsip) }}</td>
+              <td class="py-2 px-2">{{ fmtTgl(r.tgl_retensi_habis) }}</td>
+              <td class="py-2 px-2"><app-badge size="sm" :status="r.status_arsip === 'musnah' ? 'ditolak' : 'menunggu'" :label="r.status_arsip"></app-badge></td>
+              <td class="py-2 px-2 text-rose-600">{{ r.alasan }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <app-empty-state v-else icon="fa-solid fa-scale-balanced" title="Belum dimuat" subtitle="Klik Tampilkan untuk laporan kepatuhan JRA."></app-empty-state>
+  </div>
+
+  <!-- ========== L12 — BULANAN KHAS ========== -->
+  <div v-if="laporanTab === 'khas'" class="card space-y-4">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+      <h3 class="font-bold text-slate-700 dark:text-slate-200 mr-auto">
+        <i class="fa-solid fa-file-excel text-emerald-600"></i> Laporan Bulanan Format Khas Satpol PP (L12)
+      </h3>
+      <input type="month" class="input" v-model="lapKhasBulan">
+      <button class="btn btn-primary" @click="exportKhasBulanan()" :disabled="lapKhasLoading">
+        <i class="fa-solid fa-download"></i> {{ lapKhasLoading ? 'Membuat...' : 'Export KHAS Excel' }}
+      </button>
+    </div>
+    <p class="text-xs text-slate-500 dark:text-slate-400">
+      Workbook 7 sheet: Format Satpol PP (cover KOP + ringkasan + top klasifikasi + rekap unit + ttd), Ringkasan, Surat Masuk, Surat Keluar, Disposisi, Rekap Klasifikasi, Rekap Unit.
+      Format generik 4 sheet tetap ada di Dashboard.
+    </p>
+    <p v-if="lapKhasNama" class="text-xs text-slate-500 dark:text-slate-400">
+      Siap diunduh: <a :href="lapKhasUrl" target="_blank" rel="noopener" class="text-emerald-600 underline">{{ lapKhasNama }}</a>
+    </p>
+    <div class="card !bg-amber-50 dark:!bg-amber-950/30 !border-amber-200 dark:!border-amber-800">
+      <div class="text-xs text-amber-800 dark:text-amber-200">
+        <i class="fa-solid fa-circle-info"></i> <b>Catatan L12:</b> Format khas ini sudah pakai KOP instansi dari Pengaturan → instansi.
+        Jika pimpinan punya contoh Excel laporan bulanan Satpol yang baku, kirim contohnya — sheet "Format Satpol PP" tinggal ganti template tanpa ubah data.
+      </div>
+    </div>
+  </div>
+
+</section>
