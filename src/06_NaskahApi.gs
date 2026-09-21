@@ -165,6 +165,10 @@ function ndSave_(data, user) {
       invalidateSheetCache_('T_NASKAH_DINAS');
       audit_(user, isInsert ? 'CREATE_NASKAH' : 'UPDATE_NASKAH',
              'T_NASKAH_DINAS', record.id, true, record.nomor_naskah);
+      catatLogbook_(record.id, 'naskah_dinas', isInsert ? 'simpan_baru' : 'ubah', user,
+                    (!isInsert && existing) ? logbookRingkasanDok_(existing) : '',
+                    logbookRingkasanDok_(record),
+                    isInsert ? 'Naskah draft dibuat' : 'Edit naskah');
       return { success: true, data: record };
     } finally {
       releaseLock_(lock);
@@ -212,6 +216,8 @@ function ndUbahStatus_(data, user) {
       invalidateSheetCache_('T_NASKAH_DINAS');
       audit_(user, 'UBAH_STATUS_NASKAH', 'T_NASKAH_DINAS', data.id, true,
              'Status: ' + statusLama + ' → ' + statusBaru);
+      catatLogbook_(data.id, 'naskah_dinas', 'ubah_status', user,
+                    statusLama, statusBaru, 'Transisi status naskah');
 
       // FR-28: naskah final otomatis jadi baris arsip
       if (statusBaru === 'final') {
@@ -241,6 +247,8 @@ function ndDelete_(data, user) {
     var ok = softDeleteRecord_('T_NASKAH_DINAS', data.id, user);
     invalidateSheetCache_('T_NASKAH_DINAS');
     audit_(user, 'DELETE_NASKAH', 'T_NASKAH_DINAS', data.id, ok, row.nomor_naskah);
+    if (ok) catatLogbook_(data.id, 'naskah_dinas', 'hapus', user,
+                          logbookRingkasanDok_(row), '', 'Soft delete naskah');
     return { success: ok, message: ok ? 'Naskah dihapus.' : 'Gagal hapus.' };
   } catch (err) {
     Logger.log('[ndDelete_] ' + err.message);
