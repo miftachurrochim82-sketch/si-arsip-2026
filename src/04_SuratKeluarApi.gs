@@ -213,7 +213,8 @@ function skSave_(data, user) {
 
     if (record.tanggal_surat) {
       record.tanggal_surat = CoreLib.dateKey10(record.tanggal_surat) || record.tanggal_surat;
-    } else {
+    } else if (!String(record.id || '').trim()) {
+      // v1.4.1: default hari-ini HANYA insert; edit tak boleh diam-diam ganti tanggal
       record.tanggal_surat = CoreLib.todayIsoLocal();
     }
 
