@@ -23,6 +23,31 @@ window.ArsipState = {
       // ============ DASHBOARD (v1 shell) ============
       dashData: null,
       dashLoading: false,
+      // v1.2 (G14 tutup): payload 4 chart + 2 panel
+      dashTren: null,        // { labels[], masuk[], keluar[] }
+      dashKlas: null,        // { labels[], values[] }
+      dashDpChart: null,     // { labels[3], values[3] }
+      dashKritis: [],        // 10 surat masuk kritis terbaru
+      dashSla: [],           // 10 disposisi lewat SLA
+
+      // Laporan bulanan (v1.3, G27)
+      lapBulan: (function () {
+        var d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+      })(),
+      lapLoading: false,
+      lapUrl: '',
+      lapNama: '',
+
+      // v1.4: detail dokumen + preview + menu cepat + notifikasi
+      showDocDetail: false,
+      docDetail: null,
+      docDetailJenis: '',
+      previewUrl: '',
+      rowMenuId: '',
+      notifItems: [],
+      notifUnread: 0,
+      notifOpen: false,
 
       // ============ SURAT MASUK (tahap 2, 2026-09-20) ============
       _searchTimerSm: null,
