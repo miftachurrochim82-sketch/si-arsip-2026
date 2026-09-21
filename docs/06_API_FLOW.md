@@ -1,4 +1,6 @@
-# 06 — API FLOW [SI-ARSIP: Sistem Informasi Kearsipan Dinamis — 2026-09-20]
+# 06 — API FLOW [SI-ARSIP: Sistem Informasi Kearsipan Dinamis — 2026-09-21 v1.5]
+
+> Amendemen v1.5: +4 aksi laporan rekap L4/L5/L11/L12 (13_LaporanRekapApi.gs + 10_LaporanApi.gs khas).
 
 > Semua aksi lewat CoreLib router (`handleAction({action, data, token})`).
 > Level aksi dideklarasikan di `01_ConfigAndBridge.gs` (`getAppConfig_().actionLevels`) —
@@ -37,7 +39,7 @@
                                                     [T_ARSIP]
 ```
 
-## Daftar aksi Fase 1 (MVP) — ~48 handler
+## Daftar aksi v1.5 — ~56 handler (48 + 4 rekap + 4 fase2 yang sudah hidup)
 
 Handler didaftarkan di `02_AppLogic.gs` via `buildLocalHandlers_()`, digabung ke
 `cfg.localHandlers` lalu dieksekusi `CoreLib.dispatchAction`. Level aksi dideklarasikan
@@ -181,26 +183,26 @@ terpisah di `01_ConfigAndBridge.gs` (`getAppConfig_().actionLevels`).
 |---|---|---|---|---|
 | `init_database` | **super** | `02_AppLogic.gs` → `initDatabase` | — | delegasi `CoreLib.initDatabase` |
 
-## Aksi Fase 2 (belum didaftarkan di `actionLevels`)
+## Aksi Fase 2 + v1.5 Laporan Rekap (semua sudah di `actionLevels` per v1.5)
 
-Untuk Fase 2 (Naskah Dinas, Kearsipan, Pencarian), aksi berikut akan ditambahkan
-saat fitur mulai dibuka. Struktur level disiapkan sebagai komentar di
-`01_ConfigAndBridge.gs`.
-
-| Aksi | Level | Domain |
-|---|---|---|
-| `nd_get_list` / `nd_save` / `nd_delete` | viewer / user / admin | Naskah Dinas |
-| `nd_ubah_status` | user | Naskah Dinas (draft→final) |
-| `ar_get_list` / `ar_get_detail` | viewer | Kearsipan |
-| `ar_get_akan_musnah` | viewer | Kearsipan |
-| `ar_ubah_lokasi` | user | Kearsipan |
-| `ar_tandai_musnah` / `ar_tandai_serah` | admin | Kearsipan |
-| `search_all` | viewer | Pencarian Lintas |
-| `dash_chart_disposisi` | viewer | Dashboard (chart ke-4, FR-36b) |
-| `laporan_export_excel` | user | `10_LaporanApi.gs` | `{ym}` → `{url,nama,ukuran_kb}` file xlsx 4 sheet di Drive |
-| `lmp_upload` | user | `11_LampiranApi.gs` | `{dokumen_jenis,dokumen_id,nama,mime,base64}` → baris T_LAMPIRAN + file Drive |
-| `get_notifikasi` | viewer | `12_NotifikasiApi.gs` | `-` → `{items, unread}` (disposisi baru & SLA lewat, ≤14 hari) |
-| `notif_read` | viewer | `12_NotifikasiApi.gs` | `-` → marker baca = hari ini |
+| Aksi | Level | Backend | Input | Output |
+|---|---|---|---|---|
+| `nd_get_list` / `nd_save` / `nd_delete` | viewer / user / admin | `06_NaskahApi.gs` | — | Naskah Dinas |
+| `nd_ubah_status` | user | `06_NaskahApi.gs` | — | draft→final |
+| `ar_get_list` / `ar_get_detail` | viewer | `07_KearsipanApi.gs` | — | Kearsipan |
+| `ar_get_akan_musnah` | viewer | `07_KearsipanApi.gs` | — | Akan musnah |
+| `ar_ubah_lokasi` | user | `07_KearsipanApi.gs` | — | Ubah lokasi |
+| `ar_tandai_musnah` / `ar_tandai_serah` | admin | `07_KearsipanApi.gs` | — | BA musnah/serah |
+| `search_all` | viewer | `08_PencarianApi.gs` | `{q, jenis, tahun, kode}` | Lintas 4 sheet |
+| `dash_chart_disposisi` | viewer | `09_DashboardApi.gs` | — | Chart status disposisi |
+| `laporan_export_excel` | user | `10_LaporanApi.gs` | `{ym: YYYY-MM}` | xlsx 4 sheet generik |
+| `laporan_export_khas` | user | `10_LaporanApi.gs` → `exportKhasBulanan_` | `{ym: YYYY-MM}` | **v1.5 L12** xlsx 7 sheet (Format Satpol PP + 4 generik + 2 rekap) |
+| `lap_rekap_klasifikasi` | viewer | `13_LaporanRekapApi.gs` | `{tahun?: YYYY, search?}` | **v1.5 L4** full rekap per klasifikasi |
+| `lap_rekap_unit` | viewer | `13_LaporanRekapApi.gs` | `{tahun?: YYYY}` | **v1.5 L5** disposisi+keluar per unit |
+| `lap_kepatuhan_jra` | viewer | `13_LaporanRekapApi.gs` | `{tahun?: YYYY}` | **v1.5 L11** % patuh JRA tahunan |
+| `lmp_upload` | user | `11_LampiranApi.gs` | `{dokumen_jenis,dokumen_id,nama,mime,base64}` | T_LAMPIRAN file_drive |
+| `get_notifikasi` | viewer | `12_NotifikasiApi.gs` | — | `{items, unread}` ≤14 hari |
+| `notif_read` | viewer | `12_NotifikasiApi.gs` | — | Marker baca hari ini |
 
 ## Kontrak respons (CoreLib v2.2+)
 
