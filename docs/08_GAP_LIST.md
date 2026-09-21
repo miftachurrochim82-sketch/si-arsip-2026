@@ -126,6 +126,18 @@ skop **kantor Satpol PP & Damkar**, dengan kemungkinan perluasan ke SKPD lain di
 
 **Piramida selesai bila**: 12+10+8+5=35 TUTUP. **Kini: 35/35 TUTUP per v1.9.** 🎓
 
+### Fase 2c — Polish UIUX v1.10 (Langkah 1 pasca-piramida, 2026-09-21 malam)
+
+| # | Item | Kategori | Status |
+|---|---|---|---|
+| G46 | Tabel & Mobile (min-w + table-scroll) — 11 view | UIUX | ✅ TUTUP v1.10a (min-w 59, table-scroll 28, overflow 0, HP 360px scroll mulus) |
+| G47 | Badge & Status valid (app-badge mapping) | UIUX | ✅ TUTUP v1.10b (empty 0, raw badge-sky/rose/amber/gray 0, mapping aktif/disetujui/ditolak/menunggu/proses/draft/nonaktif) |
+| G48 | Stats & Cards app-stat-card (custom 0) | UIUX | ✅ TUTUP v1.10c (custom card !p-3 0 → 56 app-stat-card) |
+| G49 | Pagination btn-icon + Filter bar label text-[11px] | UIUX | ✅ TUTUP v1.10d (btn-ghost btn-xs 0, filter label konsisten) |
+| G50 | Modal v-if + @close + size + tema #0369a1 sync | UIUX | ✅ TUTUP v1.10e (V_Modals 9 modal :show→v-if, tema #0369a1 locked, preview_v1.10.html 217KB) |
+
+**Polish selesai bila**: G46-G50 TUTUP. **Kini: 5/5 TUTUP per v1.10 malam.** 🎨
+
 ---
 
 ### Fase 3 — TTE, Integrasi & Multi-Kantor (backlog lanjut, tanpa jadwal)
@@ -158,7 +170,7 @@ skop **kantor Satpol PP & Damkar**, dengan kemungkinan perluasan ke SKPD lain di
 | 5 | Penomoran | **Auto-generate** format Permendagri 78/2012 + override manual | ✅ Diputuskan |
 | 6 | Alur disposisi | **Sederhana 1–2 jenjang**, serial | ✅ Diputuskan |
 | 7 | Fitur khas | 5 usulan (SI-LAHAR, template Satpol, dashboard khas, alert kritis, export khas) | ✅ Diputuskan |
-| 8 | Warna tema | **Biru tua** (blue-800, `#1e40af`) | ✅ Diputuskan |
+| 8 | Warna tema | **Sky-700 `#0369a1`** (v1.10 locked, sebelumnya blue-800 `#1e40af` di docs lama) | ✅ Diputuskan v1.10 |
 | 9 | Menu Fase 2 disembunyikan? | **Ya** — supaya UI tidak bingung | ✅ Diputuskan |
 | 10 | Format nomor surat keluar | `<kode_klas>/<urut:3>/<kode_unit>/<tahun>` | ✅ Diputuskan |
 | 11 | Kode unit singkat | `SATPOL` (dari Script Properties) | ✅ Diputuskan |
@@ -218,6 +230,13 @@ FASE 2 — ~2–3 minggu
 ├── Peningkatan: Export Excel, Upload Drive, Preview PDF, Timeline visual
 └── Test: +N asersi (Naskah/Kearsipan/Pencarian)
 
+FASE 2c — Polish UIUX v1.10 (2026-09-21 malam)
+├── G46 Tabel & Mobile (59 min-w + 28 table-scroll)
+├── G47 Badge valid (0 empty + 0 raw)
+├── G48 Stat-card (0 custom → 56)
+├── G49 Pagination + Filter label
+└── G50 Modal v-if + tema #0369a1
+
 FASE 3 — tanpa jadwal
 ├── TTE (BSrE atau internal)
 ├── Integrasi SI-LAHAR
@@ -270,6 +289,7 @@ Fase 1 selesai bila semua berikut **TERPENUHI**:
 | **Fase 2** | 15 (G19–G33) | ✅ 15 TUTUP — SELESAI (v1.4) |
 | **Fase 3** | 12 (G34–G45) | 🟡 1 TUTUP (G39 v1.5) + 11 BACKLOG LANJUT |
 | **Piramida v1.5-v1.9** | 25 (L4/L5/L11/L12 + A3-A10 + E1-E8 + R1-R5) | ✅ 25 TUTUP — PIRAMIDA FINAL 35/35 TUTUP 🎓 |
+| **Polish v1.10** | 5 (G46-G50) | ✅ 5 TUTUP — UIUX 59/28/0/0/56 🎨 |
 | **Kandidat (belum masuk PRD)** | 9 (B1–B9) | 📝 IDE |
 | **Keputusan pemilik** | 13 | ✅ DIPUTUSKAN |
 
