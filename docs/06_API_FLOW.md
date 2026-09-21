@@ -196,6 +196,11 @@ saat fitur mulai dibuka. Struktur level disiapkan sebagai komentar di
 | `ar_ubah_lokasi` | user | Kearsipan |
 | `ar_tandai_musnah` / `ar_tandai_serah` | admin | Kearsipan |
 | `search_all` | viewer | Pencarian Lintas |
+| `dash_chart_disposisi` | viewer | Dashboard (chart ke-4, FR-36b) |
+| `laporan_export_excel` | user | `10_LaporanApi.gs` | `{ym}` → `{url,nama,ukuran_kb}` file xlsx 4 sheet di Drive |
+| `lmp_upload` | user | `11_LampiranApi.gs` | `{dokumen_jenis,dokumen_id,nama,mime,base64}` → baris T_LAMPIRAN + file Drive |
+| `get_notifikasi` | viewer | `12_NotifikasiApi.gs` | `-` → `{items, unread}` (disposisi baru & SLA lewat, ≤14 hari) |
+| `notif_read` | viewer | `12_NotifikasiApi.gs` | `-` → marker baca = hari ini |
 
 ## Kontrak respons (CoreLib v2.2+)
 
@@ -354,7 +359,8 @@ Tidak ada aksi API baru karena pin sudah di 15. Yang dipakai:
 
 - **Surat kritis** dihitung runtime (tidak disimpan di sheet): `kode_klasifikasi ∈ {005.1, 015}` atau `sifat ∈ {segera, rahasia}`.
 - **SLA disposisi** dihitung runtime: `jatuh_tempo < today` && `status ≠ selesai`.
-- **Export Excel** via `AppCore.exportExcel` / custom `_exportXlsx` (multi-sheet).
+- **Export Excel** (v1.3): server-side `10_LaporanApi.gs` — Spreadsheet sementara →
+  URL export xlsx + token OAuth → file di folder Drive 'SI-ARSIP Export' → temp di-trash.
 - **Auto-archive** (Fase 2): saat surat keluar `terkirim` atau surat masuk `selesai`, buat baris `T_ARSIP` idempoten by (`jenis_asal` + `ref_id`).
 - **CoreLib First**: aksi util generik (tanggal, paginasi, pencarian, whitelist) **wajib** pakai CoreLib. Jangan tulis ulang lokal.
 - **Fail-closed**: setiap handler baru di `buildLocalHandlers_()` **wajib** didaftarkan di `actionLevels` (`01_ConfigAndBridge.gs`). Test `testAppLogicSelfCheck()` akan mendeteksi mismatch.
