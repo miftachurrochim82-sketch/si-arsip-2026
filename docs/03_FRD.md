@@ -220,6 +220,22 @@
   Detail & Lampiran / Ubah / transisi status / Disposisikan / Hapus.
 - **FR-65** Preset rentang tanggal (Bulan ini / Bulan lalu / 90 hari / Tahun ini / Semua)
   di filter bar surat masuk, surat keluar, disposisi; mengisi tanggal_dari/sampai.
+- **FR-66** (v1.5 L4) Rekap per Klasifikasi lengkap: `lap_rekap_klasifikasi` (viewer) —
+  params `{tahun?: YYYY, search?}` → `{rekap: [{kode_klasifikasi, uraian, jml_masuk, jml_keluar, total, pct}], total_masuk, total_keluar, total_all}`; tally dari `T_SURAT_MASUK` + `T_SURAT_KELUAR` group by `kode_klasifikasi`; uraian dari `M_KLASIFIKASI`; sort total desc; filter tahun via `dateKey10`.
+  - Backend: `lapRekapKlasifikasi_` (`13_LaporanRekapApi.gs`).
+  - Frontend: tab Klasifikasi di `V_Laporan.html`.
+- **FR-67** (v1.5 L5) Rekap per Unit kerja: `lap_rekap_unit` (viewer) — params `{tahun?: YYYY}` →
+  `{disposisi_per_unit: [{unit_id, nama_unit, jumlah, pct}], keluar_per_unit: [...], total_disposisi, total_keluar}`; map `M_PEJABAT → PEGAWAI → UNIT_KERJA` via `_lapPejabatUnitMap_`; tally disposisi by `ke_pejabat_id` + surat keluar by `penandatangan_id`.
+  - Backend: `lapRekapUnit_` (`13_LaporanRekapApi.gs`).
+  - Frontend: tab Per Unit di `V_Laporan.html`.
+- **FR-68** (v1.5 L11) Laporan Kepatuhan JRA Tahunan: `lap_kepatuhan_jra` (viewer) — params `{tahun?: YYYY}` →
+  `{total, patuh, tidak_patuh, pct_patuh, rincian_tidak_patuh: [{id,judul,kode,tgl_arsip,tgl_retensi_habis,status_arsip,tindakan_akhir,alasan}]}`; hitung expected retensi via `arHitungRetensiHabis_` + cek `tindakan_akhir` vs `status_arsip` (permanen≠musnah); list tidak patuh max 100.
+  - Backend: `lapKepatuhanJra_` (`13_LaporanRekapApi.gs`).
+  - Frontend: tab Kepatuhan JRA di `V_Laporan.html` (4 stat-card + tabel tidak patuh).
+- **FR-69** (v1.5 L12) Laporan Bulanan Format Khas Satpol PP: `laporan_export_khas` (user) — params `{ym: YYYY-MM}` →
+  workbook 7 sheet: Format Satpol PP (cover KOP instansi + periode + ringkasan + top-5 klasifikasi bulan + rekap unit 10 + ttd), Ringkasan, Surat Masuk, Surat Keluar, Disposisi, Rekap Klasifikasi (full tahun), Rekap Unit (disposisi+keluar); reuse `laporanBulanData_` + `lapRekapKlasifikasi_`/`lapRekapUnit_`; file xlsx di folder Drive 'SI-ARSIP Export' via UrlFetch export + OAuth; temp spreadsheet di-trash.
+  - Backend: `laporanKhasData_` + `exportKhasBulanan_` (`10_LaporanApi.gs`).
+  - Frontend: tab Bulanan Khas di `V_Laporan.html` + export di Dashboard tetap hidup.
   - Backend: `99_TestSuite.gs`.
 
 ---
