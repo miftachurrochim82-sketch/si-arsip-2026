@@ -63,13 +63,13 @@
       <table>
         <thead>
           <tr>
-            <th>Judul</th>
-            <th>Asal & Klasifikasi</th>
-            <th>Tgl arsip</th>
-            <th>Retensi habis</th>
-            <th>Lokasi fisik</th>
-            <th>Status</th>
-            <th class="text-right">Aksi</th>
+            <th class="min-w-[260px]">Judul</th>
+            <th class="min-w-[160px]">Asal & Klasifikasi</th>
+            <th class="min-w-[110px]">Tgl arsip</th>
+            <th class="min-w-[140px]">Retensi habis</th>
+            <th class="min-w-[160px]">Lokasi fisik</th>
+            <th class="min-w-[110px]">Status</th>
+            <th class="min-w-[120px] text-right">Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -90,7 +90,7 @@
             <td class="text-xs">{{ r.lokasi_fisik || '—' }}</td>
             <td>
               <app-badge size="sm"
-                         :status="r.status_arsip === 'musnah' ? 'ditolak' : (r.status_arsip === 'permanen' ? 'definitif' : (r.status_arsip === 'inaktif' ? 'inactive' : 'aktif'))"
+                         :status="r.status_arsip === 'musnah' ? 'ditolak' : (r.status_arsip === 'permanen' ? 'disetujui' : (r.status_arsip === 'inaktif' ? 'menunggu' : 'aktif'))"
                          :label="r.status_arsip || 'aktif'"></app-badge>
             </td>
             <td class="text-right whitespace-nowrap">
