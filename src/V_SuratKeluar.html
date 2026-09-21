@@ -20,6 +20,16 @@
     </button>
   </div>
 
+  <!-- G33: preset rentang tanggal -->
+  <div class="flex flex-wrap items-center gap-1 mb-2">
+    <span class="text-[11px] text-slate-400 mr-1">Rentang cepat:</span>
+    <button class="btn btn-ghost !px-2 !py-1 text-[11px]" @click="setRentang('sk','bulan-ini')">Bulan ini</button>
+    <button class="btn btn-ghost !px-2 !py-1 text-[11px]" @click="setRentang('sk','bulan-lalu')">Bulan lalu</button>
+    <button class="btn btn-ghost !px-2 !py-1 text-[11px]" @click="setRentang('sk','90-hari')">90 hari</button>
+    <button class="btn btn-ghost !px-2 !py-1 text-[11px]" @click="setRentang('sk','tahun-ini')">Tahun ini</button>
+    <button class="btn btn-ghost !px-2 !py-1 text-[11px]" @click="setRentang('sk','semua')">Semua</button>
+  </div>
+
   <app-filter-bar :filters="[
     { key: 'search', label: 'Pencarian', type: 'text', placeholder: 'Cari nomor, tujuan, perihal...', span: 2 },
     { key: 'tanggal_dari', label: 'Tanggal dari', type: 'date' },
@@ -68,14 +78,30 @@
                          :status="r.status_surat === 'terkirim' ? 'disetujui' : (r.status_surat === 'review' ? 'menunggu' : '')"
                          :label="r.status_surat || 'draft'"></app-badge>
             </td>
-            <td class="text-right whitespace-nowrap">
-              <button v-if="r.status_surat === 'draft'" class="btn-icon" title="Ajukan ke review"
-                      @click="skTransisi(r, 'review')"><i class="fa-solid fa-eye"></i></button>
-              <button v-if="r.status_surat === 'review'" class="btn-icon" title="Tandai terkirim"
-                      @click="skTransisi(r, 'terkirim')"><i class="fa-solid fa-envelope-circle-check"></i></button>
-              <button v-if="r.status_surat !== 'terkirim'" class="btn-icon" title="Ubah"
-                      @click="skOpenForm(r)"><i class="fa-solid fa-pen-to-square"></i></button>
-              <button class="btn-icon-danger" title="Hapus" @click="skDelete(r)"><i class="fa-solid fa-trash-can"></i></button>
+            <td class="text-right whitespace-nowrap relative">
+              <button class="btn-icon" title="Aksi cepat" @click.stop="toggleRowMenu(r.id)">
+                <i class="fa-solid fa-ellipsis-vertical"></i></button>
+              <div v-if="rowMenuId === r.id" @click.stop
+                   class="absolute right-0 top-8 z-30 w-44 card !p-1 shadow-xl text-left">
+                <button class="w-full text-left px-2 py-1.5 text-xs rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+                        @click="openDocDetail('sk', r); closeMenu()">
+                  <i class="fa-solid fa-eye mr-1 text-sky-600"></i> Detail & Lampiran</button>
+                <button v-if="r.status_surat === 'draft'"
+                        class="w-full text-left px-2 py-1.5 text-xs rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+                        @click="skTransisi(r, 'review'); closeMenu()">
+                  <i class="fa-solid fa-eye mr-1 text-amber-500"></i> Ajukan review</button>
+                <button v-if="r.status_surat === 'review'"
+                        class="w-full text-left px-2 py-1.5 text-xs rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+                        @click="skTransisi(r, 'terkirim'); closeMenu()">
+                  <i class="fa-solid fa-envelope-circle-check mr-1 text-emerald-600"></i> Tandai terkirim</button>
+                <button v-if="r.status_surat !== 'terkirim'"
+                        class="w-full text-left px-2 py-1.5 text-xs rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+                        @click="skOpenForm(r); closeMenu()">
+                  <i class="fa-solid fa-pen-to-square mr-1 text-slate-500"></i> Ubah</button>
+                <button class="w-full text-left px-2 py-1.5 text-xs rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/30 text-rose-600"
+                        @click="skDelete(r); closeMenu()">
+                  <i class="fa-solid fa-trash-can mr-1"></i> Hapus</button>
+              </div>
             </td>
           </tr>
         </tbody>
