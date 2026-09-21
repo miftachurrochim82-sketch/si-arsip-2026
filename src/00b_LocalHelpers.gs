@@ -173,3 +173,61 @@ function testLocalHelpersSelfCheck() {
 
   Logger.log('=== Selesai ===');
 }
+
+// ==================== §LOGBOOK & DRIVE (v1.3, G26/G28) ====================
+// T_LOGBOOK (T7) = jejak hidup setiap aksi dokumen. AUDIT_LOGS tetap
+// untuk audit sistem (CoreLib); logbook = narasi bisnis per dokumen.
+// catatLogbook_ TIDAK mengunci sendiri: panggil di luar lock ATAU di
+// dalam lock pemanggil (writeRecordNoLock_ = append, aman).
+
+var LOGBOOK_AKSI_VALID_ = [
+  'simpan_baru', 'ubah', 'hapus', 'ubah_status',
+  'arsip_auto', 'ubah_lokasi', 'upload_lampiran'
+];
+
+/** Ringkasan satu baris untuk kolom detail_sebelum/sesudah. */
+function logbookRingkasanDok_(rec) {
+  rec = rec || {};
+  var nomor = rec.nomor_agenda_masuk || rec.nomor_surat || rec.nomor_naskah || rec.id || '';
+  var perihal = rec.perihal || rec.tujuan || rec.isi || '';
+  var status  = rec.status_surat || rec.status_naskah || rec.status_disposisi || '';
+  var s = String(nomor);
+  if (perihal) s += ' | ' + String(perihal).slice(0, 60);
+  if (status)  s += ' | ' + status;
+  return s;
+}
+
+/** Tulis satu baris T_LOGBOOK. Gagal ≠ aksi gagal (try/catch). */
+function catatLogbook_(dokumenId, dokumenJenis, aksi, user, sebelum, sesudah, catatan) {
+  if (LOGBOOK_AKSI_VALID_.indexOf(aksi) === -1) aksi = 'ubah';
+  try {
+    var rec = {
+      id: '',
+      dokumen_id: dokumenId || '',
+      dokumen_jenis: dokumenJenis || '',
+      aksi: aksi,
+      aktor_email: (user && user.email) || '',
+      tgl_aksi: new Date().toISOString(),
+      detail_sebelum: sebelum || '',
+      detail_sesudah: sesudah || '',
+      catatan: catatan || ''
+    };
+    writeRecordNoLock_('T_LOGBOOK', rec, true, user, 'id');
+  } catch (e) {
+    Logger.log('[catatLogbook_] ' + e.message);
+  }
+}
+
+/** Folder Drive bernama `nama` (buat sekali, ID di-cache di props). */
+function getDriveFolder_(nama) {
+  var props = PropertiesService.getScriptProperties();
+  var key = 'DRIVE_FOLDER_ID_' + String(nama).replace(/[^A-Za-z0-9]+/g, '_');
+  var id = props.getProperty(key);
+  if (id) {
+    try { return DriveApp.getFolderById(id); } catch (e) { /* jatuh ke cari */ }
+  }
+  var it = DriveApp.getFoldersByName(nama);
+  var f = it.hasNext() ? it.next() : DriveApp.createFolder(nama);
+  try { props.setProperty(key, f.getId()); } catch (e2) {}
+  return f;
+}
