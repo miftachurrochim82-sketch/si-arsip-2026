@@ -87,9 +87,9 @@
   <!-- Stats -->
   <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
     <app-stat-card title="Total RTL" :value="rtlTotalData" icon="fa-solid fa-list-check" color="sky" subtext="semua"></app-stat-card>
-    <div class="card !p-3 text-center"><div class="text-slate-400">Baru</div><div class="text-lg font-black text-sky-600">{{ rtlList.filter(function(r){return r.status_rtl==='baru'}).length }}</div></div>
-    <div class="card !p-3 text-center"><div class="text-slate-400">Diproses</div><div class="text-lg font-black text-amber-600">{{ rtlList.filter(function(r){return r.status_rtl==='diproses'}).length }}</div></div>
-    <div class="card !p-3 text-center"><div class="text-slate-400">Selesai</div><div class="text-lg font-black text-emerald-600">{{ rtlList.filter(function(r){return r.status_rtl==='selesai'}).length }}</div></div>
+    <app-stat-card title="Baru" :value="rtlList.filter(function(r){return r.status_rtl==='baru'}).length" icon="fa-solid fa-clock" color="sky" subtext="perlu diproses"></app-stat-card>
+    <app-stat-card title="Diproses" :value="rtlList.filter(function(r){return r.status_rtl==='diproses'}).length" icon="fa-solid fa-spinner" color="amber" subtext="sedang jalan"></app-stat-card>
+    <app-stat-card title="Selesai" :value="rtlList.filter(function(r){return r.status_rtl==='selesai'}).length" icon="fa-solid fa-check" color="emerald" subtext="sudah tuntas"></app-stat-card>
   </div>
 
   <app-skeleton v-if="rtlLoading" type="table"></app-skeleton>
@@ -100,17 +100,17 @@
       <i class="fa-solid fa-inbox text-3xl mb-2 block"></i>
       Belum ada RTL. Klik Generate atau Buat Manual.
     </div>
-    <div v-else class="overflow-x-auto">
+    <div v-else class="table-scroll">
       <table class="w-full text-xs">
         <thead class="border-b bg-slate-50 dark:bg-slate-800/50">
           <tr>
-            <th class="text-left py-2 px-3">Judul RTL</th>
-            <th class="text-left py-2 px-3">Sumber</th>
-            <th class="text-left py-2 px-3">Status</th>
-            <th class="text-right py-2 px-3">Progress</th>
-            <th class="text-left py-2 px-3">Assignee</th>
-            <th class="text-left py-2 px-3">Due</th>
-            <th class="text-right py-2 px-3">Aksi</th>
+            <th class="text-left py-2 px-3 min-w-[260px]">Judul RTL</th>
+            <th class="text-left py-2 px-3 min-w-[100px]">Sumber</th>
+            <th class="text-left py-2 px-3 min-w-[100px]">Status</th>
+            <th class="text-right py-2 px-3 min-w-[120px]">Progress</th>
+            <th class="text-left py-2 px-3 min-w-[140px]">Assignee</th>
+            <th class="text-left py-2 px-3 min-w-[110px]">Due</th>
+            <th class="text-right py-2 px-3 min-w-[120px]">Aksi</th>
           </tr>
         </thead>
         <tbody class="divide-y">
@@ -139,9 +139,9 @@
             <td class="py-2 px-3">{{ r.due_date ? fmtTgl(r.due_date) : '—' }}</td>
             <td class="py-2 px-3 text-right">
               <div class="flex gap-1 justify-end">
-                <button class="btn btn-ghost btn-xs" @click="openRtlEdit(r)" title="Edit"><i class="fa-solid fa-pen"></i></button>
-                <button class="btn btn-ghost btn-xs" @click="openRtlStatus(r)" title="Ubah Status"><i class="fa-solid fa-arrows-rotate"></i></button>
-                <button class="btn btn-ghost btn-xs text-rose-600" @click="hapusRtl(r)" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                <button class="btn-icon" @click="openRtlEdit(r)" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn-icon" @click="openRtlStatus(r)" title="Ubah Status"><i class="fa-solid fa-arrows-rotate"></i></button>
+                <button class="btn-icon-danger" @click="hapusRtl(r)" title="Hapus"><i class="fa-solid fa-trash"></i></button>
               </div>
             </td>
           </tr>
@@ -152,8 +152,8 @@
     <div v-if="rtlTotalPages>1" class="flex items-center justify-between p-3 border-t text-xs">
       <span class="text-slate-500">{{ rtlTotalData }} data · hal {{ rtlPage }}/{{ rtlTotalPages }}</span>
       <div class="flex gap-1">
-        <button class="btn btn-ghost btn-xs" :disabled="rtlPage<=1" @click="loadRtl(rtlPage-1)"><i class="fa-solid fa-chevron-left"></i></button>
-        <button class="btn btn-ghost btn-xs" :disabled="rtlPage>=rtlTotalPages" @click="loadRtl(rtlPage+1)"><i class="fa-solid fa-chevron-right"></i></button>
+        <button class="btn-icon" :disabled="rtlPage<=1" @click="loadRtl(rtlPage-1)"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="btn-icon" :disabled="rtlPage>=rtlTotalPages" @click="loadRtl(rtlPage+1)"><i class="fa-solid fa-chevron-right"></i></button>
       </div>
     </div>
   </div>
@@ -257,5 +257,4 @@
       </div>
     </div>
   </app-modal>
-
 </section>
