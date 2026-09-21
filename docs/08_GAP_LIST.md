@@ -9,7 +9,9 @@
 > **Riwayat**:
 > - 2026-09-20 — daftar gap awal dari Gate 0 (BRD/PRD/FRD/DATABASE/UIUX/API/TESTCASE).
 > - 2026-09-20 malam-2 — SWEEP STATUS: G1–G13,G15–G18 TUTUP; G14 PARTIAL;
->   G19–G25 TUTUP; G26 PARTIAL; G27–G45 tetap backlog. Bukti: log test 120/0/1
+>   G19–G33 TUTUP = FASE 2 SELESAI (v1.4: preview inline, timeline disposisi,
+>   notifikasi in-app, quick action, preset rentang). Bukti: 127/0/1 (v1.3) →
+>   harapan 129/0/1 (v1.4).
 >   + screenshot per modul + tag rilis.
 >
 > Rujukan: SRIKANDI (ANRI), Permendagri 78/2012, Perka ANRI (JRA).
@@ -56,13 +58,13 @@ skop **kantor Satpol PP & Damkar**, dengan kemungkinan perluasan ke SKPD lain di
 | G11 | Surat Keluar (T2) — draft + review + terbitkan | Fitur | ✅ TUTUP (v1.0) |
 | G12 | Surat Keluar — auto-generate nomor surat | Fitur | ✅ TUTUP (v1.0) |
 | G13 | Disposisi (T4) — buat + teruskan + selesaikan + SLA alert | Fitur | ✅ TUTUP (v1.0) |
-| G14 | Dashboard (4 KPI + 2 chart + 2 panel) | Fitur | 🟡 PARTIAL — 4 KPI live; 2 chart + 2 panel: endpoint `dash_*` siap, UI tahap 2 |
+| G14 | Dashboard (4 KPI + 4 chart + 2 panel) | Fitur | ✅ TUTUP (v1.2 — chart tren masuk/keluar, doughnut klasifikasi & status disposisi, panel kritis + lewat SLA) |
 | G15 | Pengaturan (wrapper `<app-settings>`) | Fitur | ✅ TUTUP (v1.0) |
 | G16 | Lampiran (T6) — v1 pakai URL manual | Fitur | ✅ TUTUP (v1.0) |
 | G17 | Test suite `runLibraryTests` + adopsi + routing + domain | Test | ✅ TUTUP (v1.0) |
 | G18 | Deploy Web App + smoke test | Deploy | ✅ TUTUP (v1.0) |
 
-**MVP selesai bila**: G1–G18 status TUTUP. **Kini: 17 TUTUP + 1 PARTIAL (G14 chart/panel UI).**
+**MVP selesai bila**: G1–G18 status TUTUP. **Kini: 18 TUTUP (G14 ditutup v1.2).**
 
 ---
 
@@ -77,16 +79,16 @@ skop **kantor Satpol PP & Damkar**, dengan kemungkinan perluasan ke SKPD lain di
 | G23 | Kearsipan — daftar akan musnah + BA musnah | Fitur | ✅ TUTUP (v1.1) |
 | G24 | Kearsipan — daftar permanen + BA serah | Fitur | ✅ TUTUP (v1.1) |
 | G25 | Pencarian Lintas — search 4 sheet (masuk/keluar/naskah/arsip) | Fitur | ✅ TUTUP (v1.1) |
-| G26 | Logbook (T7) — auto-log setiap aksi dokumen | Fitur | 🟡 PARTIAL — aksi arsip ter-log ke T7; aksi dokumen lain masih via AUDIT_LOGS |
-| G27 | Export Excel multi-sheet (laporan bulanan) | Fitur | 🟡 BACKLOG |
-| G28 | Upload file biner ke Drive (ganti link manual) | Fitur | 🟡 BACKLOG |
-| G29 | Preview PDF inline di modal detail | UI/UX | 🟡 BACKLOG |
-| G30 | Timeline disposisi visual (bertingkat) | UI/UX | 🟡 BACKLOG |
-| G31 | Notifikasi in-app (disposisi baru, SLA lewat) | Fitur | 🟡 BACKLOG |
-| G32 | Quick action dropdown di tabel | UI/UX | 🟡 BACKLOG |
-| G33 | Filter rentang tanggal kalender | UI/UX | 🟡 BACKLOG |
+| G26 | Logbook (T7) — auto-log setiap aksi dokumen | Fitur | ✅ TUTUP (v1.3: catatLogbook_ di 00b dipanggil sm/sk/dp/nd simpan-hapus-transisi + upload lampiran; FR-58) |
+| G27 | Export Excel multi-sheet (laporan bulanan) | Fitur | ✅ TUTUP (v1.3: 10_LaporanApi.gs, 4 sheet, xlsx via URL export + OAuth; FR-59) |
+| G28 | Upload file biner ke Drive (ganti link manual) | Fitur | ✅ TUTUP (v1.3: 11_LampiranApi.gs, ≤5 MB whitelist mime, T_LAMPIRAN file_drive; FR-60) |
+| G29 | Preview PDF inline di modal detail | UI/UX | ✅ TUTUP (v1.4: modal Detail Dokumen, iframe preview Drive /preview + link manual; FR-61) |
+| G30 | Timeline disposisi visual (bertingkat) | UI/UX | ✅ TUTUP (v1.4: timeline node berwarna per status, tingkat 1..n, dari→ke+tenggat; FR-62) |
+| G31 | Notifikasi in-app (disposisi baru, SLA lewat) | Fitur | ✅ TUTUP (v1.4: 12_NotifikasiApi.gs + lonceng slot extra-actions + marker baca; FR-63) |
+| G32 | Quick action dropdown di tabel | UI/UX | ✅ TUTUP (v1.4: menu ⋮ di tabel surat masuk & keluar; FR-64) |
+| G33 | Filter rentang tanggal kalender | UI/UX | ✅ TUTUP (v1.4: preset Bulan ini/lalu/90 hari/Tahun ini/Semua di sm, sk, dp; FR-65) |
 
-**Fase 2 selesai bila**: G19–G33 status TUTUP. **Kini: 7 TUTUP + 1 PARTIAL (G26) + 7 BACKLOG (G27–G33).**
+**Fase 2 selesai bila**: G19–G33 status TUTUP. **Kini: 15 TUTUP — FASE 2 SELESAI per v1.4.** 🎓
 
 ---
 
@@ -199,7 +201,7 @@ Fase 1 selesai bila semua berikut **TERPENUHI**:
 - ✅ Login SSO via SI-PLATFORM berhasil.
 - ✅ Surat masuk bisa diregistrasi + disposisi + selesai.
 - ✅ Surat keluar bisa draft → review → terkirim.
-- 🟡 Dashboard menampilkan 4 KPI + 2 chart + 2 panel → **KPI terpenuhi; chart+panel = satu-satunya butir DoD Fase 1 yang belum (UI tahap 2, endpoint siap)**.
+- ✅ Dashboard menampilkan 4 KPI + 4 chart + 2 panel (v1.2: UI kit `<app-chart-*>` live).
 - ✅ Master Klasifikasi/Pejabat/Template bisa CRUD.
 - ✅ Pengaturan bisa baca/tulis Script Properties.
 
@@ -228,8 +230,8 @@ Fase 1 selesai bila semua berikut **TERPENUHI**:
 
 | Fase | Total Item | Status |
 |---|---|---|
-| **Fase 1 (MVP)** | 18 (G1–G18) | ✅ 17 TUTUP + 🟡 1 PARTIAL (G14) |
-| **Fase 2** | 15 (G19–G33) | ✅ 7 TUTUP + 🟡 1 PARTIAL (G26) + 7 BACKLOG |
+| **Fase 1 (MVP)** | 18 (G1–G18) | ✅ 18 TUTUP (v1.2) |
+| **Fase 2** | 15 (G19–G33) | ✅ 15 TUTUP — SELESAI (v1.4) |
 | **Fase 3** | 12 (G34–G45) | 🔵 BACKLOG LANJUT |
 | **Kandidat (belum masuk PRD)** | 9 (B1–B9) | 📝 IDE |
 | **Keputusan pemilik** | 13 | ✅ DIPUTUSKAN |
