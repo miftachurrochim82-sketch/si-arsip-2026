@@ -51,12 +51,12 @@
       <table>
         <thead>
           <tr>
-            <th>Nomor / Tanggal</th>
-            <th>Tujuan & Perihal</th>
-            <th>Klasifikasi</th>
-            <th>Penandatangan</th>
-            <th>Status</th>
-            <th class="text-right">Aksi</th>
+            <th class="min-w-[180px]">Nomor / Tanggal</th>
+            <th class="min-w-[260px]">Tujuan & Perihal</th>
+            <th class="min-w-[180px]">Klasifikasi</th>
+            <th class="min-w-[160px]">Penandatangan</th>
+            <th class="min-w-[100px]">Status</th>
+            <th class="min-w-[120px] text-right">Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -75,7 +75,7 @@
             <td class="text-xs">{{ labelPejabat(r.penandatangan_id) }}</td>
             <td>
               <app-badge size="sm"
-                         :status="r.status_surat === 'terkirim' ? 'disetujui' : (r.status_surat === 'review' ? 'menunggu' : '')"
+                         :status="r.status_surat === 'terkirim' ? 'disetujui' : (r.status_surat === 'review' ? 'menunggu' : 'draft')"
                          :label="r.status_surat || 'draft'"></app-badge>
             </td>
             <td class="text-right whitespace-nowrap relative">
