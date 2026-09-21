@@ -23,6 +23,16 @@
     </div>
   </div>
 
+  <!-- G33: preset rentang tanggal -->
+  <div class="flex flex-wrap items-center gap-1">
+    <span class="text-[11px] text-slate-400 mr-1">Rentang cepat:</span>
+    <button class="btn btn-ghost !px-2 !py-1 text-[11px]" @click="setRentang('sm','bulan-ini')">Bulan ini</button>
+    <button class="btn btn-ghost !px-2 !py-1 text-[11px]" @click="setRentang('sm','bulan-lalu')">Bulan lalu</button>
+    <button class="btn btn-ghost !px-2 !py-1 text-[11px]" @click="setRentang('sm','90-hari')">90 hari</button>
+    <button class="btn btn-ghost !px-2 !py-1 text-[11px]" @click="setRentang('sm','tahun-ini')">Tahun ini</button>
+    <button class="btn btn-ghost !px-2 !py-1 text-[11px]" @click="setRentang('sm','semua')">Semua</button>
+  </div>
+
   <!-- Filter bar (kit v2.8.1): pencarian melebar span:2 -->
   <app-filter-bar :filters="[
     { key: 'search', label: 'Pencarian', type: 'text', placeholder: 'Cari agenda, nomor, asal, perihal...', span: 2 },
@@ -81,11 +91,25 @@
                          :status="r.status_surat === 'selesai' ? 'disetujui' : (r.status_surat === 'didiposisi' ? 'menunggu' : 'proses')"
                          :label="r.status_surat || 'baru'"></app-badge>
             </td>
-            <td class="text-right whitespace-nowrap">
-              <button v-if="r.status_surat !== 'selesai'" class="btn-icon" title="Disposisikan surat ini"
-                      @click="disposisiDariSurat(r)"><i class="fa-solid fa-share-nodes"></i></button>
-              <button class="btn-icon" title="Ubah" @click="smOpenForm(r)"><i class="fa-solid fa-pen-to-square"></i></button>
-              <button class="btn-icon-danger" title="Hapus" @click="smDelete(r)"><i class="fa-solid fa-trash-can"></i></button>
+            <td class="text-right whitespace-nowrap relative">
+              <button class="btn-icon" title="Aksi cepat" @click.stop="toggleRowMenu(r.id)">
+                <i class="fa-solid fa-ellipsis-vertical"></i></button>
+              <div v-if="rowMenuId === r.id" @click.stop
+                   class="absolute right-0 top-8 z-30 w-44 card !p-1 shadow-xl text-left">
+                <button class="w-full text-left px-2 py-1.5 text-xs rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+                        @click="openDocDetail('sm', r); closeMenu()">
+                  <i class="fa-solid fa-eye mr-1 text-sky-600"></i> Detail & Lampiran</button>
+                <button class="w-full text-left px-2 py-1.5 text-xs rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+                        @click="smOpenForm(r); closeMenu()">
+                  <i class="fa-solid fa-pen-to-square mr-1 text-slate-500"></i> Ubah</button>
+                <button v-if="r.status_surat !== 'selesai'"
+                        class="w-full text-left px-2 py-1.5 text-xs rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+                        @click="disposisiDariSurat(r); closeMenu()">
+                  <i class="fa-solid fa-share-nodes mr-1 text-emerald-600"></i> Disposisikan</button>
+                <button class="w-full text-left px-2 py-1.5 text-xs rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/30 text-rose-600"
+                        @click="smDelete(r); closeMenu()">
+                  <i class="fa-solid fa-trash-can mr-1"></i> Hapus</button>
+              </div>
             </td>
           </tr>
         </tbody>
