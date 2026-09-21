@@ -1,0 +1,35 @@
+<script>
+// ============================================================
+// SI-ARSIP - J_Export.html (v1.4 — STRUCTURE ALIGNMENT G18c-2)
+// ------------------------------------------------------------
+// Export laporan: BERBEDA dari si-lahar (SheetJS klien) — di sini
+// xlsx disusun SERVER-SIDE (10_LaporanApi.gs, 4 sheet) lewat aksi
+// `laporan_export_excel`, karena laporan kearsipan butuh join sheet
+// yang sudah divalidasi backend; klien hanya menerima link Drive.
+// Kandidat Fase 3: exportPDF via AppCore.loadLib.
+// Digabung ke mixin di J_App (window.ArsipExport.methods).
+// ============================================================
+window.ArsipExport = {
+  methods: {
+    async exportExcelBulanan() {
+      const ym = String(this.lapBulan || '').slice(0, 7);
+      if (!/^\d{4}-\d{2}$/.test(ym)) return this.showToast('Pilih bulan dulu.', 'error');
+      this.lapLoading = true;
+      try {
+        const r = await this.callServer('laporan_export_excel', { ym: ym });
+        if (r && r.success) {
+          this.lapUrl = r.data.url;
+          this.lapNama = r.data.nama + ' (' + r.data.ukuran_kb + ' KB)';
+          this.showToast('Laporan Excel siap: ' + r.data.nama, 'success');
+        } else {
+          this.showToast((r && r.error) || 'Gagal export laporan.', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      } finally {
+        this.lapLoading = false;
+      }
+    }
+  }
+};
+</script>
