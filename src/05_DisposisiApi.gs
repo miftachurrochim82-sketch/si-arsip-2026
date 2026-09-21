@@ -296,6 +296,12 @@ function dpSave_(data, user) {
            'Surat: ' + (surat.nomor_agenda_masuk || saved.surat_id) +
            ' → ' + (kePjb.pegawai_id || kePjb.id));
 
+    // G26: logbook T7
+    catatLogbook_(saved.id, 'disposisi', isInsert ? 'simpan_baru' : 'ubah', user,
+                  (!isInsert && existing) ? logbookRingkasanDok_(existing) : '',
+                  logbookRingkasanDok_(saved),
+                  isInsert ? 'Disposisi dibuat' : 'Edit disposisi');
+
     return { success: true, data: saved };
   } catch (err) {
     Logger.log('[dpSave_] ' + err.message);
@@ -421,6 +427,8 @@ function dpTransisiStatus_(id, statusBaru, user, opts) {
 
     audit_(user, 'UBAH_STATUS_DISPOSISI', 'T_DISPOSISI', id, true,
            'Status: ' + statusLama + ' → ' + statusBaru);
+    catatLogbook_(id, 'disposisi', 'ubah_status', user, statusLama, statusBaru,
+                  opts.catatan || 'Transisi status disposisi');
 
     // ---------- FR-24: kalau selesai, cek semua disposisi surat ----------
     if (statusBaru === 'selesai' && rec.surat_id) {
@@ -522,6 +530,8 @@ function dpDelete_(data, user) {
     var ok = softDeleteRecord_('T_DISPOSISI', data.id, user);
     audit_(user, 'DELETE_DISPOSISI', 'T_DISPOSISI', data.id, ok,
            'Surat: ' + (row.surat_id || '-'));
+    if (ok) catatLogbook_(data.id, 'disposisi', 'hapus', user,
+                          logbookRingkasanDok_(row), '', 'Soft delete disposisi');
     return { success: ok, message: ok ? 'Disposisi dihapus.' : 'Gagal hapus.' };
   } catch (err) {
     Logger.log('[dpDelete_] ' + err.message);
