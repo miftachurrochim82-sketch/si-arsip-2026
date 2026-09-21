@@ -6,7 +6,7 @@
      ============================================================ -->
 
 <!-- ========== 1. MODAL FORM SURAT MASUK ========== -->
-<app-modal :show="showSmForm"
+<app-modal v-if="showSmForm"
            :title="smForm.id ? 'Ubah Surat Masuk' : 'Registrasi Surat Masuk'"
            subtitle="Nomor agenda masuk dihasilkan otomatis oleh server (format Permendagri 78/2012)."
            icon="fa-solid fa-inbox" size="2xl" :loading="smSaving"
@@ -81,7 +81,7 @@
 </app-modal>
 
 <!-- ========== 2. MODAL FORM DISPOSISI ========== -->
-<app-modal :show="showDpForm"
+<app-modal v-if="showDpForm"
            :title="dpForm.id ? 'Ubah Disposisi' : 'Disposisikan Surat'"
            subtitle="Disposisi baru otomatis berstatus 'diteruskan' dan surat induk jadi 'didiposisi'."
            icon="fa-solid fa-share-nodes" size="lg" :loading="dpSaving"
@@ -120,7 +120,7 @@
 </app-modal>
 
 <!-- ========== 3. MODAL FORM SURAT KELUAR ========== -->
-<app-modal :show="showSkForm"
+<app-modal v-if="showSkForm"
            :title="skForm.id ? 'Ubah Surat Keluar' : 'Surat Keluar Baru'"
            subtitle="Nomor keluar otomatis: <kode_klas>/<urut:3>/<kode_unit>/<tahun>."
            icon="fa-solid fa-paper-plane" size="2xl" :loading="skSaving"
@@ -185,7 +185,7 @@
 </app-modal>
 
 <!-- ========== 4. MODAL FORM KLASIFIKASI (M1) ========== -->
-<app-modal :show="showRefForm"
+<app-modal v-if="showRefForm"
            :title="refForm.id ? 'Ubah Kode Klasifikasi' : 'Tambah Kode Klasifikasi'"
            subtitle="Kode mengikuti format ANRI; simpan sebagai teks (mis. 015, bukan 15)."
            icon="fa-solid fa-tags" size="lg" :loading="refSaving"
@@ -230,7 +230,7 @@
 </app-modal>
 
 <!-- ========== 5. MODAL FORM PEJABAT (M2) ========== -->
-<app-modal :show="showPjbForm"
+<app-modal v-if="showPjbForm"
            :title="pjbForm.id ? 'Ubah Pejabat' : 'Tambah Pejabat'"
            subtitle="Pegawai diambil dari SIMPEG (read-only); hierarki 1 = tertinggi."
            icon="fa-solid fa-user-tie" size="lg" :loading="pjbSaving"
@@ -276,7 +276,7 @@
 </app-modal>
 
 <!-- ========== 6. MODAL FORM NASKAH DINAS ========== -->
-<app-modal :show="showNdForm"
+<app-modal v-if="showNdForm"
            :title="ndForm.id ? 'Ubah Naskah Dinas' : 'Naskah Dinas Baru'"
            subtitle="Nomor otomatis per jenis (ND/MEMO/LAP/NSK). Final = otomatis terarsipkan."
            icon="fa-solid fa-file-pen" size="2xl" :loading="ndSaving"
@@ -330,7 +330,7 @@
 </app-modal>
 
 <!-- ========== 7. MODAL AKSI ARSIP (lokasi / musnah / serah) ========== -->
-<app-modal :show="arAksiMode !== ''"
+<app-modal v-if="arAksiMode !== ''"
            :title="arAksiMode === 'lokasi' ? 'Ubah Lokasi Fisik' : (arAksiMode === 'serah' ? 'Serahkan Arsip (Permanen)' : 'Musnahkan Arsip')"
            :subtitle="arAksiMode === 'lokasi' ? 'Format: ruang-rak-box-folder.' : 'Wajib mencantumkan nomor BA / keterangan resmi (FR-33, admin).'"
            :icon="arAksiMode === 'lokasi' ? 'fa-solid fa-location-dot' : (arAksiMode === 'serah' ? 'fa-solid fa-landmark' : 'fa-solid fa-fire')"
@@ -358,7 +358,7 @@
 </app-modal>
 
 <!-- ========== 8. MODAL FORM TEMPLATE (M3) ========== -->
-<app-modal :show="showTplForm"
+<app-modal v-if="showTplForm"
            :title="tplForm.id ? 'Ubah Template' : 'Tambah Template'"
            subtitle="Template naskah dipakai fase lanjut (pembuatan naskah dari contoh)."
            icon="fa-solid fa-file-lines" size="lg" :loading="tplSaving"
@@ -407,7 +407,7 @@
 <div v-if="rowMenuId" class="fixed inset-0 z-20" @click="closeMenu()"></div>
 
 <!-- ============ MODAL DETAIL DOKUMEN (v1.4: G29 preview + G30 timeline) ============ -->
-<app-modal :show="showDocDetail"
+<app-modal v-if="showDocDetail"
            title="Detail Dokumen"
            subtitle="Riwayat disposisi bertingkat + lampiran dengan preview inline."
            icon="fa-solid fa-magnifying-glass-plus" size="3xl"
