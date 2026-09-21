@@ -1,4 +1,4 @@
-# 05 — UI/UX [SI-ARSIP: Sistem Informasi Kearsipan Dinamis — 2026-09-20]
+# 05 — UI/UX [SI-ARSIP: Sistem Informasi Kearsipan Dinamis — 2026-09-21 v1.5]
 
 > Shell & komponen kit dipertahankan: `<app-login>`/`<app-sidebar>`/`<app-header>`,
 > `<app-crud-table>`, `<app-filter-bar>`, `<app-badge>`, `<app-modal>`, toast, dark mode.
@@ -7,16 +7,17 @@
 >
 > Rujukan: SRIKANDI (ANRI), Permendagri 78/2012.
 
-## Peta halaman (menu sidebar final)
+## Peta halaman (menu sidebar final v1.5)
 
-Menu sidebar = **9 item** (6 operasional + 2 master/sistem + 1 fase 2).
+Menu sidebar = **10 item** (7 operasional termasuk Laporan + 2 kearsipan + 2 master/sistem).
 
 | Grup | Menu | View | Fase | Isi utama |
 |---|---|---|---|---|
-| **Utama** | Dashboard | `V_Dashboard.html` | **1** | 4 KPI (`<app-stat-card>`): Surat Masuk Bulan Ini, Surat Keluar Bulan Ini, Disposisi Menunggu, Disposisi Lewat SLA. Chart bar 12 bulan + doughnut top 5 klasifikasi. Panel **Surat Kritis** + panel **Disposisi Jatuh Tempo**. Footer info aplikasi. |
-| **Utama** | Surat Masuk | `V_SuratMasuk.html` | **1** | `<app-filter-bar>` (tanggal/asal/klasifikasi/sifat) + `<app-crud-table>`. Baris ada badge **Kritis** (kode 005.1/015 atau sifat segera/rahasia). Aksi per baris: Detail, Disposisi, Edit, Hapus. Tombol "Registrasi Surat Masuk". |
-| **Utama** | Surat Keluar | `V_SuratKeluar.html` | **1** | `<app-filter-bar>` (tanggal/tujuan/klasifikasi/status) + `<app-crud-table>`. Baris status: draft/review/terkirim. Aksi: Detail, Ajukan Review, Terbitkan, Edit, Hapus (saat draft). Tombol "Buat Surat Baru". |
-| **Utama** | Disposisi | `V_Disposisi.html` | **1** | `<app-filter-bar>` (status/dari/ke/tanggal) + `<app-crud-table>`. Badge **Lewat SLA** (jatuh tempo lewat & belum selesai). Aksi: Teruskan, Tandai Diproses, Selesaikan, Hapus. |
+| **Utama** | Dashboard | `V_Dashboard.html` | **1** | 4 KPI (`<app-stat-card>`): Surat Masuk Bulan Ini, Surat Keluar Bulan Ini, Disposisi Menunggu, Disposisi Lewat SLA. Chart bar 12 bulan + doughnut top 5 klasifikasi + doughnut status disposisi. Panel **Surat Kritis** + panel **Disposisi Jatuh Tempo**. Export Excel 4 sheet (v1.3) + footer info aplikasi. |
+| **Utama** | Laporan | `V_Laporan.html` | **1.5** | **4 tab segmented (L4/L5/L11/L12)**: Klasifikasi (tabel lengkap kode+uraian+masuk/keluar/total+%, filter tahun+search), Per Unit (disposisi per unit + keluar per unit, filter tahun), Kepatuhan JRA (4 stat-card total/patuh/tidak patuh/% + tabel rincian tidak patuh), Bulanan Khas (input month + Export KHAS 7 sheet). |
+| **Utama** | Surat Masuk | `V_SuratMasuk.html` | **1** | `<app-filter-bar>` (tanggal/asal/klasifikasi/sifat) + `<app-crud-table>`. Baris ada badge **Kritis** (kode 005.1/015 atau sifat segera/rahasia). Aksi per baris via menu ⋮: Detail & Lampiran, Ubah, Disposisikan, Hapus. Tombol "Registrasi Surat Masuk". |
+| **Utama** | Surat Keluar | `V_SuratKeluar.html` | **1** | `<app-filter-bar>` (tanggal/tujuan/klasifikasi/status) + `<app-crud-table>`. Baris status: draft/review/terkirim. Aksi via ⋮: Detail, Ajukan Review, Terbitkan, Edit, Hapus (saat draft). Tombol "Buat Surat Baru". |
+| **Utama** | Disposisi | `V_Disposisi.html` | **1** | `<app-filter-bar>` (status/dari/ke/tanggal + preset rentang) + `<app-crud-table>`. Badge **Lewat SLA**. Aksi: Teruskan, Tandai Diproses, Selesaikan, Hapus. |
 | **Utama** | Naskah Dinas | `V_NaskahDinas.html` | **2** | 3 tab segmented: Nota Dinas / Memo / Laporan. CRUD sederhana + status final. |
 | **Utama** | Kearsipan | `V_Kearsipan.html` | **2** | 3 tab: Arsip Aktif, Arsip Inaktif, Permanen. Panel "Akan Musnah" di atas. Aksi: Ubah Lokasi, Tandai Musnah (BA), Tandai Serah. |
 | **Utama** | Pencarian | `V_Pencarian.html` | **2** | Satu search box besar + filter jenis/tahun/klasifikasi. Hasil dari 4 sheet (Surat Masuk, Surat Keluar, Naskah Dinas, Arsip) dengan badge jenis. |
@@ -54,7 +55,7 @@ Semua modal pakai kit `<app-modal>`:
 - Identitas tema `:root` (`--primary-*`) — **warna SI-ARSIP: biru tua** (khas kearsipan).
 - Boot dark-mode: kunci `siarsip_dark`.
 - Window var SSO: `__SSO_TICKET__`, `__IS_SSO_ENTRY__`.
-- Include satu tingkat: `V_Modals` → `V_Dashboard` → `V_SuratMasuk` → `V_SuratKeluar` → `V_Disposisi` → `V_Master` → `V_Pengaturan`; `J_State` → `J_Helpers` → `J_Api` → `J_Actions` → `J_Export` → `J_App`.
+- Include satu tingkat (v1.5): `V_Modals` → `V_Dashboard` → `V_Laporan` → `V_SuratMasuk` → `V_SuratKeluar` → `V_NaskahDinas` → `V_Disposisi` → `V_Kearsipan` → `V_Pencarian` → `V_Master` → `V_Pengaturan`; `J_State` → `J_Helpers` → `J_Api` → `J_Actions` → `J_Export` → `J_App`.
 - **Tidak ada** `A0_Head.html` (head inline).
 
 ### Tema warna SI-ARSIP
