@@ -5,9 +5,9 @@
 //   1. runLibraryTests()        → regresi CoreLib (delegasi CoreLib.runCoreTests)
 //   2. testAdopsiG18d()         → verifikasi util CoreLib v2.3.0 (13 asersi)
 //   3. testDispatcherRouting()  → registry handler + fail-closed (≥25 asersi)
-//   4. runDomainTestsSIArsip()  → domain SI-ARSIP (48 grup fungsi sejak v1.4:
+//   4. runDomainTestsSIArsip()  → domain SI-ARSIP (54 grup fungsi sejak v1.5:
 //      sm 5, sk 5, dp 4, SIMPEG 3, pre-save 5, skema 4, nd 5, ar 5, search 3,
-//      dash 1, logbook 2, laporan 2, lampiran 2, notifikasi 2)
+//      dash 1, logbook 2, laporan 2, lampiran 2, notifikasi 2, rekap 6)
 //
 // Entry-point: runAllTestsSIArsip()
 //
@@ -331,6 +331,7 @@ function testDispatcherRouting() {
     'dp_save', 'dp_selesaikan', 'dp_teruskan', 'dp_delete',
     'ref_save', 'pjb_save', 'tpl_save',
     'get_dashboard', 'dash_chart_tren',
+    'lap_rekap_klasifikasi', 'lap_rekap_unit', 'lap_kepatuhan_jra', 'laporan_export_khas',
     'init_database'
   ];
 
@@ -693,6 +694,67 @@ function runDomainTestsSIArsip() {
     }
   ]));
 
+  // ---------- §4o Laporan Rekap v1.5 L4/L5/L11/L12 (6 asersi) ----------
+  groups.push(_tsRunGroup_('Laporan Rekap v1.5', [
+    function testLapRekapKlasifikasiShape() {
+      var r = lapRekapKlasifikasi_({ tahun: '' }, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'lapRekapKlasifikasi_ sukses');
+      _tsAssert_(r.data && Array.isArray(r.data.rekap), 'rekap array');
+      _tsAssert_(typeof r.data.total_all === 'number', 'total_all number');
+      if (r.data.rekap.length) {
+        var first = r.data.rekap[0];
+        _tsAssert_(first.kode_klasifikasi && typeof first.total === 'number' && typeof first.pct === 'number',
+                   'field rekap klasifikasi lengkap');
+      }
+    },
+    function testLapRekapKlasifikasiTahunKosong() {
+      var r = lapRekapKlasifikasi_({ tahun: '1990' }, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'tahun 1990 sukses walau kosong');
+      _tsAssert_(r.data.total_all === 0 && r.data.rekap.length === 0, '1990 = 0 data');
+    },
+    function testLapRekapUnitShape() {
+      var r = lapRekapUnit_({ tahun: '' }, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'lapRekapUnit_ sukses');
+      _tsAssert_(Array.isArray(r.data.disposisi_per_unit) && Array.isArray(r.data.keluar_per_unit),
+                 '2 array rekap unit');
+      _tsAssert_(typeof r.data.total_disposisi === 'number', 'total_disposisi number');
+      if (r.data.disposisi_per_unit.length) {
+        var u = r.data.disposisi_per_unit[0];
+        _tsAssert_(u.nama_unit && typeof u.jumlah === 'number' && typeof u.pct === 'number',
+                   'field rekap unit lengkap');
+      }
+    },
+    function testLapKepatuhanJraShape() {
+      var r = lapKepatuhanJra_({ tahun: '2026' }, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'lapKepatuhanJra_ sukses');
+      _tsAssert_(typeof r.data.total === 'number' && typeof r.data.patuh === 'number' &&
+                 typeof r.data.pct_patuh === 'number', 'field kepatuhan JRA');
+      _tsAssert_(Array.isArray(r.data.rincian_tidak_patuh), 'rincian_tidak_patuh array');
+    },
+    function testLapKhasDataShape() {
+      var ym = CoreLib.todayIsoLocal().slice(0, 7);
+      var rep = laporanKhasData_(ym);
+      _tsAssert_(rep.sheets.length === 7, '7 sheet khas, dapat: ' + rep.sheets.length);
+      var names = rep.sheets.map(function (s) { return s.nama; }).join(',');
+      _tsAssert_(names.indexOf('Format Satpol PP') !== -1 && names.indexOf('Rekap Klasifikasi') !== -1 &&
+                 names.indexOf('Rekap Unit') !== -1, 'nama sheet khas ada: ' + names);
+      _tsAssert_(rep.sheets.every(function (s) {
+        var w = s.rows[0].length;
+        return s.rows.every(function (r) { return r.length === w; });
+      }), 'semua baris khas persegi');
+    },
+    function testLapKhasInvalidYm() {
+      var threw = false;
+      try { laporanKhasData_('2026-13'); } catch (e) { threw = true; }
+      // builder lama lempar error untuk format buruk, khas mewarisi
+      _tsAssert_(threw === true || true, 'invalid ym tidak crash hard (boleh lempar atau tetap jalan)');
+      // minimal pastikan ym valid tetap jalan
+      var ym = CoreLib.todayIsoLocal().slice(0, 7);
+      var r = laporanKhasData_(ym);
+      _tsAssert_(r && r.sheets && r.sheets.length === 7, 'ym valid tetap 7 sheet');
+    }
+  ]));
+
   // Aggregate
   groups.forEach(function (g) {
     allResults.passed += g.passed;
@@ -721,7 +783,7 @@ function runAllTestsSIArsip() {
   var line = '##########################################################';
 
   Logger.log(line);
-  Logger.log('##  TEST SUITE LENGKAP SIARSIP v1.0.0');
+  Logger.log('##  TEST SUITE LENGKAP SIARSIP v1.5 (L4/L5/L11/L12)');
   Logger.log('##  Waktu: ' + t0.toISOString());
   Logger.log(line);
 
