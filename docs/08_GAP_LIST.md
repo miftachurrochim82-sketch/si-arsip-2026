@@ -1,17 +1,17 @@
-# 08 — GAP LIST (as-is → to-be) [SI-ARSIP] — 2026-09-20
+# 08 — GAP LIST (as-is → to-be) [SI-ARSIP] — 2026-09-21 v1.5
 
-> **Status per 2026-09-20 (amendemen malam-2, pasca v1.1)**: backend **lengkap
-> Fase 1 + fitur Fase 2** (12 berkas `.gs`), frontend **9 halaman + 8 modal**
-> hidup di GAS, suite **120/0/1**, repo bertag `siarsip-v1.1.0` (fitur) &
-> `siarsip-v1.1.1` (bukti test). Kolom status di bawah = **keadaan kode
-> terverifikasi**, bukan rencana. Dokumen ini tetap baseline tracking roadmap.
+> **Status per 2026-09-21 (amendemen v1.5, pasca 139/0/1)**: backend **14 berkas `.gs`**
+> (12 + 13_LaporanRekapApi), frontend **10 halaman + 8 modal** (baru V_Laporan 4 tab),
+> suite **139/0/1**, piramida Laporan **12/12 HIDUP**. Kolom status di bawah = **keadaan kode
+> terverifikasi**, bukan rencana.
 >
 > **Riwayat**:
 > - 2026-09-20 — daftar gap awal dari Gate 0 (BRD/PRD/FRD/DATABASE/UIUX/API/TESTCASE).
 > - 2026-09-20 malam-2 — SWEEP STATUS: G1–G13,G15–G18 TUTUP; G14 PARTIAL;
 >   G19–G33 TUTUP = FASE 2 SELESAI (v1.4: preview inline, timeline disposisi,
->   notifikasi in-app, quick action, preset rentang). Bukti: 127/0/1 (v1.3) →
->   harapan 129/0/1 (v1.4).
+>   notifikasi in-app, quick action, preset rentang). Bukti: 127/0/1 (v1.3) → 129/0/1 (v1.4).
+> - 2026-09-21 — v1.5 paket hemat L4/L5/L11/L12 TUTUP (13_LaporanRekapApi + export khas 7 sheet).
+>   Bukti: 139/0/1. Piramida Laporan penuh (12/12). G39 TUTUP via FR-69.
 >   + screenshot per modul + tag rilis.
 >
 > Rujukan: SRIKANDI (ANRI), Permendagri 78/2012, Perka ANRI (JRA).
@@ -101,7 +101,7 @@ skop **kantor Satpol PP & Damkar**, dengan kemungkinan perluasan ke SKPD lain di
 | G36 | Integrasi SI-LAHAR — surat tugas → e-Kinerja Harian | Integrasi | 🔵 BACKLOG LANJUT |
 | G37 | Template Surat Satpol PP (Surat Tugas Patroli, SPK, BA Pemeriksaan) | Fitur Khas | 🔵 BACKLOG LANJUT |
 | G38 | Dashboard KPI khas Satpol PP (patroli, penertiban, Damkar) | Fitur Khas | 🔵 BACKLOG LANJUT |
-| G39 | Export Excel format Satpol PP (laporan bulanan) | Fitur Khas | 🔵 BACKLOG LANJUT |
+| G39 | Export Excel format Satpol PP (laporan bulanan) | Fitur Khas | ✅ TUTUP v1.5 (7 sheet: Format Satpol PP KOP+ringkasan+top5+rekap unit+ttd + 4 generik + 2 rekap, FR-69) |
 | G40 | Multi-kantor — arsitektur siap, tinggal aktifasi | Arsitektur | 🔵 BACKLOG LANJUT |
 | G41 | Integrasi SRIKANDI nasional (ANRI) | Integrasi | 🔵 BACKLOG LANJUT |
 | G42 | Integrasi SIASN / SRIKANDI KemenPANRB | Integrasi | 🔵 BACKLOG LANJUT |
@@ -232,7 +232,8 @@ Fase 1 selesai bila semua berikut **TERPENUHI**:
 |---|---|---|
 | **Fase 1 (MVP)** | 18 (G1–G18) | ✅ 18 TUTUP (v1.2) |
 | **Fase 2** | 15 (G19–G33) | ✅ 15 TUTUP — SELESAI (v1.4) |
-| **Fase 3** | 12 (G34–G45) | 🔵 BACKLOG LANJUT |
+| **Fase 3** | 12 (G34–G45) | 🟡 1 TUTUP (G39 v1.5) + 11 BACKLOG LANJUT |
+| **Laporan v1.5** | 4 (L4/L5/L11/L12) | ✅ 4 TUTUP — PIRAMIDA LAPORAN PENUH 12/12 |
 | **Kandidat (belum masuk PRD)** | 9 (B1–B9) | 📝 IDE |
 | **Keputusan pemilik** | 13 | ✅ DIPUTUSKAN |
 
