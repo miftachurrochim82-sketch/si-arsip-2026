@@ -91,8 +91,35 @@ function buildLocalHandlers_() {
   h['dash_disposisi_lewat_sla'] = function (d, u) { return dashDisposisiLewatSla_(d || {}); };
   h['dash_chart_disposisi']     = function (d, u) { return dashChartDisposisi_(d || {}); };
 
-  // Laporan & lampiran (v1.3: G27, G28)
+  // Laporan & lampiran (v1.3: G27, G28) + v1.5 L4/L5/L11/L12 + v1.6 A3/A4/A5 + v1.7 A6-A10 + v1.8 E1-E8
   h['laporan_export_excel']     = function (d, u) { return exportExcelBulanan_(d || {}, u); };
+  h['laporan_export_khas']      = function (d, u) { return exportKhasBulanan_(d || {}, u); };
+  h['lap_rekap_klasifikasi']    = function (d, u) { return lapRekapKlasifikasi_(d || {}, u); };
+  h['lap_rekap_unit']           = function (d, u) { return lapRekapUnit_(d || {}, u); };
+  h['lap_kepatuhan_jra']        = function (d, u) { return lapKepatuhanJra_(d || {}, u); };
+  h['analisa_distribusi_unit']  = function (d, u) { return analisaDistribusiUnit_(d || {}, u); };
+  h['analisa_top_pengirim']     = function (d, u) { return analisaTopPengirim_(d || {}, u); };
+  h['analisa_beban_pejabat']    = function (d, u) { return analisaBebanPejabat_(d || {}, u); };
+  h['analisa_retensi_5th']      = function (d, u) { return analisaRetensi5Thn_(d || {}, u); };
+  h['analisa_klasifikasi_unit']= function (d, u) { return analisaKlasifikasiUnit_(d || {}, u); };
+  h['analisa_tte_ratio']        = function (d, u) { return analisaTteRatio_(d || {}, u); };
+  h['analisa_sla_per_pejabat']  = function (d, u) { return analisaSlaPerPejabat_(d || {}, u); };
+  h['analisa_kritis_bulanan']   = function (d, u) { return analisaKritisBulanan_(d || {}, u); };
+  h['evaluasi_sla_disposisi']   = function (d, u) { return evaluasiSlaDisposisi_(d || {}, u); };
+  h['evaluasi_sla_keluar']      = function (d, u) { return evaluasiSlaKeluar_(d || {}, u); };
+  h['evaluasi_kelengkapan']     = function (d, u) { return evaluasiKelengkapan_(d || {}, u); };
+  h['evaluasi_format_nomor']    = function (d, u) { return evaluasiFormatNomor_(d || {}, u); };
+  h['evaluasi_jra']             = function (d, u) { return evaluasiJra_(d || {}, u); };
+  h['evaluasi_musnah']          = function (d, u) { return evaluasiMusnah_(d || {}, u); };
+  h['evaluasi_fisik']           = function (d, u) { return evaluasiFisik_(d || {}, u); };
+  h['evaluasi_alih_media']      = function (d, u) { return evaluasiAlihMedia_(d || {}, u); };
+  // RTL R1-R5 (v1.9)
+  h['rtl_get_list']             = function (d, u) { return rtlGetList_(d || {}, u); };
+  h['rtl_get_detail']           = function (d, u) { return rtlGetDetail_(d || {}, u); };
+  h['rtl_save']                 = function (d, u) { return rtlSave_(d || {}, u); };
+  h['rtl_delete']               = function (d, u) { return rtlDelete_(d || {}, u); };
+  h['rtl_ubah_status']          = function (d, u) { return rtlUbahStatus_(d || {}, u); };
+  h['rtl_generate']             = function (d, u) { return rtlGenerate_(d || {}, u); };
   h['lmp_upload']               = function (d, u) { return lmpUpload_(d || {}, u); };
 
   // Notifikasi (v1.4: G31)
@@ -617,7 +644,7 @@ function initDatabase(actor) {
       }
     } catch (e) { Logger.log('[WARN] Gagal hapus Sheet1: ' + e.message); }
 
-    var summary = 'Inisialisasi database ' + APP_CODE + ' selesai. 10 sheet bisnis + ZZ_TEST_CRUD.';
+    var summary = 'Inisialisasi database ' + APP_CODE + ' selesai. 11 sheet bisnis (3 master + 8 tabel incl T_RTL) + ZZ_TEST_CRUD — v1.9 35/35.';
     Logger.log('✅ ' + summary);
     audit_(actor, 'INIT_DB', 'SYSTEM', 'ALL', true, summary);
     return { success: true, message: summary, corelib: result };
