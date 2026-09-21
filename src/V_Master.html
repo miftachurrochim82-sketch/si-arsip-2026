@@ -46,7 +46,7 @@
     <div v-else class="table-scroll">
       <table>
         <thead>
-          <tr><th>Kode</th><th>Uraian</th><th>Retensi (aktif/inaktif)</th><th>Akhir</th><th>Status</th><th class="text-right">Aksi</th></tr>
+          <tr><th class="min-w-[100px]">Kode</th><th class="min-w-[240px]">Uraian</th><th>Retensi (aktif/inaktif)</th><th>Akhir</th><th class="min-w-[100px]">Status</th><th class="text-right">Aksi</th></tr>
         </thead>
         <tbody>
           <tr v-for="r in refList" :key="r.id">
@@ -54,7 +54,7 @@
             <td class="text-xs">{{ r.uraian }}</td>
             <td class="text-xs text-slate-500 dark:text-slate-400">{{ r.retensi_aktif_th }} th / {{ r.retensi_inaktif_th }} th</td>
             <td class="text-xs">{{ r.tindakan_akhir }}</td>
-            <td><app-badge size="sm" :status="String(r.status_aktif) === 'false' ? 'inactive' : 'aktif'" :label="String(r.status_aktif) === 'false' ? 'nonaktif' : 'aktif'"></app-badge></td>
+            <td><app-badge size="sm" :status="String(r.status_aktif) === 'false' ? 'nonaktif' : 'aktif'" :label="String(r.status_aktif) === 'false' ? 'nonaktif' : 'aktif'"></app-badge></td>
             <td class="text-right whitespace-nowrap">
               <button class="btn-icon" title="Ubah" @click="refOpenForm(r)"><i class="fa-solid fa-pen-to-square"></i></button>
               <button class="btn-icon-danger" title="Hapus" @click="refDelete(r)"><i class="fa-solid fa-trash-can"></i></button>
@@ -75,7 +75,7 @@
     <div v-else class="table-scroll">
       <table>
         <thead>
-          <tr><th>Hierarki</th><th>Pegawai</th><th>Jabatan</th><th>Status</th><th class="text-right">Aksi</th></tr>
+          <tr><th>Hierarki</th><th class="min-w-[180px]">Pegawai</th><th class="min-w-[180px]">Jabatan</th><th class="min-w-[100px]">Status</th><th class="text-right">Aksi</th></tr>
         </thead>
         <tbody>
           <tr v-for="r in pjbList" :key="r.id">
@@ -85,7 +85,7 @@
               <div class="text-[11px] font-normal text-slate-400">{{ r.pegawai_id }}</div>
             </td>
             <td class="text-xs">{{ labelJabatan(r.jabatan_id) || r.jabatan_id || '—' }}</td>
-            <td><app-badge size="sm" :status="String(r.aktif) === 'false' ? 'inactive' : 'aktif'" :label="String(r.aktif) === 'false' ? 'nonaktif' : 'aktif'"></app-badge></td>
+            <td><app-badge size="sm" :status="String(r.aktif) === 'false' ? 'nonaktif' : 'aktif'" :label="String(r.aktif) === 'false' ? 'nonaktif' : 'aktif'"></app-badge></td>
             <td class="text-right whitespace-nowrap">
               <button class="btn-icon" title="Ubah" @click="pjbOpenForm(r)"><i class="fa-solid fa-pen-to-square"></i></button>
               <button class="btn-icon-danger" title="Hapus" @click="pjbDelete(r)"><i class="fa-solid fa-trash-can"></i></button>
@@ -106,14 +106,14 @@
     <div v-else class="table-scroll">
       <table>
         <thead>
-          <tr><th>Kode</th><th>Nama template</th><th>Jenis naskah</th><th>Status</th><th class="text-right">Aksi</th></tr>
+          <tr><th class="min-w-[100px]">Kode</th><th>Nama template</th><th>Jenis naskah</th><th class="min-w-[100px]">Status</th><th class="text-right">Aksi</th></tr>
         </thead>
         <tbody>
           <tr v-for="r in tplList" :key="r.id">
             <td class="font-black text-slate-800 dark:text-slate-100 whitespace-nowrap">{{ r.kode_template }}</td>
             <td class="text-xs">{{ r.nama_template }}</td>
             <td><app-badge size="sm" status="proses" :label="r.jenis_naskah"></app-badge></td>
-            <td><app-badge size="sm" :status="String(r.status_aktif) === 'false' ? 'inactive' : 'aktif'" :label="String(r.status_aktif) === 'false' ? 'nonaktif' : 'aktif'"></app-badge></td>
+            <td><app-badge size="sm" :status="String(r.status_aktif) === 'false' ? 'nonaktif' : 'aktif'" :label="String(r.status_aktif) === 'false' ? 'nonaktif' : 'aktif'"></app-badge></td>
             <td class="text-right whitespace-nowrap">
               <button class="btn-icon" title="Ubah" @click="tplOpenForm(r)"><i class="fa-solid fa-pen-to-square"></i></button>
               <button class="btn-icon-danger" title="Hapus" @click="tplDelete(r)"><i class="fa-solid fa-trash-can"></i></button>
