@@ -16,13 +16,28 @@ window.ArsipApi = {
     //          disposisi_menunggu, disposisi_lewat_sla }
     async loadDashboard() {
       this.dashLoading = true;
+      this.muatNotifikasi();   // v1.4: badge lonceng ikut segar
+      // Label panel butuh peta surat & pejabat (cache sesi, senyap jika gagal)
+      this.ensureSmMap();
+      this.loadPejabat();
+      this.loadSimpegLookup();
+      this.loadKlasifikasi();   // v1.2.1: chip klasifikasi panel = kode — uraian
       try {
-        const r = await this.callServer('get_dashboard', {});
-        if (r && r.success) {
-          this.dashData = r.data;
-        } else {
-          this.showToast((r && r.error) || 'Gagal memuat dashboard', 'error');
-        }
+        const [rKpi, rTren, rKlas, rDp, rKrit, rSla] = await Promise.all([
+          this.callServer('get_dashboard', {}),
+          this.callServer('dash_chart_tren', { bulan: 12 }),
+          this.callServer('dash_klasifikasi', {}),
+          this.callServer('dash_chart_disposisi', {}),
+          this.callServer('dash_surat_kritis', {}),
+          this.callServer('dash_disposisi_lewat_sla', {})
+        ]);
+        if (rKpi && rKpi.success) this.dashData = rKpi.data;
+        else this.showToast((rKpi && rKpi.error) || 'Gagal memuat dashboard', 'error');
+        if (rTren && rTren.success) this.dashTren = rTren.data;
+        if (rKlas && rKlas.success) this.dashKlas = rKlas.data;
+        if (rDp && rDp.success) this.dashDpChart = rDp.data;
+        if (rKrit && rKrit.success) this.dashKritis = rKrit.data || [];
+        if (rSla && rSla.success) this.dashSla = rSla.data || [];
       } catch (e) {
         this.showToast(e.message, 'error');
       } finally {
@@ -184,32 +199,6 @@ window.ArsipApi = {
           this.smMapLoaded = true;
         }
       } catch (e) { /* senyap */ }
-    },
-
-    // ---------- LABEL HELPER (template-safe) ----------
-    labelSurat(id) {
-      const s = this.smMap && this.smMap[id];
-      if (!s) return id || '—';
-      return (s.nomor_agenda_masuk || s.id) + ' · ' + (s.perihal || '');
-    },
-    labelPegawai(pegawaiId) {
-      const l = this.simpegLookup && this.simpegLookup.pegawai;
-      if (!l || !pegawaiId) return '';
-      const p = l.find(x => String(x.pegawai_id || x.id) === String(pegawaiId));
-      return p ? (p.nama || p.nama_lengkap || pegawaiId) : '';
-    },
-    labelJabatan(jabatanId) {
-      const l = this.simpegLookup && this.simpegLookup.jabatan;
-      if (!l || !jabatanId) return '';
-      const j = l.find(x => String(x.jabatan_id || x.id) === String(jabatanId));
-      return j ? (j.nama_jabatan || j.nama || j.jabatan || jabatanId) : '';
-    },
-    labelPejabat(pejabatId) {
-      const p = (this.pejabatList || []).find(x => String(x.id) === String(pejabatId));
-      if (!p) return pejabatId || '—';
-      const nama = this.labelPegawai(p.pegawai_id) || p.pegawai_id || '?';
-      const jab = this.labelJabatan(p.jabatan_id);
-      return jab ? (nama + ' — ' + jab) : nama;
     },
 
     // ---------- NASKAH DINAS (v1.1) ----------
