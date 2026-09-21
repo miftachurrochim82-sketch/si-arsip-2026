@@ -30,7 +30,7 @@ window.ArsipState = {
       dashKritis: [],        // 10 surat masuk kritis terbaru
       dashSla: [],           // 10 disposisi lewat SLA
 
-      // Laporan bulanan (v1.3, G27)
+      // Laporan bulanan (v1.3, G27) + v1.5 L4/L5/L11/L12
       lapBulan: (function () {
         var d = new Date();
         return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
@@ -38,6 +38,69 @@ window.ArsipState = {
       lapLoading: false,
       lapUrl: '',
       lapNama: '',
+      // v1.5 — Laporan Rekap L4/L5/L11/L12
+      laporanTab: 'klasifikasi',
+      lapKlasTahun: (function(){ return String(new Date().getFullYear()); })(),
+      lapKlasLoading: false,
+      lapKlasData: null,
+      lapKlasSearch: '',
+      lapUnitTahun: (function(){ return String(new Date().getFullYear()); })(),
+      lapUnitLoading: false,
+      lapUnitData: null,
+      lapJraTahun: (function(){ return String(new Date().getFullYear()); })(),
+      lapJraLoading: false,
+      lapJraData: null,
+      lapKhasBulan: (function () {
+        var d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+      })(),
+      lapKhasLoading: false,
+      lapKhasUrl: '',
+      lapKhasNama: '',
+      // v1.6 — Analisa A3/A4/A5
+      analisaTab: 'unit',
+      analisaTahun: (function(){ return String(new Date().getFullYear()); })(),
+      analisaLoading: false,
+      analisaUnitData: null,
+      analisaTopData: null,
+      analisaBebanData: null,
+      // v1.7 — Analisa A6-A10
+      analisaRetensiData: null,
+      analisaKlasUnitData: null,
+      analisaTteData: null,
+      analisaSlaData: null,
+      analisaKritisData: null,
+      // v1.8 — Evaluasi E1-E8
+      evaluasiTab: 'sla_disposisi',
+      evaluasiTahun: (function(){ return String(new Date().getFullYear()); })(),
+      evaluasiLoading: false,
+      evaluasiSlaDispData: null,
+      evaluasiSlaKeluarData: null,
+      evaluasiKelengkapanData: null,
+      evaluasiFormatData: null,
+      evaluasiJraData: null,
+      evaluasiMusnahData: null,
+      evaluasiFisikData: null,
+      evaluasiAlihMediaData: null,
+      // v1.9 — RTL R1-R5
+      rtlList: [],
+      rtlPage: 1,
+      rtlTotalPages: 1,
+      rtlTotalData: 0,
+      rtlLoading: false,
+      rtlSaving: false,
+      rtlFilters: { status_rtl: '', sumber_evaluasi: '', tahun: '' },
+      rtlSearch: '',
+      showRtlForm: false,
+      rtlForm: { id: '', sumber_evaluasi: 'manual', judul_rtl: '', deskripsi: '', assigned_to: '', due_date: '', status_rtl: 'baru', progress_pct: 0, dokumen_terkait: '', catatan: '' },
+      rtlGenerateSumber: 'semua',
+      rtlGenerateTahun: (function(){ return String(new Date().getFullYear()); })(),
+      rtlGenerating: false,
+      showRtlStatusForm: false,
+      rtlStatusTarget: {},
+      rtlStatusBaru: 'baru',
+      rtlStatusProgress: 0,
+      rtlStatusCatatan: '',
 
       // v1.4: detail dokumen + preview + menu cepat + notifikasi
       showDocDetail: false,
