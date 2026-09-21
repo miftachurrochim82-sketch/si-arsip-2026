@@ -280,6 +280,12 @@ function skSave_(data, user) {
            'T_SURAT_KELUAR', saved.id, true,
            'Nomor: ' + saved.nomor_surat + ' — ' + saved.perihal);
 
+    // G26: logbook T7
+    catatLogbook_(saved.id, 'surat_keluar', isInsert ? 'simpan_baru' : 'ubah', user,
+                  (!isInsert && existing) ? logbookRingkasanDok_(existing) : '',
+                  logbookRingkasanDok_(saved),
+                  isInsert ? 'Draft surat keluar dibuat' : 'Edit surat keluar');
+
     return { success: true, data: saved };
   } catch (err) {
     Logger.log('[skSave_] ' + err.message);
@@ -318,6 +324,8 @@ function skDelete_(data, user) {
     var ok = softDeleteRecord_('T_SURAT_KELUAR', data.id, user);
     audit_(user, 'DELETE_SURAT_KELUAR', 'T_SURAT_KELUAR', data.id, ok,
            'Nomor: ' + (row.nomor_surat || data.id));
+    if (ok) catatLogbook_(data.id, 'surat_keluar', 'hapus', user,
+                          logbookRingkasanDok_(row), '', 'Soft delete surat keluar');
     return { success: ok, message: ok ? 'Surat keluar dihapus.' : 'Gagal hapus.' };
   } catch (err) {
     Logger.log('[skDelete_] ' + err.message);
