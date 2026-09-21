@@ -270,6 +270,17 @@ RINGKASAN DOMAIN: PASS=20 / FAIL=0 / SKIP=0
 | TC-SR-01 | testSearchAllTanpaParamKosong | search_all tanpa param tidak membocorkan isi |
 | TC-SR-02 | testSearchAllQMustahilKosong | q tak cocok = 0 temuan |
 | TC-SR-03 | testSearchAllJenisTakDikenal | filter jenis ketat |
+| TC-DH-01 | testDashChartDisposisiShape | shape chart ke-4: 3 label/3 nilai non-negatif |
+TC-LB-01 | Logbook T7 | simpan/ubah surat masuk → baris T_LOGBOOK aksi simpan_baru/ubah dengan aktor & ringkasan; hapus → aksi hapus | §4k suite + mata-user
+TC-LP-01 | Laporan bulanan | exportExcelBulanan('YYYY-MM') → file xlsx 4 sheet di Drive 'SI-ARSIP Export', link terbuka & isi sesuai filter bulan | §4l suite + mata-user
+TC-LM-01 | Lampiran Drive | form surat masuk pilih PDF ≤5 MB → simpan → toast sukses, baris T_LAMPIRAN jenis_bukti=file_drive, file ada di folder 'SI-ARSIP Lampiran'; file >5 MB & exe ditolak | §4m suite + mata-user
+TC-NT-01 | Notifikasi | lonceng header menampilkan badge unread; admin melihat item sla_lewat disposisi uji; 'Tandai dibaca' menghapus badge | §4n suite + mata-user
+TC-UI-01 | Detail & preview | menu ⋮ → Detail & Lampiran: modal terbuka, timeline disposisi 1 tingkat, lampiran 'Revisi Jadwal…' tampil, tombol Preview memuat iframe Drive | mata-user
+TC-UI-02 | Preset rentang | klik 'Bulan ini' di Surat Masuk → filter tanggal terisi & daftar menyempit ke Sep 2026 | mata-user
 
-Rekap harapan sejak v1.1: **TOTAL PASS=120 / FAIL=0 / SKIP=1**
-(CoreLib 42/0/1 + G18d 13 + routing 26 + domain 39).
+Rekap harapan sejak v1.2: **TOTAL PASS=121 / FAIL=0 / SKIP=1**
+(CoreLib 42/0/1 + G18d 13 + routing 26 + domain 40).
+Rekap harapan sejak v1.3: **TOTAL PASS=127 / FAIL=0 / SKIP=1**
+(CoreLib 42/0/1 + G18d 13 + routing 26 + domain 46: +Logbook T7 2, +Laporan Bulanan 2, +Lampiran Drive 2).
+Rekap harapan sejak v1.4: **TOTAL PASS=129 / FAIL=0 / SKIP=1**
+(domain 48: +Notifikasi 2).
