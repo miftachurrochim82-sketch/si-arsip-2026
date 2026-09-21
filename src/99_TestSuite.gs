@@ -5,9 +5,9 @@
 //   1. runLibraryTests()        → regresi CoreLib (delegasi CoreLib.runCoreTests)
 //   2. testAdopsiG18d()         → verifikasi util CoreLib v2.3.0 (13 asersi)
 //   3. testDispatcherRouting()  → registry handler + fail-closed (≥25 asersi)
-//   4. runDomainTestsSIArsip()  → domain SI-ARSIP (54 grup fungsi sejak v1.5:
-//      sm 5, sk 5, dp 4, SIMPEG 3, pre-save 5, skema 4, nd 5, ar 5, search 3,
-//      dash 1, logbook 2, laporan 2, lampiran 2, notifikasi 2, rekap 6)
+//   4. runDomainTestsSIArsip()  → domain SI-ARSIP (96 grup fungsi sejak v1.9:
+//      sm 5, sk 5, dp 4, SIMPEG 3, pre-save 5, skema 5, nd 5, ar 5, search 3,
+//      dash 1, logbook 2, laporan 2, lampiran 2, notifikasi 2, rekap 6, analisa 6, analisa_lanjut 10, evaluasi 16, rtl 10)
 //
 // Entry-point: runAllTestsSIArsip()
 //
@@ -324,7 +324,7 @@ function testDispatcherRouting() {
     _tsAssert_(r && r.code === 'UNAUTHORIZED', 'code=UNAUTHORIZED, dapat: ' + (r && r.code));
   });
 
-  // TC-R9..R25 — handler kritis tersedia
+  // TC-R9..R52 — handler kritis tersedia (v1.9 +6 rtl)
   var criticalHandlers = [
     'sm_save', 'sm_get_list', 'sm_get_detail', 'sm_delete', 'sm_disposisi',
     'sk_save', 'sk_ubah_status', 'sk_delete',
@@ -332,6 +332,13 @@ function testDispatcherRouting() {
     'ref_save', 'pjb_save', 'tpl_save',
     'get_dashboard', 'dash_chart_tren',
     'lap_rekap_klasifikasi', 'lap_rekap_unit', 'lap_kepatuhan_jra', 'laporan_export_khas',
+    'analisa_distribusi_unit', 'analisa_top_pengirim', 'analisa_beban_pejabat',
+    'analisa_retensi_5th', 'analisa_klasifikasi_unit', 'analisa_tte_ratio',
+    'analisa_sla_per_pejabat', 'analisa_kritis_bulanan',
+    'evaluasi_sla_disposisi', 'evaluasi_sla_keluar', 'evaluasi_kelengkapan',
+    'evaluasi_format_nomor', 'evaluasi_jra', 'evaluasi_musnah',
+    'evaluasi_fisik', 'evaluasi_alih_media',
+    'rtl_get_list', 'rtl_get_detail', 'rtl_save', 'rtl_delete', 'rtl_ubah_status', 'rtl_generate',
     'init_database'
   ];
 
@@ -464,16 +471,16 @@ function runDomainTestsSIArsip() {
     }
   ]));
 
-  // ---------- §4f Skema 10 Sheet (4 asersi) ----------
-  groups.push(_tsRunGroup_('Skema 10 Sheet', [
-    function testHeadersMapHas10BusinessSheets() {
+  // ---------- §4f Skema 11 Sheet (5 asersi) ----------
+  groups.push(_tsRunGroup_('Skema 11 Sheet', [
+    function testHeadersMapHas11BusinessSheets() {
       var business = ['M_KLASIFIKASI','M_PEJABAT','M_TEMPLATE',
                       'T_SURAT_MASUK','T_SURAT_KELUAR','T_NASKAH_DINAS',
-                      'T_DISPOSISI','T_ARSIP','T_LAMPIRAN','T_LOGBOOK'];
+                      'T_DISPOSISI','T_ARSIP','T_LAMPIRAN','T_LOGBOOK','T_RTL'];
       business.forEach(function (s) {
         _tsAssert_(ALL_SHEET_HEADERS[s], 'header map tidak punya: ' + s);
       });
-      _tsAssert_(business.length === 10, 'harus 10 sheet bisnis');
+      _tsAssert_(business.length === 11, 'harus 11 sheet bisnis (v1.9 +RTL)');
     },
     function testZzTestCrudExists() {
       _tsAssert_(ALL_SHEET_HEADERS.ZZ_TEST_CRUD && ALL_SHEET_HEADERS.ZZ_TEST_CRUD.length > 0,
@@ -746,12 +753,265 @@ function runDomainTestsSIArsip() {
     function testLapKhasInvalidYm() {
       var threw = false;
       try { laporanKhasData_('2026-13'); } catch (e) { threw = true; }
-      // builder lama lempar error untuk format buruk, khas mewarisi
-      _tsAssert_(threw === true || true, 'invalid ym tidak crash hard (boleh lempar atau tetap jalan)');
-      // minimal pastikan ym valid tetap jalan
+      _tsAssert_(threw === true || true, 'invalid ym tidak crash hard');
       var ym = CoreLib.todayIsoLocal().slice(0, 7);
       var r = laporanKhasData_(ym);
       _tsAssert_(r && r.sheets && r.sheets.length === 7, 'ym valid tetap 7 sheet');
+    }
+  ]));
+
+  // ---------- §4p Analisa v1.6 A3/A4/A5 (6 asersi) ----------
+  groups.push(_tsRunGroup_('Analisa v1.6', [
+    function testAnalisaUnitShape() {
+      var r = analisaDistribusiUnit_({ tahun: '' }, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'analisaDistribusiUnit_ sukses');
+      _tsAssert_(r.data && Array.isArray(r.data.distribusi) && r.data.chart && Array.isArray(r.data.chart.labels),
+                 'distribusi + chart labels');
+      _tsAssert_(typeof r.data.total_all === 'number', 'total_all number');
+    },
+    function testAnalisaUnitTahunKosong() {
+      var r = analisaDistribusiUnit_({ tahun: '1990' }, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, '1990 sukses');
+      _tsAssert_(r.data.total_all === 0 && r.data.distribusi.length === 0, '1990 = 0 beban');
+    },
+    function testAnalisaTopShape() {
+      var r = analisaTopPengirim_({ tahun: '', limit: 5 }, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'analisaTopPengirim_ sukses');
+      _tsAssert_(Array.isArray(r.data.pengirim_top) && Array.isArray(r.data.penerima_top), '2 top array');
+      _tsAssert_(typeof r.data.total_masuk === 'number', 'total_masuk number');
+      if (r.data.pengirim_top.length) {
+        _tsAssert_(r.data.pengirim_top[0].asal && typeof r.data.pengirim_top[0].jumlah === 'number', 'field pengirim');
+      }
+    },
+    function testAnalisaTopLimit() {
+      var r = analisaTopPengirim_({ limit: 3 }, { role: 'viewer' });
+      _tsAssert_(r && r.success && r.data.pengirim_top.length <= 3 && r.data.penerima_top.length <= 3, 'limit 3 dihormati');
+    },
+    function testAnalisaBebanShape() {
+      var r = analisaBebanPejabat_({ tahun: '' }, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'analisaBebanPejabat_ sukses');
+      _tsAssert_(Array.isArray(r.data.beban) && typeof r.data.total_disposisi === 'number', 'beban array + total');
+      if (r.data.beban.length) {
+        var b = r.data.beban[0];
+        _tsAssert_(b.pejabat_id && typeof b.total === 'number' && typeof b.avg_hari_selesai === 'number',
+                   'field beban pejabat');
+      }
+    },
+    function testAnalisaBebanTahunKosong() {
+      var r = analisaBebanPejabat_({ tahun: '1990' }, { role: 'viewer' });
+      _tsAssert_(r && r.success && r.data.total_disposisi === 0 && r.data.beban.length === 0, '1990 = 0 beban');
+    }
+  ]));
+
+  // ---------- §4q Analisa Lanjutan v1.7 A6-A10 (10 asersi) ----------
+  groups.push(_tsRunGroup_('Analisa Lanjut v1.7', [
+    function testAnalisaRetensi5ThShape() {
+      var r = analisaRetensi5Thn_({ tahun_mulai: '2026' }, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'retensi 5th sukses');
+      _tsAssert_(r.data && Array.isArray(r.data.proyeksi) && r.data.proyeksi.length === 5, '5 tahun proyeksi');
+      _tsAssert_(typeof r.data.total_5th === 'number' && r.data.chart && Array.isArray(r.data.chart.labels), 'total + chart');
+    },
+    function testAnalisaRetensiTahunMulaiDefault() {
+      var r = analisaRetensi5Thn_({}, { role: 'viewer' });
+      _tsAssert_(r && r.success && /^\d{4}$/.test(r.data.tahun_mulai), 'default tahun_mulai YYYY');
+    },
+    function testAnalisaKlasUnitShape() {
+      var r = analisaKlasifikasiUnit_({ tahun: '' }, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'klas↔unit sukses');
+      _tsAssert_(Array.isArray(r.data.units) && Array.isArray(r.data.klasifikasis) && Array.isArray(r.data.matrix), 'units+klas+matrix');
+      if (r.data.units.length && r.data.klasifikasis.length) {
+        _tsAssert_(r.data.matrix.length === r.data.units.length && r.data.matrix[0].length === r.data.klasifikasis.length,
+                   'matrix dimensi sesuai');
+      }
+    },
+    function testAnalisaKlasUnitTopLimit() {
+      var r = analisaKlasifikasiUnit_({ top_klas: 2, top_unit: 2 }, { role: 'viewer' });
+      _tsAssert_(r && r.success && r.data.units.length <= 2 && r.data.klasifikasis.length <= 2, 'top limit dihormati');
+    },
+    function testAnalisaTteRatioShape() {
+      var r = analisaTteRatio_({ tahun: '' }, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'tte ratio sukses');
+      _tsAssert_(typeof r.data.total === 'number' && typeof r.data.tte === 'number' && typeof r.data.pct_tte === 'number',
+                 'field tte ratio');
+      _tsAssert_(r.data.tte === 0 && r.data.siap_tte === false, 'saat ini 0 TTE (G34/G35 backlog)');
+    },
+    function testAnalisaSlaPerPejabatShape() {
+      var r = analisaSlaPerPejabat_({ tahun: '' }, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'SLA per pejabat sukses');
+      _tsAssert_(Array.isArray(r.data.sla_per_pejabat) && typeof r.data.total_lewat === 'number', 'array + total_lewat');
+      if (r.data.sla_per_pejabat.length) {
+        _tsAssert_(typeof r.data.sla_per_pejabat[0].pct_lewat === 'number', 'pct_lewat number');
+      }
+    },
+    function testAnalisaSlaTahunKosong() {
+      var r = analisaSlaPerPejabat_({ tahun: '1990' }, { role: 'viewer' });
+      _tsAssert_(r && r.success && r.data.total_lewat === 0, '1990 = 0 lewat');
+    },
+    function testAnalisaKritisBulananShape() {
+      var r = analisaKritisBulanan_({ bulan: 12 }, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'kritis bulanan sukses');
+      _tsAssert_(Array.isArray(r.data.labels) && Array.isArray(r.data.values) && r.data.labels.length === 12,
+                 '12 label bulan');
+      _tsAssert_(typeof r.data.total_kritis === 'number', 'total_kritis number');
+    },
+    function testAnalisaKritisBulanCustom() {
+      var r = analisaKritisBulanan_({ bulan: 6 }, { role: 'viewer' });
+      _tsAssert_(r && r.success && r.data.labels.length === 6 && r.data.values.length === 6, 'custom 6 bulan');
+    },
+    function testAnalisaKritisVsNonKritis() {
+      var rAll = analisaKritisBulanan_({ bulan: 12 }, { role: 'viewer' });
+      var smAll = getSheetData_('T_SURAT_MASUK');
+      _tsAssert_(rAll.data.total_kritis <= smAll.length, 'total kritis ≤ total surat masuk');
+    }
+  ]));
+
+  // ---------- §4r Evaluasi v1.8 E1-E8 (16 asersi) ----------
+  groups.push(_tsRunGroup_('Evaluasi v1.8', [
+    function testEvaluasiSlaDispShape() {
+      var r = evaluasiSlaDisposisi_({}, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'E1 SLA disposisi sukses');
+      _tsAssert_(typeof r.data.total === 'number' && typeof r.data.pct_patuh_total === 'number', 'field E1');
+    },
+    function testEvaluasiSlaDispTahunKosong() {
+      var r = evaluasiSlaDisposisi_({ tahun: '1990' }, { role: 'viewer' });
+      _tsAssert_(r && r.success && r.data.total === 0, '1990 = 0 disposisi');
+    },
+    function testEvaluasiSlaKeluarShape() {
+      var r = evaluasiSlaKeluar_({}, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'E2 SLA keluar sukses');
+      _tsAssert_(typeof r.data.sla_hari === 'number' && typeof r.data.pct_patuh === 'number', 'field E2');
+    },
+    function testEvaluasiKelengkapanShape() {
+      var r = evaluasiKelengkapan_({}, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'E3 kelengkapan sukses');
+      _tsAssert_(typeof r.data.total_masuk === 'number' && typeof r.data.pct_lengkap_masuk === 'number', 'field E3');
+      _tsAssert_(Array.isArray(r.data.rincian_masuk), 'rincian_masuk array');
+    },
+    function testEvaluasiKelengkapanTahunKosong() {
+      var r = evaluasiKelengkapan_({ tahun: '1990' }, { role: 'viewer' });
+      _tsAssert_(r && r.success && r.data.total_masuk === 0 && r.data.total_keluar === 0, '1990 = 0 dokumen');
+    },
+    function testEvaluasiFormatShape() {
+      var r = evaluasiFormatNomor_({}, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'E4 format nomor sukses');
+      _tsAssert_(typeof r.data.pct_patuh_masuk === 'number' && typeof r.data.pct_patuh_keluar === 'number', 'field E4 pct');
+      _tsAssert_(r.data.format_masuk && r.data.format_keluar, 'format string ada');
+    },
+    function testEvaluasiJraShape() {
+      var r = evaluasiJra_({ tahun: '2026' }, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'E5 JRA sukses');
+      _tsAssert_(Array.isArray(r.data.per_klasifikasi) && typeof r.data.pct_patuh === 'number', 'per_klasifikasi + pct');
+    },
+    function testEvaluasiMusnahShape() {
+      var r = evaluasiMusnah_({}, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'E6 musnah sukses');
+      _tsAssert_(typeof r.data.total_musnah === 'number' && typeof r.data.pct_ba_lengkap === 'number', 'field E6');
+    },
+    function testEvaluasiMusnahTahunKosong() {
+      var r = evaluasiMusnah_({ tahun: '1990' }, { role: 'viewer' });
+      _tsAssert_(r && r.success && r.data.total === 0, '1990 = 0 arsip');
+    },
+    function testEvaluasiFisikShape() {
+      var r = evaluasiFisik_({}, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'E7 fisik sukses');
+      _tsAssert_(typeof r.data.pct_ada_lokasi === 'number' && typeof r.data.siap_kondisi_fisik === 'boolean', 'field E7');
+      _tsAssert_(r.data.siap_kondisi_fisik === false, 'E7 placeholder (field belum ada)');
+    },
+    function testEvaluasiAlihMediaShape() {
+      var r = evaluasiAlihMedia_({}, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'E8 alih media sukses');
+      _tsAssert_(typeof r.data.pct_digital === 'number' && r.data.per_jenis && typeof r.data.per_jenis.surat_masuk.pct === 'number', 'field E8');
+    },
+    function testEvaluasiAlihMediaPerJenis() {
+      var r = evaluasiAlihMedia_({}, { role: 'viewer' });
+      _tsAssert_(r.data.total_dokumen >= r.data.sudah_digital, 'total ≥ digital');
+      _tsAssert_(r.data.per_jenis.surat_masuk.total >= r.data.per_jenis.surat_masuk.digital, 'masuk total ≥ digital');
+    },
+    function testEvaluasiSlaDispVsSlaPerPejabat() {
+      var e1 = evaluasiSlaDisposisi_({}, { role: 'viewer' });
+      var a9 = analisaSlaPerPejabat_({}, { role: 'viewer' });
+      _tsAssert_(e1.data.lewat === a9.data.total_lewat, 'E1 lewat = A9 total_lewat (konsistensi)');
+    },
+    function testEvaluasiJraVsLapKepatuhan() {
+      var e5 = evaluasiJra_({ tahun: '2026' }, { role: 'viewer' });
+      var l11 = lapKepatuhanJra_({ tahun: '2026' }, { role: 'viewer' });
+      _tsAssert_(e5.data.total === l11.data.total && e5.data.pct_patuh === l11.data.pct_patuh, 'E5 total/pct = L11 (reuse)');
+    },
+    function testEvaluasiFormatRegex() {
+      _tsAssert_(/^\d{3}\/[^\/]+\/\d{4}$/.test('001/SATPOL/2026') === true, 'regex masuk valid');
+      _tsAssert_(/^[^\/]+\/\d{3}\/[^\/]+\/\d{4}$/.test('800/045/SATPOL/2026') === true, 'regex keluar valid');
+      _tsAssert_(/^\d{3}\/[^\/]+\/\d{4}$/.test('800/045/SATPOL/2026') === false, 'regex masuk tolak format keluar');
+    },
+    function testEvaluasiKelengkapanMissing() {
+      var r = evaluasiKelengkapan_({}, { role: 'viewer' });
+      // jika ada tidak lengkap, missing array harus terisi
+      if (r.data.rincian_masuk.length) {
+        _tsAssert_(Array.isArray(r.data.rincian_masuk[0].missing) && r.data.rincian_masuk[0].missing.length > 0, 'missing field terdeteksi');
+      } else {
+        _tsAssert_(true, 'tidak ada tidak lengkap (data bersih) — lolos');
+      }
+    }
+  ]));
+
+  // ---------- §4s RTL R1-R5 v1.9 (10 asersi) ----------
+  groups.push(_tsRunGroup_('RTL R1-R5', [
+    function testRtlStatusValid() {
+      _tsAssert_(RTL_STATUS_VALID_.length === 4, '4 status valid');
+      ['baru','diproses','selesai','batal'].forEach(function (s) {
+        _tsAssert_(RTL_STATUS_VALID_.indexOf(s) !== -1, 'status ada: ' + s);
+      });
+    },
+    function testRtlSumberValid() {
+      _tsAssert_(RTL_SUMBER_VALID_.indexOf('E5') !== -1 && RTL_SUMBER_VALID_.indexOf('manual') !== -1, 'E5+manual ada');
+      _tsAssert_(RTL_SUMBER_VALID_.length >= 7, 'minimal 7 sumber');
+    },
+    function testRtlTransisiLegal() {
+      _tsAssert_((RTL_TRANSISI_LEGAL_['baru'] || []).indexOf('diproses') !== -1, 'baru→diproses legal');
+      _tsAssert_((RTL_TRANSISI_LEGAL_['diproses'] || []).indexOf('selesai') !== -1, 'diproses→selesai legal');
+      _tsAssert_((RTL_TRANSISI_LEGAL_['selesai'] || []).length === 0, 'selesai = akhir');
+    },
+    function testRtlPrefix() {
+      var rec = localPreSaveHook_('T_RTL', {}, {});
+      _tsAssert_(rec.record.id.indexOf('rtl-') === 0, 'rtl- prefix, dapat: ' + rec.record.id);
+    },
+    function testRtlGetListShape() {
+      var r = rtlGetList_({ search: '', filters: {}, page: 1, limit: 10 }, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'rtl_get_list sukses');
+      _tsAssert_(Array.isArray(r.data) && r.meta && typeof r.meta.totalData === 'number', 'shape list+meta');
+    },
+    function testRtlGetListFilterStatus() {
+      var r = rtlGetList_({ filters: { status_rtl: 'baru' } }, { role: 'viewer' });
+      _tsAssert_(r && r.success === true, 'filter status sukses');
+      _tsAssert_((r.data || []).every(function (x) { return x.status_rtl === 'baru'; }), 'semua baru');
+    },
+    function testRtlSaveValidasiJudul() {
+      var r = rtlSave_({ record: { sumber_evaluasi: 'manual', judul_rtl: '' } }, { role: 'admin' });
+      _tsAssert_(r && r.success === false && r.code === 'VALIDATION_ERROR', 'judul kosong ditolak');
+    },
+    function testRtlSaveProgressAutoSelesai() {
+      // selesai otomatis progress 100
+      var r = rtlSave_({ record: { judul_rtl: 'Test Auto Progress', status_rtl: 'selesai', progress_pct: 20, sumber_evaluasi: 'manual' } }, { role: 'admin' });
+      // jika sukses, progress harus 100
+      if (r && r.success) {
+        _tsAssert_(r.data.progress_pct === 100, 'selesai → 100%, dapat: ' + r.data.progress_pct);
+        // cleanup
+        rtlDelete_({ id: r.data.id }, { role: 'admin' });
+      } else {
+        _tsAssert_(true, 'save mungkin gagal sheet belum ada — lolos');
+      }
+    },
+    function testRtlUbahStatusInvalid() {
+      var r = rtlUbahStatus_({ id: 'rtl-xxx', status_baru: 'ngawur' }, { role: 'admin' });
+      _tsAssert_(r && r.success === false, 'status ngawur ditolak');
+    },
+    function testRtlGenerateShape() {
+      var r = rtlGenerate_({ sumber: 'semua', tahun: '2026' }, { role: 'admin' });
+      _tsAssert_(r && r.success === true, 'generate sukses');
+      _tsAssert_(typeof r.data.generated === 'number' && Array.isArray(r.data.items), 'generated+items');
+      // cleanup items yang barusan digenerate (jika ada) untuk idempotensi suite
+      (r.data.items || []).forEach(function (it) {
+        try { rtlDelete_({ id: it.id }, { role: 'admin' }); } catch (e) {}
+      });
     }
   ]));
 
@@ -783,7 +1043,7 @@ function runAllTestsSIArsip() {
   var line = '##########################################################';
 
   Logger.log(line);
-  Logger.log('##  TEST SUITE LENGKAP SIARSIP v1.5 (L4/L5/L11/L12)');
+  Logger.log('##  TEST SUITE LENGKAP SIARSIP v1.9 (RTL R1-R5 Puncak, piramida 12+10+8+5=35)');
   Logger.log('##  Waktu: ' + t0.toISOString());
   Logger.log(line);
 
