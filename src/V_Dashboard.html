@@ -1,8 +1,9 @@
 <!-- ============================================================
-     SI-ARSIP - V_Dashboard.html (v1 shell, 2026-09-20)
-     KPI ringkas dari handler get_dashboard (dashRingkas_):
-     surat masuk/keluar bulan ini, disposisi menunggu, lewat SLA.
-     Chart tren/klasifikasi = tahap 2 (komponen kit <app-chart-*>).
+     SI-ARSIP - V_Dashboard.html (v1.2, 2026-09-20 — G14 TUTUP)
+     4 KPI (app-stat-card) + 4 chart kit (2 bar tren masuk/keluar,
+     doughnut klasifikasi top-5, doughnut status disposisi) +
+     2 panel (surat kritis FR-38, disposisi lewat SLA FR-39).
+     Chart.js dimuat on-demand oleh kit (FR-51).
      ============================================================ -->
 <section v-if="currentPage === 'dashboard'" class="space-y-6 animate-fade-in">
 
@@ -22,6 +23,7 @@
 
   <app-skeleton v-if="dashLoading && !dashData" type="cards"></app-skeleton>
 
+  <!-- ========== 4 KPI (FR-35) ========== -->
   <div v-else-if="dashData" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
     <app-stat-card title="Surat Masuk Bulan Ini" :value="dashData.surat_masuk_bulan_ini || 0"
                    icon="fa-solid fa-inbox" color="sky" subtext="terregistrasi agenda"></app-stat-card>
@@ -39,11 +41,97 @@
                    subtitle="Data ringkasan akan muncul setelah surat pertama teregistrasi.">
   </app-empty-state>
 
-  <!-- Tahap 2: chart tren surat & komposisi klasifikasi (kit <app-chart-bar>/<app-chart-doughnut>) -->
-  <div class="card p-4 text-xs text-slate-400 dark:text-slate-500">
-    <i class="fa-solid fa-circle-info mr-1"></i>
-    Grafik tren & klasifikasi, surat kritis, dan daftar disposisi lewat SLA menyusul pada tahap 2
-    (endpoint <code>dash_chart_tren</code>, <code>dash_klasifikasi</code>, <code>dash_surat_kritis</code>,
-    <code>dash_disposisi_lewat_sla</code> sudah siap di backend).
+  <!-- ========== 4 CHART (FR-36, FR-36b, FR-37) ========== -->
+  <div v-if="dashData" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="card p-4">
+      <app-chart-bar :labels="dashTren ? dashTren.labels : []"
+                     :datasets="[{ label: 'Surat Masuk', data: dashTren ? dashTren.masuk : [] }]"
+                     title="Tren Surat Masuk — 12 bulan" :height="220" :legend="false"
+                     :colors="['#0ea5e9']"></app-chart-bar>
+    </div>
+    <div class="card p-4">
+      <app-chart-bar :labels="dashTren ? dashTren.labels : []"
+                     :datasets="[{ label: 'Surat Keluar', data: dashTren ? dashTren.keluar : [] }]"
+                     title="Tren Surat Keluar — 12 bulan" :height="220" :legend="false"
+                     :colors="['#10b981']"></app-chart-bar>
+    </div>
+    <div class="card p-4">
+      <app-chart-doughnut :labels="dashKlas ? dashKlas.labels : []"
+                          :datasets="[{ label: 'Surat', data: dashKlas ? dashKlas.values : [] }]"
+                          title="Komposisi Klasifikasi (top 5)" :height="220"></app-chart-doughnut>
+    </div>
+    <div class="card p-4">
+      <app-chart-doughnut :labels="dashDpChart ? dashDpChart.labels : []"
+                          :datasets="[{ label: 'Disposisi', data: dashDpChart ? dashDpChart.values : [] }]"
+                          title="Status Disposisi" :height="220"
+                          :colors="['#f59e0b', '#3b82f6', '#10b981']"></app-chart-doughnut>
+    </div>
+  </div>
+
+  <!-- ========== 2 PANEL (FR-38, FR-39) ========== -->
+  <div v-if="dashData" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+    <!-- Panel surat kritis -->
+    <div class="card overflow-hidden !p-0">
+      <div class="flex items-center gap-2 px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+        <i class="fa-solid fa-triangle-exclamation text-rose-500"></i>
+        <h3 class="font-bold text-slate-700 dark:text-slate-200 text-sm">Surat Kritis Terbaru</h3>
+        <span class="text-[11px] text-slate-400">(klasifikasi/sifat prioritas)</span>
+      </div>
+      <div v-if="!dashKritis.length" class="px-4 py-6 text-xs text-slate-400 text-center">
+        Tidak ada surat kritis — kabar baik.
+      </div>
+      <ul v-else class="divide-y divide-slate-100 dark:divide-slate-800">
+        <li v-for="r in dashKritis" :key="'kr-' + r.id" class="px-4 py-2.5 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="font-black text-slate-800 dark:text-slate-100">{{ r.nomor_agenda_masuk }}</span>
+            <app-badge size="sm" :status="r.sifat === 'rahasia' ? 'ditolak' : 'menunggu'" :label="r.sifat"></app-badge>
+            <span class="text-slate-400 truncate">{{ smLabelKlasifikasi(r.kode_klasifikasi) }}</span>
+          </div>
+          <div class="text-slate-600 dark:text-slate-300 truncate">{{ r.perihal }}</div>
+          <div class="text-[11px] text-slate-400">{{ r.asal }} · {{ fmtTgl(r.tanggal_terima) }}</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Panel disposisi lewat SLA -->
+    <div class="card overflow-hidden !p-0 !border-rose-200 dark:!border-rose-900">
+      <div class="flex items-center gap-2 px-4 py-3 border-b border-rose-100 dark:border-rose-900">
+        <i class="fa-solid fa-clock text-rose-500"></i>
+        <h3 class="font-bold text-rose-700 dark:text-rose-300 text-sm">Disposisi Lewat SLA</h3>
+        <span class="text-[11px] text-slate-400">(tenggat terlewat, belum selesai)</span>
+      </div>
+      <div v-if="!dashSla.length" class="px-4 py-6 text-xs text-slate-400 text-center">
+        Tidak ada disposisi lewat SLA — pertahankan.
+      </div>
+      <ul v-else class="divide-y divide-rose-50 dark:divide-rose-950">
+        <li v-for="r in dashSla" :key="'sla-' + r.id" class="px-4 py-2.5 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="font-semibold text-slate-700 dark:text-slate-200 truncate">{{ labelSurat(r.surat_id) }}</span>
+            <app-badge size="sm" status="ditolak" label="LEWAT"></app-badge>
+          </div>
+          <div class="text-slate-600 dark:text-slate-300 truncate">→ {{ labelPejabat(r.ke_pejabat_id) }}</div>
+          <div class="text-[11px] text-slate-400">tenggat {{ fmtTgl(r.jatuh_tempo) }} · {{ r.status_disposisi }}</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <!-- Laporan bulanan: export Excel multi-sheet (v1.3, G27) -->
+  <div class="card">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+      <div class="flex items-center gap-2 mr-auto">
+        <i class="fa-solid fa-file-excel text-emerald-600"></i>
+        <h3 class="font-bold text-slate-700 dark:text-slate-200 text-sm">Laporan Bulanan (Export Excel)</h3>
+      </div>
+      <input type="month" class="input" v-model="lapBulan">
+      <button class="btn btn-primary" @click="exportExcelBulanan()" :disabled="lapLoading">
+        <i class="fa-solid fa-download"></i> {{ lapLoading ? 'Membuat...' : 'Export Excel' }}
+      </button>
+    </div>
+    <p v-if="lapNama" class="text-xs text-slate-500 dark:text-slate-400 mt-2">
+      Siap diunduh: <a :href="lapUrl" target="_blank" rel="noopener"
+      class="text-emerald-600 underline">{{ lapNama }}</a>
+      — workbook 4 sheet: Ringkasan, Surat Masuk, Surat Keluar, Disposisi.
+    </p>
   </div>
 </section>
