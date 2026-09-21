@@ -85,7 +85,7 @@
         <li v-for="r in dashKritis" :key="'kr-' + r.id" class="px-4 py-2.5 text-xs">
           <div class="flex items-center gap-2">
             <span class="font-black text-slate-800 dark:text-slate-100">{{ r.nomor_agenda_masuk }}</span>
-            <app-badge size="sm" :status="r.sifat === 'rahasia' ? 'ditolak' : 'menunggu'" :label="r.sifat"></app-badge>
+            <app-badge size="sm" :status="r.sifat === 'rahasia' ? 'ditolak' : (r.sifat === 'segera' ? 'menunggu' : 'aktif')" :label="r.sifat"></app-badge>
             <span class="text-slate-400 truncate">{{ smLabelKlasifikasi(r.kode_klasifikasi) }}</span>
           </div>
           <div class="text-slate-600 dark:text-slate-300 truncate">{{ r.perihal }}</div>
