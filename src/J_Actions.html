@@ -16,8 +16,8 @@ window.ArsipActions = {
         this.smForm = {
           id: row.id || '',
           nomor_surat: row.nomor_surat || '',
-          tanggal_surat: row.tanggal_surat || '',
-          tanggal_terima: row.tanggal_terima || '',
+          tanggal_surat: this.isoKeInput(row.tanggal_surat),
+          tanggal_terima: this.isoKeInput(row.tanggal_terima),
           asal: row.asal || '',
           perihal: row.perihal || '',
           kode_klasifikasi: row.kode_klasifikasi || '',
@@ -211,7 +211,7 @@ window.ArsipActions = {
         surat_id: row.surat_id || '',
         ke_pejabat_id: row.ke_pejabat_id || '',
         instruksi: row.instruksi || '',
-        jatuh_tempo: row.jatuh_tempo || '',
+        jatuh_tempo: this.isoKeInput(row.jatuh_tempo),
         catatan: row.catatan || ''
       };
       this.showDpForm = true;
@@ -294,7 +294,7 @@ window.ArsipActions = {
           jumlah_lampiran: Number(row.jumlah_lampiran || 0),
           sifat: row.sifat || 'biasa',
           penandatangan_id: row.penandatangan_id || '',
-          tanggal_surat: row.tanggal_surat || '',
+          tanggal_surat: this.isoKeInput(row.tanggal_surat),
           lampiran_link: row.lampiran_link || '',
           lampiran_file: null,
           catatan: row.catatan || ''
@@ -500,7 +500,7 @@ window.ArsipActions = {
       this.ndForm = row ? {
         id: row.id || '', jenis_naskah: row.jenis_naskah || 'nota_dinas',
         perihal: row.perihal || '', tujuan: row.tujuan || '', isi: row.isi || '',
-        kode_klasifikasi: row.kode_klasifikasi || '', tanggal: row.tanggal || '',
+        kode_klasifikasi: row.kode_klasifikasi || '', tanggal: this.isoKeInput(row.tanggal),
         lampiran_link: row.lampiran_link || '', lampiran_file: null
       } : {
         id: '', jenis_naskah: 'nota_dinas', perihal: '', tujuan: '', isi: '',
