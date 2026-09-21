@@ -1,4 +1,6 @@
-# 09 — ROADMAP OUTPUT [SI-ARSIP: Sistem Informasi Kearsipan Dinamis — 2026-09-20]
+# 09 — ROADMAP OUTPUT [SI-ARSIP: Sistem Informasi Kearsipan Dinamis — 2026-09-21, amendemen v1.5]
+
+> Amendemen v1.5 (2026-09-21 siang): L4, L5, L11, L12 TUTUP sekaligus (paket hemat). Suite 139/0/1.
 
 > Dokumen ini memetakan **output** yang akan dihasilkan SI-ARSIP — melampaui
 > sekadar fitur CRUD. Setiap output diukur **manfaat terukurnya** (pengguna,
@@ -11,6 +13,11 @@
 > Setiap output wajib bisa dijawab: siapa pakai, berapa kali, untuk keputusan apa.
 >
 > Rujukan: Permendagri 78/2012, Perka ANRI (JRA), SRIKANDI.
+>
+> **Amendemen v1.4 (2026-09-21)**: status realisasi disinkronkan dengan kode
+> hidup (v1.0–v1.4). Banyak output 'RENCANA/BACKLOG' ternyata sudah terbangun
+> lewat jalur fitur (G19–G33), bukan lewat jalur output — piramida tetap
+> jadi kompas, GAP_LIST tetap jadi radar.
 
 ## 1. Rasio Output Ideal
 
@@ -58,28 +65,28 @@ Skor = (Dampak × 3) + (Frekuensi × 2) - Effort
 
 | # | Laporan | Pengguna | Frek/th | Hemat | Keputusan | Dampak | Frek | Effort | Skor | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| L1 | Daftar Surat Masuk | Staf arsip, Sekretaris | 12 | 2j | Monitoring | 4 | 5 | 1 | **21** | 📋 RENCANA |
-| L2 | Daftar Surat Keluar | Staf arsip, Sekretaris | 12 | 2j | Monitoring | 4 | 5 | 1 | **21** | 📋 RENCANA |
-| L3 | Daftar Disposisi | Sekretaris, Pimpinan | 12 | 1.5j | Monitoring SLA | 4 | 5 | 1 | **21** | 📋 RENCANA |
-| L4 | Rekap Surat per Klasifikasi | Staf arsip | 4 | 2j | Evaluasi beban | 3 | 3 | 2 | **13** | 📋 RENCANA |
-| L5 | Rekap Surat per Unit | Pimpinan | 4 | 2j | Evaluasi unit | 3 | 3 | 2 | **13** | 📋 RENCANA |
-| L6 | Berita Acara Musnah (v1 dummy) | Admin arsip | 1 | 4j | Pemusnahan resmi | 5 | 1 | 3 | **14** | 📋 RENCANA |
+| L1 | Daftar Surat Masuk | Staf arsip, Sekretaris | 12 | 2j | Monitoring | 4 | 5 | 1 | **21** | ✅ HIDUP v1.0 (+sheet xlsx v1.3) |
+| L2 | Daftar Surat Keluar | Staf arsip, Sekretaris | 12 | 2j | Monitoring | 4 | 5 | 1 | **21** | ✅ HIDUP v1.0 (+sheet xlsx v1.3) |
+| L3 | Daftar Disposisi | Sekretaris, Pimpinan | 12 | 1.5j | Monitoring SLA | 4 | 5 | 1 | **21** | ✅ HIDUP v1.0 (+sheet xlsx v1.3) |
+| L4 | Rekap Surat per Klasifikasi | Staf arsip | 4 | 2j | Evaluasi beban | 3 | 3 | 2 | **13** | ✅ HIDUP v1.5 (tabel lengkap + pct + filter tahun + search, FR-66) |
+| L5 | Rekap Surat per Unit | Pimpinan | 4 | 2j | Evaluasi unit | 3 | 3 | 2 | **13** | ✅ HIDUP v1.5 (disposisi per unit + keluar per unit via M_PEJABAT→SIMPEG, FR-67) |
+| L6 | Berita Acara Musnah (v1 dummy) | Admin arsip | 1 | 4j | Pemusnahan resmi | 5 | 1 | 3 | **14** | ✅ HIDUP v1.1 (G23) |
 
 ### Fase 2 (4 laporan)
 
 | # | Laporan | Pengguna | Frek/th | Hemat | Keputusan | Skor | Status |
 |---|---|---|---|---|---|---|---|
-| L7 | Daftar Inventaris Arsip (DIA) | Staf arsip | 4 | 3j | Audit | **14** | 🟡 BACKLOG |
-| L8 | Daftar Arsip Akan Musnah | Staf arsip | 2 | 2j | Pemusnahan | **14** | 🟡 BACKLOG |
-| L9 | Daftar Arsip Permanen | Staf arsip | 2 | 2j | Penyerahan | **14** | 🟡 BACKLOG |
-| L10 | Berita Acara Serah ke ANRI | Admin arsip | 1 | 4j | Penyerahan | **14** | 🟡 BACKLOG |
+| L7 | Daftar Inventaris Arsip (DIA) | Staf arsip | 4 | 3j | Audit | **14** | ✅ HIDUP v1.1 (halaman Kearsipan & Retensi) |
+| L8 | Daftar Arsip Akan Musnah | Staf arsip | 2 | 2j | Pemusnahan | **14** | ✅ HIDUP v1.1 (G23) |
+| L9 | Daftar Arsip Permanen | Staf arsip | 2 | 2j | Penyerahan | **14** | ✅ HIDUP v1.1 (G24) |
+| L10 | Berita Acara Serah ke ANRI | Admin arsip | 1 | 4j | Penyerahan | **14** | ✅ HIDUP v1.1 (G24) |
 
 ### Fase 3 (2 laporan)
 
 | # | Laporan | Pengguna | Frek/th | Hemat | Keputusan | Skor | Status |
 |---|---|---|---|---|---|---|---|
-| L11 | Laporan Kepatuhan JRA Tahunan | Pimpinan | 1 | 8j | Evaluasi kebijakan | **12** | 🔵 BACKLOG LANJUT |
-| L12 | Laporan Bulanan Satpol PP (export khas) | Pimpinan | 12 | 1j | Pelaporan dinas | **18** | 🔵 BACKLOG LANJUT |
+| L11 | Laporan Kepatuhan JRA Tahunan | Pimpinan | 1 | 8j | Evaluasi kebijakan | **12** | ✅ HIDUP v1.5 (total/patuh/tidak patuh/pct_patuh + rincian 100, FR-68) |
+| L12 | Laporan Bulanan Satpol PP (export khas) | Pimpinan | 12 | 1j | Pelaporan dinas | **18** | ✅ HIDUP v1.5 (7 sheet: Format Satpol PP KOP+ringkasan+top5+rekap unit+ttd + 4 generik + 2 rekap, FR-69/G39) |
 
 **Total hemat Fase 1 (L1–L6)**: ~150 jam/tahun.
 **Total hemat Fase 2 (L7–L10)**: ~44 jam/tahun.
@@ -94,8 +101,8 @@ Skor = (Dampak × 3) + (Frekuensi × 2) - Effort
 
 | # | Analisa | Pengguna | Frek/th | Hemat | Keputusan | Skor | Status |
 |---|---|---|---|---|---|---|---|
-| A1 | Tren Volume Surat 12 Bulan | Pimpinan | 12 | 1j | Perencanaan SDM | **19** | 🟡 BACKLOG |
-| A2 | Distribusi per Klasifikasi | Staf analisa | 4 | 3j | Evaluasi beban | **14** | 🟡 BACKLOG |
+| A1 | Tren Volume Surat 12 Bulan | Pimpinan | 12 | 1j | Perencanaan SDM | **19** | ✅ HIDUP v1.2 (chart bar tren masuk/keluar) |
+| A2 | Distribusi per Klasifikasi | Staf analisa | 4 | 3j | Evaluasi beban | **14** | ✅ HIDUP v1.2 (doughnut klasifikasi) |
 | A3 | Distribusi per Unit Kerja | Pimpinan | 4 | 3j | Distribusi kerja | **14** | 🟡 BACKLOG |
 | A4 | Top Pengirim / Penerima Surat | Staf analisa | 4 | 2j | Relasi antar-instansi | **12** | 🟡 BACKLOG |
 | A5 | Beban Kerja per Pejabat (disposisi) | Pimpinan | 12 | 1j | Rotasi/penambahan | **18** | 🟡 BACKLOG |
@@ -107,8 +114,8 @@ Skor = (Dampak × 3) + (Frekuensi × 2) - Effort
 | A6 | Proyeksi Retensi Habis 5 Tahun | Staf arsip | 1 | 8j | Perencanaan ruang | **11** | 🔵 BACKLOG LANJUT |
 | A7 | Korelasi Klasifikasi ↔ Unit | Staf analisa | 4 | 3j | Evaluasi proses | **12** | 🔵 BACKLOG LANJUT |
 | A8 | Rasio Surat TTE vs Non-TTE (setelah TTE) | Staf analisa | 12 | 1j | Adopsi TTE | **14** | 🔵 BACKLOG LANJUT |
-| A9 | Analisa Disposisi Lewat SLA (per pejabat) | Pimpinan | 12 | 1j | Evaluasi kinerja | **15** | 🔵 BACKLOG LANJUT |
-| A10 | Analisa Volume Surat Kritis per Bulan | Pimpinan | 12 | 1j | Kewaspadaan | **15** | 🔵 BACKLOG LANJUT |
+| A9 | Analisa Disposisi Lewat SLA (per pejabat) | Pimpinan | 12 | 1j | Evaluasi kinerja | **15** | 🟡 PARTIAL v1.2/v1.4 (panel SLA + lonceng; per-pejabat belum) |
+| A10 | Analisa Volume Surat Kritis per Bulan | Pimpinan | 12 | 1j | Kewaspadaan | **15** | 🟡 PARTIAL v1.2 (panel kritis; agregat bulanan belum) |
 
 **Total hemat Analisa (10)**: **~144 jam/tahun** (~18 hari kerja).
 
@@ -120,7 +127,7 @@ Skor = (Dampak × 3) + (Frekuensi × 2) - Effort
 
 | # | Evaluasi | Pengguna | Frek/th | Hemat | Keputusan | Skor | Status |
 |---|---|---|---|---|---|---|---|
-| E1 | Kepatuhan SLA Disposisi | Pimpinan | 12 | 1j | Evaluasi kinerja | **19** | 🟡 BACKLOG |
+| E1 | Kepatuhan SLA Disposisi | Pimpinan | 12 | 1j | Evaluasi kinerja | **19** | 🟡 PARTIAL v1.2 (KPI + badge LEWAT; % kepatuhan belum) |
 | E2 | Kepatuhan SLA Surat Keluar | Pimpinan | 12 | 1j | Evaluasi proses | **19** | 🟡 BACKLOG |
 | E3 | Kelengkapan Metadata Surat | Staf arsip | 4 | 3j | Perbaikan data | **14** | 🟡 BACKLOG |
 | E4 | Kepatuhan Format Nomor Surat | Admin arsip | 4 | 2j | Perbaikan SOP | **12** | 🟡 BACKLOG |
@@ -396,6 +403,22 @@ Dokumen ini **living document** — akan di-update setiap kali:
 > **"Ukur manfaat dulu, baru bangun. Bukan bangun dulu, baru cari manfaat."**
 
 ---
+
+## 19. Status Realisasi per v1.5 (2026-09-21)
+
+| Kategori | ✅ HIDUP | 🟡 PARTIAL | Belum |
+|---|---|---|---|
+| Laporan (12) | L1, L2, L3, L4, L5, L6, L7, L8, L9, L10, L11, L12 (12) | — | — |
+| Analisa (10) | A1, A2 (2) | A9, A10 (2) | A3–A8 (6) |
+| Evaluasi (8) | — | E1 (1) | E2–E8 (7) |
+| RTL (5) | — | — | R1–R5 (5) |
+
+**Catatan realisasi v1.5**: paket hemat 4-in-1 menutup semua lubang Laporan sekaligus.
+L4 tabel lengkap + pct, L5 per unit via M_PEJABAT→SIMPEG, L11 % patuh JRA, L12 7 sheet khas
+(Format Satpol PP KOP+top5+rekap unit+ttd). Piramida Laporan kini **100% HIDUP (12/12)** —
+fondasi paling bawah piramida penuh, tinggal Analisa/Evaluasi/RTL di atasnya.
+Output di luar piramida yang juga hidup: logbook T7 (v1.3), notifikasi in-app (v1.4),
+export xlsx generik 4 sheet (v1.3) + khas 7 sheet (v1.5) — ketiganya 'output proses'.
 
 ## Ringkasan
 
