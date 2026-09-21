@@ -18,6 +18,16 @@
     </div>
   </div>
 
+  <!-- G33: preset rentang tanggal -->
+  <div class="flex flex-wrap items-center gap-1 mb-2">
+    <span class="text-[11px] text-slate-400 mr-1">Rentang cepat:</span>
+    <button class="btn btn-ghost !px-2 !py-1 text-[11px]" @click="setRentang('dp','bulan-ini')">Bulan ini</button>
+    <button class="btn btn-ghost !px-2 !py-1 text-[11px]" @click="setRentang('dp','bulan-lalu')">Bulan lalu</button>
+    <button class="btn btn-ghost !px-2 !py-1 text-[11px]" @click="setRentang('dp','90-hari')">90 hari</button>
+    <button class="btn btn-ghost !px-2 !py-1 text-[11px]" @click="setRentang('dp','tahun-ini')">Tahun ini</button>
+    <button class="btn btn-ghost !px-2 !py-1 text-[11px]" @click="setRentang('dp','semua')">Semua</button>
+  </div>
+
   <app-filter-bar :filters="[
     { key: 'status_disposisi', label: 'Status', type: 'select',
       options: [{ value: 'diteruskan', label: 'Diteruskan' }, { value: 'diproses', label: 'Diproses' }, { value: 'selesai', label: 'Selesai' }] },
