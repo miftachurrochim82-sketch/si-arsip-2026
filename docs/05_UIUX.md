@@ -1,5 +1,6 @@
-# 05 — UI/UX [SI-ARSIP: Sistem Informasi Kearsipan Dinamis — 2026-09-21 v1.9 PIRAMIDA 35/35 TUTUP 🎓]
+# 05 — UI/UX [SI-ARSIP: Sistem Informasi Kearsipan Dinamis — 2026-09-21 v1.10 POLISH UIUX 59/28/0/0/56 🎨]
 
+> Amendemen v1.10 (2026-09-21 malam): Polish UIUX 5 sub-fase — v1.10a tabel & mobile (min-w 59 + table-scroll 28 + overflow 0), v1.10b badge valid (empty 0 + raw badge 0), v1.10c stat-card (custom 0 + app-stat-card 56), v1.10d pagination btn-icon + filter label text-[11px], v1.10e modal :show→v-if + tema #0369a1 locked + preview_v1.10.html 217KB. Backend tetap 203/0/1.
 > Amendemen v1.9 rev2 (2026-09-21): +V_Rtl R1-R5 puncak (generate panel + filter bar + stat 4 card + tabel 7 kolom + progress bar + 2 modal), Index 13 include, menu 11 item (8 operasional incl Laporan+Analisa+Evaluasi+RTL +2 kearsipan+2 sistem), audit frontend V_Rtl badge invalid→app-badge + formatTanggal→fmtTgl + :style object fixed.
 > Shell & komponen kit dipertahankan: `<app-login>`/`<app-sidebar>`/`<app-header>`,
 > `<app-crud-table>`, `<app-filter-bar>`, `<app-badge>`, `<app-modal>`, toast, dark mode.
@@ -34,20 +35,21 @@ Menu sidebar = **11 item** (8 operasional termasuk Laporan+Analisa+Evaluasi+RTL 
 
 Semua modal pakai kit `<app-modal>`:
 
-| # | Modal | Size | Fase | Fungsi |
-|---|---|---|---|---|
-| 1 | **Form Surat Masuk** | 2xl | **1** | Registrasi surat dari luar |
-| 2 | **Form Surat Keluar** | 2xl | **1** | Buat draft / edit surat |
-| 3 | **Detail Surat** | 3xl | **1** | Detail lengkap + daftar disposisi nested + lampiran |
-| 4 | **Form Disposisi** | 2xl | **1** | Buat disposisi + pilih pejabat |
-| 5 | **Form Ajukan Review** | md | **1** | Konfirmasi ubah status draft → review |
-| 6 | **Form Terbitkan** | md | **1** | Konfirmasi ubah review → terkirim |
-| 7 | **Form Klasifikasi** | lg | **1** | CRUD master klasifikasi |
-| 8 | **Form Pejabat** | lg | **1** | CRUD master pejabat |
-| 9 | **Form Template** | lg | **1** | CRUD master template |
-| 10 | **Form Naskah Dinas** | 2xl | 2 | Buat/edit naskah |
-| 11 | **Form Tandai Musnah** | lg | 2 | BA pemusnahan |
-| 12 | **Form Tandai Serah** | lg | 2 | BA penyerahan |
+| # | Modal | Size | Fase | Pattern v1.10 | Fungsi |
+|---|---|---|---|---|---|
+| 1 | **Form Surat Masuk** | 2xl | **1** | v-if + @close | Registrasi surat dari luar |
+| 2 | **Form Surat Keluar** | 2xl | **1** | v-if + @close | Buat draft / edit surat |
+| 3 | **Detail Dokumen** | 3xl | **1** | v-if + @close + :show-confirm false | Detail lengkap + timeline disposisi + lampiran preview inline (G29/G30) |
+| 4 | **Form Disposisi** | lg | **1** | v-if + @close | Buat disposisi + pilih pejabat |
+| 5 | **Form Klasifikasi** | lg | **1** | v-if + @close | CRUD master klasifikasi |
+| 6 | **Form Pejabat** | lg | **1** | v-if + @close | CRUD master pejabat |
+| 7 | **Form Naskah Dinas** | 2xl | 2 | v-if + @close | Buat/edit naskah |
+| 8 | **Form Aksi Arsip (lokasi/musnah/serah)** | lg | 2 | v-if arAksiMode !== '' | Ubah lokasi fisik / BA musnah / BA serah |
+| 9 | **Form Template** | lg | **1** | v-if + @close | CRUD master template |
+| 10 | **Form RTL** | lg | **1.9** | v-if showRtlForm + @close | CRUD RTL R1-R5 puncak piramida |
+| 11 | **Status RTL** | md | **1.9** | v-if showRtlStatusForm + @close | Ubah status RTL + progress |
+
+> **Fase 1**: modal #1-#6, #9. **Fase 2**: modal #7-#8. **v1.9**: modal #10-#11. **Total 11 modal** (9 di V_Modals.html + 2 di V_Rtl.html) — semua v-if + @close per v1.10e.
 
 **Fase 1**: modal #1–#9. **Fase 2**: modal #10–#12.
 
@@ -62,19 +64,21 @@ Semua modal pakai kit `<app-modal>`:
 - Include satu tingkat (v1.9): `V_Modals` → `V_Dashboard` → `V_Laporan` → `V_Analisa` → `V_Evaluasi` → `V_Rtl` → `V_SuratMasuk` → `V_SuratKeluar` → `V_NaskahDinas` → `V_Disposisi` → `V_Kearsipan` → `V_Pencarian` → `V_Master` → `V_Pengaturan`; `J_State` → `J_Helpers` → `J_Api` → `J_Actions` → `J_Export` → `J_App`.
 - **Tidak ada** `A0_Head.html` (head inline).
 
-### Tema warna SI-ARSIP
+### Tema warna SI-ARSIP — v1.10 locked #0369a1 (sky-700)
 
 ```css
 :root {
-  --primary:         #1e40af;   /* blue-800 — kesan formal/arsip */
-  --primary-dark:    #1e3a8a;   /* blue-900 */
-  --primary-light:   #eff6ff;   /* blue-50  */
-  --primary-lighter: #dbeafe;   /* blue-100 */
-  --primary-text:    #1e3a8a;   /* blue-900 */
-  --primary-accent:  #60a5fa;   /* blue-400 */
-  --primary-rgb:     30, 64, 175;
+  --primary:         #0369a1;   /* sky-700 — kesan arsip modern, dipilih v1.10 (vs #1e40af blue-800 lama) */
+  --primary-dark:    #075985;   /* sky-800 */
+  --primary-light:   #f0f9ff;   /* sky-50  */
+  --primary-lighter: #e0f2fe;   /* sky-100 */
+  --primary-text:    #0c4a6e;   /* sky-900 */
+  --primary-accent:  #38bdf8;   /* sky-400 */
+  --primary-rgb:     3, 105, 161;
 }
 ```
+> **Keputusan tema v1.10:** `#0369a1` (sky-700) — sinkron di `Index.html` meta theme-color + :root + tailwind config 600:#0284c7 700:#0369a1 800:#075985 900:#0c4a6e. `#1e40af` (blue-800) hanya di docs lama, src 0. Light theme `bg-slate-100 dark:bg-slate-950` dipertahankan.
+
 
 ## Aturan desain (konsisten lintas app)
 
@@ -88,7 +92,13 @@ Semua modal pakai kit `<app-modal>`:
 - **Badge khusus**: **Kritis** (merah, ikon `fa-triangle-exclamation`), **Lewat SLA** (merah, animasi pulse), **Permanen** (ungu), **Musnah** (abu).
 - **Alert Surat Kritis**: baris tabel dengan latar merah tipis (`bg-rose-50/40`) + badge di kolom status.
 - **Dark mode**: semua view wajib varian dark (token kit).
-- **min-w mobile**: kolom penting `<app-crud-table>` wajib `thClass min-w-[...]` agar scroll horizontal mulus di HP. Nomor surat & perihal `min-w-[220px]`.
+- **min-w mobile v1.10**: semua `<th>` wajib `min-w-[...]` agar di HP 360px tidak gepeng — Judul/Perihal/Asal/Tujuan `min-w-[260px]`, Agenda/Nomor/Klasifikasi `min-w-[160-180px]`, Sifat/Status `min-w-[100px]`, Aksi `min-w-[120px]`. Wrapper tabel wajib `table-scroll` (kit punya shadow/fade), bukan `overflow-x-auto`. Acceptance: `grep min-w-\[ >=30` (v1.10 = 59), `table-scroll` 28, `overflow-x-auto` 0.
+- **Badge valid v1.10**: hanya via `<app-badge :status="...">` — valid: aktif/selesai/disetujui/ditolak/batal/revisi/verifikasi/draft/belum/menunggu/proses/success/danger/warning/info/emerald/purple/nonaktif. Mapping: selesai/terkirim/terarsip/permanen=disetujui, didisposisi/review/final/diproses=menunggu/proses, rahasia/musnah/batal=ditolak, biasa/aktif=aktif, draft=draft, nonaktif=nonaktif. Dilarang raw class `badge-sky/rose/amber/gray`. Empty status 0.
+- **Stat-card v1.10**: semua KPI wajib `<app-stat-card>` — tidak ada custom `card !p-3 text-center` + `text-lg font-black`. Props: title, :value, icon fa-solid, color sky/emerald/amber/rose, subtext. Acceptance: custom 0, app-stat-card 56.
+- **Pagination v1.10**: standard `<button class="btn-icon" :disabled="page<=1" @click="loadX(page-1)"><i class="fa-solid fa-chevron-left"></i></button>` + kanan chevron-right. Dilarang `btn-ghost btn-xs` untuk pagination. Acceptance: 0 btn-ghost btn-xs.
+- **Filter bar v1.10**: transaksional sudah `<app-filter-bar>` ✅. Analitik (Laporan/Analisa/Evaluasi/RTL) standard `flex flex-col sm:flex-row gap-2 items-end` + tiap input punya `<label class="text-[11px] text-slate-500">Tahun/Cari/Bulan</label>` + `input w-full` + placeholder jelas. Acceptance: semua filter ada label text-[11px].
+- **Modal v1.10**: migrasi dari `:show="showX"` → `v-if="showX" @close="showX=false"` + :title + size md/lg/2xl/3xl + @confirm + loading spinner `fa-spinner fa-spin`. Ukuran: konfirmasi md, form master lg, transaksi 2xl, detail panjang 3xl. Acceptance: :show= 0.
+
 - **Opsi waktu dinamis**: pemilih tahun/bulan SELALU computed (tahun ini ±2), **tidak pernah hardcode**.
 - **Tombol aksi tabel**: 32×32 pakai `.btn-icon` / `.btn-icon-danger` (kit CDN v2.8.0/F2).
 
@@ -98,7 +108,7 @@ Semua modal pakai kit `<app-modal>`:
 |---|---|
 | `<app-login>` | `Index.html` (login SSO gateway) |
 | `<app-sidebar>` / `<app-header>` | `Index.html` (shell); header punya `slot #extra-actions` (opsional) |
-| `<app-stat-card>` | `V_Dashboard.html` (×4) |
+| `<app-stat-card>` | `V_Dashboard.html` (×4) + `V_Rtl.html` (×4) + `V_Laporan.html` (L4 3 + L11 4 =7) + `V_Analisa.html` (A3 3 + A6 2 + A8 3 =8) + `V_Evaluasi.html` (E1 4 + E2 3 + E3 4 + E4 4 + E5 3 + E6 3 + E7 3 + E8 4 =28) = total 56 (v1.10) |
 | `<app-chart-bar>` / `<app-chart-doughnut>` (`bare`) | `V_Dashboard.html` |
 | `<app-crud-table>` | `V_SuratMasuk`, `V_SuratKeluar`, `V_Disposisi`, `V_Master` (3 tab), `V_Kearsipan`, `V_NaskahDinas` |
 | `<app-filter-bar>` | `V_SuratMasuk`, `V_SuratKeluar`, `V_Disposisi`, `V_Pencarian` |
