@@ -25,6 +25,7 @@ window.ArsipActions = {
           sifat: row.sifat || 'biasa',
           status_surat: row.status_surat || 'baru',
           lampiran_link: row.lampiran_link || '',
+          lampiran_file: null,
           catatan: row.catatan || ''
         };
       } else {
@@ -32,7 +33,7 @@ window.ArsipActions = {
           id: '', nomor_surat: '', tanggal_surat: '',
           tanggal_terima: this.todayIso_ ? this.todayIso_() : '',
           asal: '', perihal: '', kode_klasifikasi: '', jumlah_lampiran: 0,
-          sifat: 'biasa', status_surat: 'baru', lampiran_link: '', catatan: ''
+          sifat: 'biasa', status_surat: 'baru', lampiran_link: '', lampiran_file: null, catatan: ''
         };
       }
       this.showSmForm = true;
@@ -46,8 +47,11 @@ window.ArsipActions = {
       if (!String(f.kode_klasifikasi || '').trim()) return this.showToast('Kode klasifikasi wajib dipilih.', 'error');
       this.smSaving = true;
       try {
-        const r = await this.callServer('sm_save', f);
+        const lf = f.lampiran_file || null;
+        const payload = Object.assign({}, f); delete payload.lampiran_file;
+        const r = await this.callServer('sm_save', payload);
         if (r && r.success) {
+          await this.uploadLampiranSetelahSimpan(lf, 'sm', r.data && r.data.id);
           this.showToast(f.id ? 'Surat masuk diperbarui.' : 'Surat masuk teregistrasi.', 'success');
           this.showSmForm = false;
           this.smMapLoaded = false;            // peta join disposisi usang
@@ -96,17 +100,107 @@ window.ArsipActions = {
       this._searchTimerSm = setTimeout(() => this.loadSm(1), 400);
     },
 
-    smLabelKlasifikasi(kode) {
-      const k = (this.klasifikasiList || []).find(x => String(x.kode_klasifikasi) === String(kode));
-      return k ? (kode + ' — ' + (k.uraian || '')) : (kode || '—');
+    // ================= DETAIL, MENU, NOTIF (v1.4) =================
+    async openDocDetail(dom, row) {
+      const aksi = { sm: 'sm_get_detail', sk: 'sk_get_detail', nd: 'nd_get_detail' }[dom];
+      if (!aksi) return;
+      try {
+        const r = await this.callServer(aksi, { id: row.id });
+        if (r && r.success) {
+          this.docDetail = r.data;
+          this.docDetailJenis = dom;
+          this.previewUrl = '';
+          this.showDocDetail = true;
+        } else {
+          this.showToast((r && r.error) || 'Gagal memuat detail.', 'error');
+        }
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      }
     },
 
-    // Tanggal sheet/GAS sering tiba sebagai ISO '2026-09-19T17:00:00.000Z'
-    // (UTC) — tampilkan sebagai dd/mm/yyyy dari 10 karakter pertama (hari WIB).
-    fmtTgl(v) {
-      if (!v) return '—';
-      const p = String(v).slice(0, 10).split('-');
-      return p.length === 3 ? (p[2] + '/' + p[1] + '/' + p[0]) : String(v);
+    // G29: embed preview — link Drive diubah ke mode /preview
+    previewLampiran(l) {
+      const url = String((l && l.url) || '');
+      const m = url.match(/\/d\/([a-zA-Z0-9_-]{20,})\//) || url.match(/[?&]id=([a-zA-Z0-9_-]{20,})/);
+      this.previewUrl = m ? ('https://drive.google.com/file/d/' + m[1] + '/preview') : url;
+    },
+
+    toggleRowMenu(id) { this.rowMenuId = (this.rowMenuId === id) ? '' : id; },
+    closeMenu() { this.rowMenuId = ''; },
+
+    // G33: preset rentang tanggal pada filter bar
+    setRentang(dom, preset) {
+      const key = { sm: 'smFilters', sk: 'skFilters', dp: 'dpFilters' }[dom];
+      if (!key) return;
+      const now = new Date();
+      const iso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      let dari = '', sampai = iso(now);
+      if (preset === 'bulan-ini') { dari = iso(new Date(now.getFullYear(), now.getMonth(), 1)); }
+      else if (preset === 'bulan-lalu') {
+        dari = iso(new Date(now.getFullYear(), now.getMonth() - 1, 1));
+        sampai = iso(new Date(now.getFullYear(), now.getMonth(), 0));
+      }
+      else if (preset === '90-hari') { dari = iso(new Date(now.getTime() - 90 * 86400000)); }
+      else if (preset === 'tahun-ini') { dari = iso(new Date(now.getFullYear(), 0, 1)); }
+      else { dari = ''; sampai = ''; }
+      this[key] = Object.assign({}, this[key], { tanggal_dari: dari, tanggal_sampai: sampai });
+      ({ sm: this.loadSm, sk: this.loadSk, dp: this.loadDp }[dom] || (() => {}))(1);
+    },
+
+    async muatNotifikasi() {
+      try {
+        const r = await this.callServer('get_notifikasi', {});
+        if (r && r.success) {
+          this.notifItems = r.data.items || [];
+          this.notifUnread = r.data.unread || 0;
+        }
+      } catch (e) { /* senyap */ }
+    },
+
+    async notifTandaiDibaca() {
+      try {
+        const r = await this.callServer('notif_read', {});
+        if (r && r.success) { this.notifUnread = 0; this.muatNotifikasi(); }
+      } catch (e) { /* senyap */ }
+    },
+
+    // ================= LAMPIRAN UPLOAD (v1.3) =================
+    // Pilih file lampiran → base64 di form (diunggah setelah simpan sukses)
+    onFileLampiran(ev, dom) {
+      const input = ev.target;
+      const file = input.files && input.files[0];
+      input.value = '';                       // boleh pilih file sama lagi
+      const formKey = { sm: 'smForm', sk: 'skForm', nd: 'ndForm' }[dom];
+      if (!formKey) return;
+      if (!file) { this[formKey].lampiran_file = null; return; }
+      if (file.size > 5 * 1024 * 1024) {
+        this.showToast('Maksimal 5 MB. File ini ' + (file.size / 1024 / 1024).toFixed(1) + ' MB.', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = String(reader.result || '').split(',')[1] || '';
+        this[formKey].lampiran_file = { nama: file.name, mime: file.type || 'application/octet-stream', base64 };
+        this.showToast('Siap diunggah: ' + file.name, 'success');
+      };
+      reader.onerror = () => this.showToast('Gagal membaca file.', 'error');
+      reader.readAsDataURL(file);
+    },
+
+    async uploadLampiranSetelahSimpan(lf, dom, recordId) {
+      if (!lf || !recordId) return;
+      const jenis = { sm: 'surat_masuk', sk: 'surat_keluar', nd: 'naskah_dinas' }[dom];
+      try {
+        const r = await this.callServer('lmp_upload', {
+          dokumen_jenis: jenis, dokumen_id: recordId,
+          nama: lf.nama, mime: lf.mime, base64: lf.base64
+        });
+        if (r && r.success) this.showToast('Lampiran tersimpan di Drive.', 'success');
+        else this.showToast('Lampiran GAGAL naik: ' + ((r && r.error) || '?'), 'error');
+      } catch (e) {
+        this.showToast('Lampiran GAGAL naik: ' + e.message, 'error');
+      }
     },
 
     // ================= DISPOSISI =================
@@ -202,6 +296,7 @@ window.ArsipActions = {
           penandatangan_id: row.penandatangan_id || '',
           tanggal_surat: row.tanggal_surat || '',
           lampiran_link: row.lampiran_link || '',
+          lampiran_file: null,
           catatan: row.catatan || ''
         };
       } else {
@@ -209,7 +304,7 @@ window.ArsipActions = {
           id: '', tujuan: '', perihal: '', kode_klasifikasi: '', jumlah_lampiran: 0,
           sifat: 'biasa', penandatangan_id: '',
           tanggal_surat: this.todayIso_ ? this.todayIso_() : '',
-          lampiran_link: '', catatan: ''
+          lampiran_link: '', lampiran_file: null, catatan: ''
         };
       }
       this.showSkForm = true;
@@ -223,8 +318,11 @@ window.ArsipActions = {
       if (!String(f.penandatangan_id || '').trim()) return this.showToast('Penandatangan wajib dipilih.', 'error');
       this.skSaving = true;
       try {
-        const r = await this.callServer('sk_save', f);
+        const lf = f.lampiran_file || null;
+        const payload = Object.assign({}, f); delete payload.lampiran_file;
+        const r = await this.callServer('sk_save', payload);
         if (r && r.success) {
+          await this.uploadLampiranSetelahSimpan(lf, 'sk', r.data && r.data.id);
           this.showToast(f.id ? 'Surat keluar diperbarui.' : 'Surat keluar terdaftar (draft).', 'success');
           this.showSkForm = false;
           await this.loadSk(this.skPage);
@@ -403,10 +501,11 @@ window.ArsipActions = {
         id: row.id || '', jenis_naskah: row.jenis_naskah || 'nota_dinas',
         perihal: row.perihal || '', tujuan: row.tujuan || '', isi: row.isi || '',
         kode_klasifikasi: row.kode_klasifikasi || '', tanggal: row.tanggal || '',
-        lampiran_link: row.lampiran_link || ''
+        lampiran_link: row.lampiran_link || '', lampiran_file: null
       } : {
         id: '', jenis_naskah: 'nota_dinas', perihal: '', tujuan: '', isi: '',
-        kode_klasifikasi: '', tanggal: this.todayIso_ ? this.todayIso_() : '', lampiran_link: ''
+        kode_klasifikasi: '', tanggal: this.todayIso_ ? this.todayIso_() : '',
+        lampiran_link: '', lampiran_file: null
       };
       this.showNdForm = true;
     },
@@ -417,8 +516,11 @@ window.ArsipActions = {
       if (!String(f.kode_klasifikasi || '').trim()) return this.showToast('Kode klasifikasi wajib dipilih.', 'error');
       this.ndSaving = true;
       try {
-        const r = await this.callServer('nd_save', f);
+        const lf = f.lampiran_file || null;
+        const payload = Object.assign({}, f); delete payload.lampiran_file;
+        const r = await this.callServer('nd_save', payload);
         if (r && r.success) {
+          await this.uploadLampiranSetelahSimpan(lf, 'nd', r.data && r.data.id);
           this.showToast(f.id ? 'Naskah diperbarui.' : 'Naskah tersimpan sebagai draft.', 'success');
           this.showNdForm = false;
           await this.loadNd(this.ndPage);
