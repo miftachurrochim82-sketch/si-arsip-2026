@@ -188,6 +188,15 @@ function dashKlasifikasi_(params) {
     tally(getSheetData_('T_SURAT_MASUK'));
     tally(getSheetData_('T_SURAT_KELUAR'));
 
+    // v1.2.1: legend doughnut = 'kode — uraian' (bukan kode polos).
+    var namaMap = {};
+    try {
+      getSheetData_('M_KLASIFIKASI').forEach(function (m) {
+        var k = String(m.kode_klasifikasi || '').trim();
+        if (k) namaMap[k] = String(m.uraian || '').trim();
+      });
+    } catch (e) { namaMap = {}; }
+
     // Sort desc by jumlah
     var sorted = Object.keys(countMap).map(function (k) {
       return { kode: k, jumlah: countMap[k] };
@@ -201,7 +210,7 @@ function dashKlasifikasi_(params) {
     return {
       success: true,
       data: {
-        labels: top.map(function (x) { return x.kode; }),
+        labels: top.map(function (x) { return namaMap[x.kode] ? (x.kode + ' — ' + namaMap[x.kode]) : x.kode; }),
         values: top.map(function (x) { return x.jumlah; }),
         top:    top,
         total:  total
@@ -290,6 +299,33 @@ function dashDisposisiLewatSla_(params) {
     return { success: true, data: out, total: lewat.length };
   } catch (err) {
     Logger.log('[dashDisposisiLewatSla_] ' + err.message);
+    return { success: false, code: 'BAD_REQUEST', error: err.message };
+  }
+}
+
+// ==================== §6b CHART STATUS DISPOSISI (FR-36b, v1.2) ====================
+
+/**
+ * Chart ke-4: distribusi status disposisi (semua waktu) untuk doughnut.
+ * Return: { success, data: { labels: [3 status], values: [3 jumlah] } }
+ */
+function dashChartDisposisi_(params) {
+  try {
+    var list = getSheetData_('T_DISPOSISI');
+    var counts = { 'diteruskan': 0, 'diproses': 0, 'selesai': 0 };
+    list.forEach(function (d) {
+      var st = CoreLib.normStr(d.status_disposisi) || 'diteruskan';
+      if (counts[st] !== undefined) counts[st] += 1;
+    });
+    return {
+      success: true,
+      data: {
+        labels: ['diteruskan', 'diproses', 'selesai'],
+        values: [counts['diteruskan'], counts['diproses'], counts['selesai']]
+      }
+    };
+  } catch (err) {
+    Logger.log('[dashChartDisposisi_] ' + err.message);
     return { success: false, code: 'BAD_REQUEST', error: err.message };
   }
 }
