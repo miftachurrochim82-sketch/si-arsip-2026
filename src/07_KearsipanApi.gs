@@ -49,22 +49,8 @@ function arIsAkanMusnah_(record) {
 
 /** Tulis jejak dokumen ke T_LOGBOOK (T7). Dipanggil di dalam lock pemanggil. */
 function arLogbook_(dokumenId, dokumenJenis, aksi, user, sebelum, sesudah, catatan) {
-  try {
-    var rec = {
-      id: '',
-      dokumen_id: dokumenId || '',
-      dokumen_jenis: dokumenJenis || '',
-      aksi: aksi || '',
-      aktor_email: (user && user.email) || '',
-      tgl_aksi: new Date().toISOString(),
-      detail_sebelum: sebelum || '',
-      detail_sesudah: sesudah || '',
-      catatan: catatan || ''
-    };
-    writeRecordNoLock_('T_LOGBOOK', rec, true, user, 'id');
-  } catch (e) {
-    Logger.log('[arLogbook_] ' + e.message);   // logbook gagal ≠ aksi gagal
-  }
+  // v1.3: implementasi tunggal di 00b_LocalHelpers.gs (catatLogbook_).
+  catatLogbook_(dokumenId, dokumenJenis, aksi, user, sebelum, sesudah, catatan);
 }
 
 // ==================== §2 AUTO-ARCHIVE (FR-28/29/30) ====================
