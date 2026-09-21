@@ -89,6 +89,15 @@ function buildLocalHandlers_() {
   h['dash_klasifikasi']         = function (d, u) { return dashKlasifikasi_(d || {}); };
   h['dash_surat_kritis']        = function (d, u) { return dashSuratKritis_(d || {}); };
   h['dash_disposisi_lewat_sla'] = function (d, u) { return dashDisposisiLewatSla_(d || {}); };
+  h['dash_chart_disposisi']     = function (d, u) { return dashChartDisposisi_(d || {}); };
+
+  // Laporan & lampiran (v1.3: G27, G28)
+  h['laporan_export_excel']     = function (d, u) { return exportExcelBulanan_(d || {}, u); };
+  h['lmp_upload']               = function (d, u) { return lmpUpload_(d || {}, u); };
+
+  // Notifikasi (v1.4: G31)
+  h['get_notifikasi']           = function (d, u) { return getNotifikasi_(u); };
+  h['notif_read']               = function (d, u) { return notifTandaiDibaca_(u); };
 
   // ---------- SIMPEG read-only ----------
   h['get_simpeg_lookup']  = function () { return getSimpegLookup_(); };
