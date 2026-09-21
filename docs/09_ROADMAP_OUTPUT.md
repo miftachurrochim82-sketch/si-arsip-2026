@@ -1,5 +1,6 @@
-# 09 — ROADMAP OUTPUT [SI-ARSIP: Sistem Informasi Kearsipan Dinamis — 2026-09-21, amendemen v1.9 PIRAMIDA 35/35 TUTUP 🎓]
+# 09 — ROADMAP OUTPUT [SI-ARSIP: Sistem Informasi Kearsipan Dinamis — 2026-09-21 v1.10 POLISH 59/28/0/0/56 🎨 — PIRAMIDA 35/35 TUTUP + UIUX 5/5]
 
+> Amendemen v1.10 (2026-09-21 malam): Polish UIUX 5/5 — min-w 59 + table-scroll 28 + overflow 0 + custom card 0 + app-stat-card 56 + modal :show→v-if + tema #0369a1 locked + preview_v1.10.html 217KB. Backend 203/0/1 tetap. Kandidat CDN v2.9.0 C1-C3 dicatat (filter-analytics + progress-bar + label-sm).
 > Amendemen v1.9 rev2 (2026-09-21 malam-2): R1-R5 TUTUP puncak (17_RtlApi + V_Rtl) + audit backend 20 OK + frontend badge fix (app-badge + fmtTgl + :style object). Suite 203/0/1. Piramida final 12+10+8+5=35 TUTUP.
 > Amendemen v1.8 (2026-09-21 sore): E1-E8 TUTUP (16_EvaluasiApi + V_Evaluasi 8 tabs). Suite 187/0/1. Piramida 12+10+8.
 > Amendemen v1.7 (2026-09-21 sore): A6-A10 TUTUP (15_AnalisaLanjutApi). Suite 171/0/1. Piramida 12+10.
@@ -427,6 +428,22 @@ Dokumen ini **living document** — akan di-update setiap kali:
 - v1.8: E1 SLA disp pct_patuh_total/selesai + avg_telat, E2 SLA keluar 3 hari, E3 kelengkapan missing[], E4 format regex, E5 JRA reuse L11 per_klas, E6 musnah tanpa BA + retensi habis belum musnah, E7 fisik ada/tanpa lokasi, E8 alih media sudah/belum digital + per_jenis → 12+10+8.
 - v1.9: R1 pemusnahan dari E6 (retensi_habis_belum_musnah>0 + musnah_tanpa_BA), R2 penyerahan permanen dari E5 (permanenCount), R3 alih media dari E8 (belum_digital>0), R4 restorasi dari E7 (tanpa_lokasi>0), R5 pelatihan dari E3 (tidak_lengkap>0) + R5b pembinaan SLA dari A9 (total_lewat>0) → 12+10+8+5=35 TUTUP. Generate idempoten judul+tahun, lock deadlock fixed, badge frontend app-badge fix.
 - Output di luar piramida yang juga hidup: logbook T7 (v1.3), notifikasi in-app (v1.4), export xlsx generik 4 sheet (v1.3) + khas 7 sheet (v1.5), T_RTL CRUD+status+progress (v1.9).
+
+## 20. Status Polish UIUX v1.10 (Langkah 1 pasca-piramida)
+
+| Sub-fase | Item | Acceptance | Status |
+|---|---|---|---|
+| v1.10a | Tabel & Mobile | min-w 59 ≥30, table-scroll 28, overflow 0 | ✅ SELESAI |
+| v1.10b | Badge valid | empty status 0, raw badge class 0 | ✅ SELESAI |
+| v1.10c | Stat-card | custom !p-3 0, app-stat-card 56 | ✅ SELESAI |
+| v1.10d | Pagination + Filter | btn-ghost btn-xs 0, label text-[11px] konsisten | ✅ SELESAI |
+| v1.10e | Modal + Tema | :show= 0, v-if+@close, #0369a1 locked | ✅ SELESAI |
+
+**Verification:** `59 min-w | 28 table-scroll | 0 overflow | 0 custom card | 0 :show | 0 raw badge | 56 app-stat-card`
+**Preview:** preview_v1.10.html 217KB, LIVE PREVIEW /preview_v1.10.html
+**Backend:** tetap 203/0/1 hijau — tidak sentuh
+
+**Kandidat CDN v2.9.0:** C1 filter-bar-analytics + C2 progress-bar + C3 form-label-sm — dicatat di CDN_CANDIDATES_v2.9.0.md, tunggu cek cross-app (si-kompetensi, si-lahar) sebelum promosi.
 
 ## Ringkasan
 
