@@ -58,12 +58,12 @@
       <table>
         <thead>
           <tr>
-            <th>Agenda / Tanggal</th>
-            <th>Asal & Perihal</th>
-            <th>Klasifikasi</th>
-            <th>Sifat</th>
-            <th>Status</th>
-            <th class="text-right">Aksi</th>
+            <th class="min-w-[160px]">Agenda / Tanggal</th>
+            <th class="min-w-[260px]">Asal & Perihal</th>
+            <th class="min-w-[180px]">Klasifikasi</th>
+            <th class="min-w-[100px]">Sifat</th>
+            <th class="min-w-[100px]">Status</th>
+            <th class="min-w-[120px] text-right">Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -83,7 +83,7 @@
             <td class="text-xs">{{ smLabelKlasifikasi(r.kode_klasifikasi) }}</td>
             <td>
               <app-badge size="sm"
-                         :status="r.sifat === 'rahasia' ? 'ditolak' : (r.sifat === 'segera' ? 'menunggu' : '')"
+                         :status="r.sifat === 'rahasia' ? 'ditolak' : (r.sifat === 'segera' ? 'menunggu' : 'aktif')"
                          :label="r.sifat || 'biasa'"></app-badge>
             </td>
             <td>
