@@ -25,10 +25,10 @@
 //   5. actionLevels (§7)           — sudah sesuai FRD
 // ────────────────────────────────────────────────────────────
 //
-// ⚡ SKEMA 10 SHEET (master 3 + tabel 7):
+// ⚡ SKEMA 11 SHEET (master 3 + tabel 8): v1.9 +T_RTL
 //   Master (3): M_KLASIFIKASI, M_PEJABAT, M_TEMPLATE
-//   Tabel (7):  T_SURAT_MASUK, T_SURAT_KELUAR, T_NASKAH_DINAS,
-//               T_DISPOSISI, T_ARSIP, T_LAMPIRAN, T_LOGBOOK
+//   Tabel (8):  T_SURAT_MASUK, T_SURAT_KELUAR, T_NASKAH_DINAS,
+//               T_DISPOSISI, T_ARSIP, T_LAMPIRAN, T_LOGBOOK, T_RTL
 //
 // Referensi SIMPEG (PEGAWAI/JABATAN/UNIT_KERJA) & ZZ_TEST_CRUD tidak
 // dihitung sebagai budget sheet bisnis.
@@ -91,17 +91,18 @@ var LOCAL_SHEETS = {
   M_KLASIFIKASI: 'M_KLASIFIKASI',
   M_PEJABAT:     'M_PEJABAT',
   M_TEMPLATE:    'M_TEMPLATE',
-  // Tabel (7)
+  // Tabel (8) v1.9 +T_RTL
   T_SURAT_MASUK:  'T_SURAT_MASUK',
   T_SURAT_KELUAR: 'T_SURAT_KELUAR',
   T_NASKAH_DINAS: 'T_NASKAH_DINAS',
   T_DISPOSISI:    'T_DISPOSISI',
   T_ARSIP:        'T_ARSIP',
   T_LAMPIRAN:     'T_LAMPIRAN',
-  T_LOGBOOK:      'T_LOGBOOK'
+  T_LOGBOOK:      'T_LOGBOOK',
+  T_RTL:          'T_RTL'
 };
 
-// Prefix ID per-sheet (dipakai localPreSaveHook_ P1)
+// Prefix ID per-sheet (dipakai localPreSaveHook_ P1) — 11 prefix v1.9
 var LOCAL_ID_PREFIX_ = {
   'M_KLASIFIKASI':  'ref',
   'M_PEJABAT':      'pjb',
@@ -112,7 +113,8 @@ var LOCAL_ID_PREFIX_ = {
   'T_DISPOSISI':    'dp',
   'T_ARSIP':        'ar',
   'T_LAMPIRAN':     'lmp',
-  'T_LOGBOOK':      'log'
+  'T_LOGBOOK':      'log',
+  'T_RTL':          'rtl'
 };
 
 // Alias nama sheet SIMPEG → kanonik (dibaca dari MASTER via CoreLib)
@@ -200,6 +202,11 @@ var ALL_SHEET_HEADERS = {
   T_LOGBOOK: [
     'id', 'dokumen_id', 'dokumen_jenis', 'aksi', 'aktor_email', 'tgl_aksi',
     'detail_sebelum', 'detail_sesudah', 'catatan',
+    'created_at', 'updated_at', 'created_by', 'updated_by', 'deleted_at'
+  ],
+  T_RTL: [
+    'id', 'sumber_evaluasi', 'judul_rtl', 'deskripsi', 'assigned_to', 'due_date',
+    'status_rtl', 'progress_pct', 'dokumen_terkait', 'catatan',
     'created_at', 'updated_at', 'created_by', 'updated_by', 'deleted_at'
   ],
 
@@ -392,7 +399,7 @@ function findRecordById_(sheetName, id) {
 
 // ==================== §6 PRE-SAVE HOOK (P1) ====================
 // P1: id kosong → generate (cegah PK jatuh ke kolom lain = data loss).
-// Prefix ID dari LOCAL_ID_PREFIX_ (10 prefix).
+// Prefix ID dari LOCAL_ID_PREFIX_ (11 prefix v1.9).
 function localPreSaveHook_(canonical, record, actor) {
   var C = String(canonical || '').toUpperCase();
 
@@ -457,8 +464,35 @@ function getAppConfig_() {
       'get_unit_list':        'viewer',
       'get_jabatan_list':     'viewer',
 
-      // Laporan & lampiran (v1.3: FR-59, FR-60)
+      // Laporan & lampiran (v1.3: FR-59, FR-60) + v1.5 L4/L5/L11/L12 + v1.6 A3/A4/A5 + v1.7 A6-A10 + v1.8 E1-E8
       'laporan_export_excel': 'user',
+      'laporan_export_khas':  'user',
+      'lap_rekap_klasifikasi': 'viewer',
+      'lap_rekap_unit':       'viewer',
+      'lap_kepatuhan_jra':    'viewer',
+      'analisa_distribusi_unit': 'viewer',
+      'analisa_top_pengirim':    'viewer',
+      'analisa_beban_pejabat':   'viewer',
+      'analisa_retensi_5th':     'viewer',
+      'analisa_klasifikasi_unit':'viewer',
+      'analisa_tte_ratio':       'viewer',
+      'analisa_sla_per_pejabat': 'viewer',
+      'analisa_kritis_bulanan':  'viewer',
+      'evaluasi_sla_disposisi':  'viewer',
+      'evaluasi_sla_keluar':     'viewer',
+      'evaluasi_kelengkapan':    'viewer',
+      'evaluasi_format_nomor':   'viewer',
+      'evaluasi_jra':            'viewer',
+      'evaluasi_musnah':         'viewer',
+      'evaluasi_fisik':          'viewer',
+      'evaluasi_alih_media':     'viewer',
+      // RTL R1-R5 (v1.9) — puncak piramida 35/35 TUTUP
+      'rtl_get_list':            'viewer',
+      'rtl_get_detail':          'viewer',
+      'rtl_save':                'user',
+      'rtl_delete':              'admin',
+      'rtl_ubah_status':         'user',
+      'rtl_generate':            'user',
       'lmp_upload':           'user',
 
       // Notifikasi (v1.4: FR-63)
