@@ -287,6 +287,13 @@ function smSave_(data, user) {
            'T_SURAT_MASUK', saved.id, true,
            'Agenda: ' + saved.nomor_agenda_masuk + ' — ' + saved.perihal);
 
+    // G26: logbook T7 untuk setiap aksi dokumen
+    catatLogbook_(saved.id, 'surat_masuk', isInsert ? 'simpan_baru' : 'ubah', user,
+                  (!isInsert && existing) ? logbookRingkasanDok_(existing) : '',
+                  logbookRingkasanDok_(saved),
+                  isInsert ? 'Registrasi agenda ' + saved.nomor_agenda_masuk
+                           : 'Edit data surat masuk');
+
     // FR-28 (Fase 2 aktif): status selesai lewat edit manual → auto-archive.
     if (CoreLib.normStr(saved.status_surat) === 'selesai') {
       try { arAutoArchive_('surat_masuk', saved.id, user); }
@@ -333,6 +340,8 @@ function smDelete_(data, user) {
     }
 
     var ok = softDeleteRecord_('T_SURAT_MASUK', data.id, user);
+    if (ok) catatLogbook_(data.id, 'surat_masuk', 'hapus', user,
+                          logbookRingkasanDok_(row), '', 'Soft delete surat masuk');
     audit_(user, 'DELETE_SURAT_MASUK', 'T_SURAT_MASUK', data.id, ok,
            'Agenda: ' + (row.nomor_agenda_masuk || data.id));
     return { success: ok, message: ok ? 'Surat masuk dihapus.' : 'Gagal hapus.' };
