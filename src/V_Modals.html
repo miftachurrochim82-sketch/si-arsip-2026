@@ -68,6 +68,10 @@
     <div class="md:col-span-2">
       <label class="form-label">Tautan lampiran (opsional — fase 1 berupa link)</label>
       <input class="input w-full" v-model.trim="smForm.lampiran_link" placeholder="https://drive.google.com/...">
+      <label class="form-label">Unggah file lampiran (opsional, maks 5 MB → Drive)</label>
+      <input class="input w-full" type="file" @change="onFileLampiran($event, 'sm')">
+      <p v-if="smForm.lampiran_file" class="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1">
+        Siap diunggah saat simpan: {{ smForm.lampiran_file.nama }}</p>
     </div>
     <div class="md:col-span-2">
       <label class="form-label">Catatan</label>
@@ -168,6 +172,10 @@
     <div class="md:col-span-2">
       <label class="form-label">Tautan lampiran (opsional)</label>
       <input class="input w-full" v-model.trim="skForm.lampiran_link" placeholder="https://drive.google.com/...">
+      <label class="form-label">Unggah file lampiran (opsional, maks 5 MB → Drive)</label>
+      <input class="input w-full" type="file" @change="onFileLampiran($event, 'sk')">
+      <p v-if="skForm.lampiran_file" class="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1">
+        Siap diunggah saat simpan: {{ skForm.lampiran_file.nama }}</p>
     </div>
     <div class="md:col-span-2">
       <label class="form-label">Catatan</label>
@@ -313,6 +321,10 @@
     <div class="md:col-span-2">
       <label class="form-label">Tautan lampiran (opsional)</label>
       <input class="input w-full" v-model.trim="ndForm.lampiran_link" placeholder="https://drive.google.com/...">
+      <label class="form-label">Unggah file lampiran (opsional, maks 5 MB → Drive)</label>
+      <input class="input w-full" type="file" @change="onFileLampiran($event, 'nd')">
+      <p v-if="ndForm.lampiran_file" class="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1">
+        Siap diunggah saat simpan: {{ ndForm.lampiran_file.nama }}</p>
     </div>
   </div>
 </app-modal>
@@ -387,6 +399,87 @@
     <div>
       <label class="form-label">Keterangan</label>
       <input class="input w-full" v-model.trim="tplForm.keterangan">
+    </div>
+  </div>
+</app-modal>
+
+<!-- Overlay penutup menu aksi cepat (G32) -->
+<div v-if="rowMenuId" class="fixed inset-0 z-20" @click="closeMenu()"></div>
+
+<!-- ============ MODAL DETAIL DOKUMEN (v1.4: G29 preview + G30 timeline) ============ -->
+<app-modal :show="showDocDetail"
+           title="Detail Dokumen"
+           subtitle="Riwayat disposisi bertingkat + lampiran dengan preview inline."
+           icon="fa-solid fa-magnifying-glass-plus" size="3xl"
+           confirm-text="Tutup" :show-confirm="false"
+           @close="showDocDetail = false">
+  <div v-if="docDetail" class="space-y-5">
+    <!-- Ringkasan field -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+      <div><span class="text-slate-400">Nomor:</span>
+        <div class="font-bold text-slate-800 dark:text-slate-100">
+          {{ docDetail.nomor_agenda_masuk || docDetail.nomor_surat || docDetail.nomor_naskah || '-' }}</div></div>
+      <div><span class="text-slate-400">Tanggal:</span>
+        <div>{{ fmtTgl(docDetail.tanggal_terima || docDetail.tanggal_surat || docDetail.tanggal) }}</div></div>
+      <div><span class="text-slate-400">Asal/Tujuan:</span>
+        <div>{{ docDetail.asal || docDetail.tujuan || '-' }}</div></div>
+      <div><span class="text-slate-400">Klasifikasi:</span>
+        <div>{{ smLabelKlasifikasi(docDetail.kode_klasifikasi) }}</div></div>
+      <div class="md:col-span-2"><span class="text-slate-400">Perihal:</span>
+        <div>{{ docDetail.perihal || docDetail.isi || '-' }}</div></div>
+    </div>
+
+    <!-- G30: timeline disposisi bertingkat -->
+    <div v-if="(docDetail.disposisi || []).length">
+      <h4 class="text-xs font-bold text-slate-700 dark:text-slate-200 mb-3">
+        <i class="fa-solid fa-timeline text-emerald-600 mr-1"></i> Timeline Disposisi
+      </h4>
+      <ol class="relative border-l-2 border-emerald-200 dark:border-emerald-800 ml-2 space-y-4">
+        <li v-for="(d, i) in docDetail.disposisi" :key="d.id" class="ml-5">
+          <span class="absolute -left-[9px] mt-1 h-4 w-4 rounded-full border-2 border-white dark:border-slate-800"
+                :class="d.status_disposisi === 'selesai' ? 'bg-emerald-500' : (d.status_disposisi === 'diproses' ? 'bg-sky-500' : 'bg-amber-400')"></span>
+          <div class="text-xs font-semibold text-slate-800 dark:text-slate-100">
+            Tingkat {{ i + 1 }} → {{ labelPejabat(d.ke_pejabat_id) }}</div>
+          <div class="text-[11px] text-slate-400">
+            dari {{ labelPejabat(d.dari_pejabat_id) || '—' }} · {{ fmtTgl(d.tgl_disposisi) }} ·
+            tenggat {{ fmtTgl(d.jatuh_tempo) }}</div>
+          <div class="text-[11px] mt-1 flex items-center gap-2">
+            <app-badge size="sm"
+                       :status="d.status_disposisi === 'selesai' ? 'disetujui' : (d.status_disposisi === 'diproses' ? 'menunggu' : 'proses')"
+                       :label="d.status_disposisi"></app-badge>
+            <span class="text-slate-500 dark:text-slate-400 truncate">{{ d.instruksi || '-' }}</span>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <!-- G29: lampiran + preview inline -->
+    <div v-if="(docDetail.lampiran || []).length">
+      <h4 class="text-xs font-bold text-slate-700 dark:text-slate-200 mb-2">
+        <i class="fa-solid fa-paperclip text-sky-600 mr-1"></i> Lampiran
+      </h4>
+      <ul class="divide-y divide-slate-100 dark:divide-slate-800 border border-slate-100 dark:border-slate-800 rounded-xl overflow-hidden">
+        <li v-for="l in docDetail.lampiran" :key="l.id"
+            class="flex items-center gap-2 px-3 py-2 text-xs">
+          <i class="fa-solid fa-file-pdf text-rose-500" v-if="(l.nama_bukti || '').toLowerCase().endsWith('.pdf')"></i>
+          <i class="fa-solid fa-file text-slate-400" v-else></i>
+          <div class="mr-auto min-w-0">
+            <div class="font-semibold truncate text-slate-700 dark:text-slate-200">{{ l.nama_bukti || l.url }}</div>
+            <div class="text-[10px] text-slate-400">{{ l.jenis_bukti }} · {{ l.keterangan || '' }}</div>
+          </div>
+          <button class="btn btn-ghost !px-2 !py-1 text-[11px]" @click="previewLampiran(l)">
+            <i class="fa-solid fa-eye"></i> Preview</button>
+          <a class="btn btn-ghost !px-2 !py-1 text-[11px]" :href="l.url" target="_blank" rel="noopener">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka</a>
+        </li>
+      </ul>
+      <iframe v-if="previewUrl" :src="previewUrl"
+              class="w-full h-80 rounded-xl border border-slate-200 dark:border-slate-700 mt-3 bg-white"></iframe>
+    </div>
+
+    <div v-if="!(docDetail.disposisi || []).length && !(docDetail.lampiran || []).length"
+         class="text-xs text-slate-400 text-center py-4">
+      Belum ada disposisi maupun lampiran pada dokumen ini.
     </div>
   </div>
 </app-modal>
