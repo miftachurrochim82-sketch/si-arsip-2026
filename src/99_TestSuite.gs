@@ -5,8 +5,9 @@
 //   1. runLibraryTests()        → regresi CoreLib (delegasi CoreLib.runCoreTests)
 //   2. testAdopsiG18d()         → verifikasi util CoreLib v2.3.0 (13 asersi)
 //   3. testDispatcherRouting()  → registry handler + fail-closed (≥25 asersi)
-//   4. runDomainTestsSIArsip()  → domain SI-ARSIP (39 grup fungsi sejak v1.1:
-//      sm 5, sk 5, dp 4, SIMPEG 3, pre-save 5, skema 4, nd 5, ar 5, search 3)
+//   4. runDomainTestsSIArsip()  → domain SI-ARSIP (48 grup fungsi sejak v1.4:
+//      sm 5, sk 5, dp 4, SIMPEG 3, pre-save 5, skema 4, nd 5, ar 5, search 3,
+//      dash 1, logbook 2, laporan 2, lampiran 2, notifikasi 2)
 //
 // Entry-point: runAllTestsSIArsip()
 //
@@ -573,6 +574,122 @@ function runDomainTestsSIArsip() {
       var r = searchAll_({ q: 'a', jenis: 'register-tidak-ada' }, { role: 'viewer' });
       _tsAssert_(r && r.success === true && (r.data || []).length === 0,
                  'jenis tak dikenal = 0 temuan (filter ketat)');
+    }
+  ]));
+
+  // ---------- §4j Dashboard v1.2 (1 asersi) ----------
+  groups.push(_tsRunGroup_('Dashboard v1.2', [
+    function testDashChartDisposisiShape() {
+      var r = dashChartDisposisi_({});
+      _tsAssert_(r && r.success === true, 'dash_chart_disposisi sukses');
+      _tsAssert_((r.data.labels || []).length === 3, '3 label status, dapat: ' + (r.data.labels || []).length);
+      _tsAssert_((r.data.values || []).length === 3, '3 nilai jumlah');
+      _tsAssert_((r.data.values || []).every(function (n) { return Number(n) >= 0; }), 'nilai non-negatif');
+    }
+  ]));
+
+  // ---------- §4k Logbook otomatis T7 (2 asersi) ----------
+  groups.push(_tsRunGroup_('Logbook T7', [
+    function testLogbookRingkasan() {
+      var s = logbookRingkasanDok_({ nomor_agenda_masuk: '001/X/2026',
+                                     perihal: 'Undangan rapat panjang sekali',
+                                     status_surat: 'baru' });
+      _tsAssert_(s.indexOf('001/X/2026') === 0, 'ringkasan diawali nomor agenda');
+      _tsAssert_(s.indexOf('baru') !== -1, 'ringkasan memuat status');
+    },
+    function testLogbookAksiVocab() {
+      var wajib = ['simpan_baru', 'ubah', 'hapus', 'ubah_status',
+                   'arsip_auto', 'upload_lampiran'];
+      _tsAssert_(wajib.every(function (a) { return LOGBOOK_AKSI_VALID_.indexOf(a) !== -1; }),
+                 'vocab aksi logbook lengkap');
+      _tsAssert_(typeof catatLogbook_ === 'function' && typeof getDriveFolder_ === 'function',
+                 'catatLogbook_ & getDriveFolder_ terdaftar');
+    }
+  ]));
+
+  // ---------- §4l Laporan bulanan multi-sheet (2 asersi) ----------
+  groups.push(_tsRunGroup_('Laporan Bulanan', [
+    function testLaporanSheetsShape() {
+      var ym = CoreLib.todayIsoLocal().slice(0, 7);
+      var rep = laporanBulanData_(ym);
+      _tsAssert_(rep.sheets.length === 4, '4 sheet workbook');
+      _tsAssert_(rep.sheets.map(function (s) { return s.nama; }).join(',') ===
+                 'Ringkasan,Surat Masuk,Surat Keluar,Disposisi',
+                 'nama sheet sesuai kontrak');
+      _tsAssert_(rep.sheets.every(function (s) {
+        var w = s.rows[0].length;
+        return s.rows.every(function (r) { return r.length === w; });
+      }), 'semua baris persegi (siap setValues)');
+    },
+    function testLaporanCountsConsistent() {
+      var ym = CoreLib.todayIsoLocal().slice(0, 7);
+      var rep = laporanBulanData_(ym);
+      var sm = getSheetData_('T_SURAT_MASUK').filter(function (r) {
+        return (CoreLib.dateKey10(r.tanggal_terima) ||
+                CoreLib.dateKey10(r.tgl_registrasi) || '').slice(0, 7) === ym;
+      });
+      _tsAssert_(rep.sheets[1].rows.length === sm.length + 1,
+                 'baris sheet Surat Masuk = data bulan ini + header');
+      var ringkasan = rep.sheets[0].rows;
+      var barisMasuk = ringkasan.filter(function (r) { return r[0] === 'Surat masuk terdaftar'; })[0];
+      _tsAssert_(Number(barisMasuk[1]) === sm.length, 'metrik ringkasan konsisten');
+    }
+  ]));
+
+  // ---------- §4m Validasi lampiran Drive (2 asersi) ----------
+  groups.push(_tsRunGroup_('Lampiran Drive', [
+    function testLampiranValidasi() {
+      // 6 MB byte → base64 ≈ 4/3 × byte (bukan ÷3!)
+      var besar = { nama: 'a.pdf', mime: 'application/pdf',
+                    base64: new Array(Math.ceil(6 * 1024 * 1024 * 4 / 3) + 2).join('A') };
+      _tsAssert_(validasiLampiranFile_(besar).ok === false, 'file > 5 MB ditolak');
+      _tsAssert_(validasiLampiranFile_({ nama: 'x.exe', mime: 'application/x-msdownload',
+                                         base64: 'QUFB' }).ok === false,
+                 'mime di luar whitelist ditolak');
+      _tsAssert_(validasiLampiranFile_({ nama: 'scan.pdf', mime: 'application/pdf',
+                                         base64: 'QUFB' }).ok === true,
+                 'pdf kecil lolos');
+    },
+    function testLampiranNamaSanitasi() {
+      var n = namaFileDrive_('Surat Masuk (fix) v2.PDF', '2026-09-21', 'abc123456789');
+      _tsAssert_(n.indexOf('2026-09-21_') === 0, 'prefix tanggal');
+      _tsAssert_(n.slice(-4).toLowerCase() === '.pdf', 'ekstensi dipertahankan');
+      _tsAssert_(n.indexOf(' ') === -1 && n.indexOf('(') === -1, 'karakter aneh dibuang');
+    }
+  ]));
+
+  // ---------- §4n Notifikasi in-app (2 asersi) ----------
+  groups.push(_tsRunGroup_('Notifikasi', [
+    function testNotifikasiItemsPenerima() {
+      var today = CoreLib.todayIsoLocal();
+      var dp = [
+        { id: 'dp-x1', surat_id: 'sm-x', ke_pejabat_id: 'pjb-TEST1',
+          dari_pejabat_id: 'pjb-TEST2', status_disposisi: 'diteruskan',
+          tgl_disposisi: today, jatuh_tempo: today, instruksi: 'proses' },
+        { id: 'dp-x2', surat_id: 'sm-x', ke_pejabat_id: 'pjb-TEST9',
+          status_disposisi: 'diteruskan', tgl_disposisi: today,
+          jatuh_tempo: today },
+        { id: 'dp-x3', surat_id: 'sm-x', ke_pejabat_id: 'pjb-TEST1',
+          status_disposisi: 'selesai', tgl_disposisi: today, jatuh_tempo: today }
+      ];
+      // user tanpa pejabat terdaftar → tidak menerima apa pun
+      var items = notifikasiItems_(dp, { pegawai_id: 'PEG-NOT-REG', role: 'user' }, today);
+      _tsAssert_(items.length === 0, 'user bukan penerima = 0 item');
+    },
+    function testNotifikasiItemsPengawasSla() {
+      var today = CoreLib.todayIsoLocal();
+      var kemarin = CoreLib.dateKey10(new Date(new Date(today + 'T00:00:00Z').getTime() -
+                    3 * 86400000).toISOString());
+      var dp = [
+        { id: 'dp-s1', surat_id: 'sm-x', ke_pejabat_id: 'pjb-TEST9',
+          status_disposisi: 'diteruskan', tgl_disposisi: kemarin,
+          jatuh_tempo: kemarin, instruksi: 'segera' }
+      ];
+      var items = notifikasiItems_(dp, { pegawai_id: 'PEG-NOT-REG', role: 'admin' }, today);
+      _tsAssert_(items.length === 1 && items[0].jenis === 'sla_lewat',
+                 'pengawas melihat SLA lewat milik orang lain');
+      var itemsUser = notifikasiItems_(dp, { pegawai_id: 'PEG-NOT-REG', role: 'user' }, today);
+      _tsAssert_(itemsUser.length === 0, 'user biasa tidak melihat SLA orang lain');
     }
   ]));
 
