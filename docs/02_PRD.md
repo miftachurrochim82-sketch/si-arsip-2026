@@ -1,272 +1,193 @@
-# 03 — FRD [SI-ARSIP: Sistem Informasi Kearsipan Dinamis — 2026-09-20]
+# 02 — PRD [SI-ARSIP: Sistem Informasi Kearsipan Dinamis — 2026-09-21 v1.5]
 
-> Aturan Gate 0: **satu baris FR = satu item kode** (handler/fungsi/komponen/kolom).
-> Build tidak boleh mendahului baris di dokumen ini.
+> Amendemen v1.5: L4/L5/L11/L12 TUTUP (paket hemat). Suite 139/0/1. P10 G39 naik jadi HIDUP via FR-69.
+
+> Modul & user story. Satu modul = satu "kamar" backend/frontend (pola si-kompetensi
+> & si-lahar: `V_*.html` per halaman + `J_*.html` per modul logika).
 >
-> Rujukan: Permendagri 78/2012, Perka ANRI tentang JRA, SRIKANDI.
-
-## Master (M1–M3)
-
-- **FR-01** CRUD `M_KLASIFIKASI` (admin): kode_klasifikasi (unik, format `NNN.N`), uraian, retensi_aktif_th (numerik ≥0), retensi_inaktif_th (numerik ≥0), tindakan_akhir ∈ {musnah, permanen}, status_aktif.
-  - Backend: `masterKlasifikasiList_` / `masterKlasifikasiSave_` / `masterKlasifikasiDelete_` (`02_AppLogic.gs`).
-
-- **FR-02** CRUD `M_PEJAJAB` (admin): pegawai_id (dari SIMPEG, wajib), jabatan_id, urutan_hierarki (numerik), tanda_tangan_url (opsional). Sinkronisasi dari SIMPEG via `getSimpegLookup_()`.
-  - Backend: `masterPejabatList_` / `masterPejabatSave_` / `masterPejabatDelete_` (`02_AppLogic.gs`).
-
-- **FR-03** CRUD `M_TEMPLATE` (admin): kode_template (unik), nama_template, jenis_naskah ∈ {surat_masuk, surat_keluar, nota_dinas, memo, laporan, lainnya}, format_default (text).
-  - Backend: `masterTemplateList_` / `masterTemplateSave_` / `masterTemplateDelete_` (`02_AppLogic.gs`).
-
-- **FR-04** Whitelist `tindakan_akhir` ∈ {musnah, permanen}; whitelist `jenis_naskah` di M3.
-  - Backend: `KLASIFIKASI_TINDAKAN_AKHIR_`, `TEMPLATE_JENIS_NASKAH_` (`02_AppLogic.gs`).
-
-## Surat Masuk (T_SURAT_MASUK)
-
-- **FR-05** Simpan surat masuk (user+): tanggal_terima (WIB, wajib), nomor_surat (wajib), tanggal_surat, asal (wajib), perihal (wajib), kode_klasifikasi (whitelist dari M1, wajib), jumlah_lampiran (numerik ≥0), sifat ∈ {biasa, segera, rahasia}, lampiran_link (URL, opsional), catatan.
-  - Backend: `smSave_` (`03_SuratMasukApi.gs`).
-
-- **FR-06** Auto-generate `nomor_agenda_masuk` (internal, terpisah dari nomor_surat): format `<urut:3>/<kode_unit_singkat>/<tahun>` (mis. `001/SATPOL/2026`). Bisa override manual via param `override_agenda`.
-  - Backend: `smGenerateNomorAgenda_` + `CoreLib.genUniqueCode('SM-', 'T_SURAT_MASUK', 'nomor_agenda_masuk', 3, ...)` (`03_SuratMasukApi.gs`).
-
-- **FR-07** Auto-inject `dicatat_oleh` (email user), `tgl_registrasi` (`CoreLib.todayIsoLocal()`), `status_surat` = `baru` saat insert baru.
-  - Backend: `smSave_` (`03_SuratMasukApi.gs`).
-
-- **FR-08** Validasi duplikat: (nomor_surat + asal + tahun) tidak boleh sama. Cek saat insert baru.
-  - Backend: `smSave_` (`03_SuratMasukApi.gs`).
-
-- **FR-09** List surat masuk: filter `tanggal_dari`, `tanggal_sampai`, `asal`, `kode_klasifikasi`, `sifat`, `status_surat`; search `nomor_surat` / `perihal` / `asal`; sort `tanggal_terima` desc; paginasi.
-  - Backend: `smGetList_` (`03_SuratMasukApi.gs`).
-
-- **FR-10** Detail surat masuk: get by ID + daftar disposisi terkait (nested dari `T_DISPOSISI` by `surat_id`).
-  - Backend: `smGetDetail_` (`03_SuratMasukApi.gs`).
-
-- **FR-11** Delete surat masuk (soft): hanya verifikator+; tolak jika masih ada disposisi berstatus ≠ selesai.
-  - Backend: `smDelete_` (`03_SuratMasukApi.gs`).
-
-- **FR-12** Alert Surat Kritis: kode_klasifikasi `005.1` / `015` atau `sifat` ∈ {segera, rahasia} → tandai flag `is_kritis` di response list.
-  - Backend: `smGetList_` (`03_SuratMasukApi.gs`).
-  - Frontend: badge khusus di `V_SuratMasuk.html`.
-
-## Surat Keluar (T_SURAT_KELUAR)
-
-- **FR-13** Simpan surat keluar (user+): tanggal_surat (wajib), tujuan (wajib), perihal (wajib), kode_klasifikasi (whitelist dari M1, wajib), jumlah_lampiran, sifat, penandatangan_id (dari M2, wajib), lampiran_link, catatan.
-  - Backend: `skSave_` (`04_SuratKeluarApi.gs`).
-
-- **FR-14** Auto-generate `nomor_surat` keluar: format `<kode_klasifikasi>/<urut:3>/<kode_unit_singkat>/<tahun>` (mis. `800/045/SATPOL/2026`). Bisa override manual via param `override_nomor`.
-  - Backend: `skGenerateNomor_` + `CoreLib.genUniqueCode('SK-', 'T_SURAT_KELUAR', 'nomor_surat', 3, ...)` (`04_SuratKeluarApi.gs`).
-
-- **FR-15** Status workflow: `draft` → `review` → `terkirim`. Insert baru = `draft`.
-  - Backend: `skSave_` + `skUbahStatus_` (`04_SuratKeluarApi.gs`).
-
-- **FR-16** Validasi transisi status: `draft → review` (pemilik atau verifikator+), `review → terkirim` (admin), `draft → terkirim` (admin langsung, bypass review).
-  - Backend: `skUbahStatus_` (`04_SuratKeluarApi.gs`).
-
-- **FR-17** Auto-archive saat status `terkirim`: buat baris di `T_ARSIP` (FR-27) dengan retensi dari M1. Idempoten (skip jika `ref_id` sudah ada di arsip).
-  - Backend: `skUbahStatus_` (`04_SuratKeluarApi.gs`).
-
-- **FR-18** Auto-inject `dibuat_oleh`, `tgl_dibuat` (WIB), `tgl_terkirim` (WIB saat status terkirim).
-  - Backend: `skSave_` + `skUbahStatus_` (`04_SuratKeluarApi.gs`).
-
-- **FR-19** List surat keluar: filter `tanggal_dari`, `tanggal_sampai`, `tujuan`, `kode_klasifikasi`, `status_surat`; search `nomor_surat` / `perihal` / `tujuan`; sort `tanggal_surat` desc; paginasi.
-  - Backend: `skGetList_` (`04_SuratKeluarApi.gs`).
-
-- **FR-20** Delete surat keluar (soft): admin; hanya boleh saat status `draft`.
-  - Backend: `skDelete_` (`04_SuratKeluarApi.gs`).
-
-## Disposisi (T_DISPOSISI)
-
-- **FR-21** Simpan disposisi (verifikator+): surat_id (dari T_SURAT_MASUK, wajib), dari_pejabat_id (dari M2), ke_pejabat_id (dari M2, wajib), instruksi (wajib), catatan, jatuh_tempo (opsional).
-  - Backend: `dpSave_` (`05_DisposisiApi.gs`).
-
-- **FR-22** Auto-inject `tgl_disposisi` (`CoreLib.todayIsoLocal()`), `status_disposisi` = `diteruskan`.
-  - Backend: `dpSave_` (`05_DisposisiApi.gs`).
-
-- **FR-23** Transisi status disposisi: `diteruskan → diproses` (user ke_pejabat), `diproses → selesai` (pemilik atau verifikator+).
-  - Backend: `dpTeruskan_` + `dpSelesaikan_` (`05_DisposisiApi.gs`).
-
-- **FR-24** Update status surat masuk terkait: saat disposisi pertama dibuat → `status_surat` = `didiposisi`; saat semua disposisi selesai → `selesai`.
-  - Backend: `dpSave_` + `dpSelesaikan_` (`05_DisposisiApi.gs`).
-
-- **FR-25** SLA alert: jika `jatuh_tempo` < hari ini (WIB) dan `status_disposisi` ≠ `selesai` → flag `is_lewat_sla` = true di response list.
-  - Backend: `dpGetList_` (`05_DisposisiApi.gs`).
-  - Frontend: badge merah di `V_Disposisi.html` + panel di `V_Dashboard.html`.
-
-- **FR-26** List disposisi: filter `status_disposisi`, `dari_pejabat_id`, `ke_pejabat_id`, `tanggal_dari`, `tanggal_sampai`; sort `tgl_disposisi` desc; paginasi.
-  - Backend: `dpGetList_` (`05_DisposisiApi.gs`).
-
-- **FR-27** Delete disposisi (soft): admin; tolak jika sudah `selesai`.
-  - Backend: `dpDelete_` (`05_DisposisiApi.gs`).
-
-## Kearsipan & Retensi (T_ARSIP) — Fase 2
-
-- **FR-28** Auto-generate baris arsip saat: surat keluar status `terkirim`, surat masuk status `selesai`, naskah dinas status `final`. Idempoten by `ref_id` + `jenis_asal`.
-  - Backend: `arAutoArchive_` (`07_KearsipanApi.gs`).
-
-- **FR-29** Field arsip: arsip_id, jenis_asal ∈ {surat_masuk, surat_keluar, naskah_dinas}, ref_id, kode_klasifikasi, judul, tgl_arsip, lokasi_fisik, status_arsip ∈ {aktif, inaktif, permanen, musnah}, tgl_retensi_habis.
-  - Backend: `arAutoArchive_` (`07_KearsipanApi.gs`).
-
-- **FR-30** Auto-set `status_arsip` & `tgl_retensi_habis` dari M1: `tgl_retensi_habis` = tgl_arsip + retensi_aktif_th + retensi_inaktif_th; `status_arsip` = `permanen` jika tindakan_akhir = permanen, else `aktif`.
-  - Backend: `arAutoArchive_` (`07_KearsipanApi.gs`).
-
-- **FR-31** List arsip: filter `jenis_asal`, `kode_klasifikasi`, `status_arsip`, `tahun`; search `judul` / `kode_klasifikasi`; paginasi.
-  - Backend: `arGetList_` (`07_KearsipanApi.gs`).
-
-- **FR-32** Daftar Akan Musnah: arsip `status_arsip ∈ {aktif, inaktif}` dengan `tgl_retensi_habis` ≤ hari ini.
-  - Backend: `arGetAkanMusnah_` (`07_KearsipanApi.gs`).
-
-- **FR-33** Aksi ubah lokasi arsip (user+), tandai musnah & tandai serah (admin, dengan catatan/BA).
-  - Backend: `arUbahLokasi_` + `arTandaiMusnah_` + `arTandaiSerah_` (`07_KearsipanApi.gs`).
-
-## Pencarian Lintas (Fase 2)
-
-- **FR-34** `searchAll_`: search lintas `T_SURAT_MASUK`, `T_SURAT_KELUAR`, `T_NASKAH_DINAS`, `T_ARSIP` dengan `CoreLib.matchSearch` pada field relevan. Filter jenis, tahun, kode_klasifikasi. Sort by tanggal desc. Limit 50.
-  - Backend: `searchAll_` (`08_PencarianApi.gs`).
-
-## Dashboard
-
-- **FR-35** `dashRingkas_`: 4 KPI — surat masuk bulan ini, surat keluar bulan ini, disposisi menunggu, disposisi lewat SLA. Filter periode bulan (default bulan berjalan WIB).
-  - Backend: `dashRingkas_` (`09_DashboardApi.gs`).
-
-- **FR-36** `dashChartTren_`: volume surat masuk + keluar per bulan, 12 bulan terakhir (termasuk bulan berjalan). Return 2 dataset.
-- **FR-36b** (amendemen v1.2, 2026-09-20): `dashChartDisposisi_` — chart ke-4: distribusi status disposisi (diteruskan/diproses/selesai) untuk doughnut dashboard.
-  - Backend: `dashChartTren_` (`09_DashboardApi.gs`).
-  - Frontend: `<app-chart-bar>` di `V_Dashboard.html`.
-
-- **FR-37** `dashKlasifikasi_`: distribusi surat per kode klasifikasi (top 5), dari `T_SURAT_MASUK` + `T_SURAT_KELUAR`.
-  - Backend: `dashKlasifikasi_` (`09_DashboardApi.gs`).
-  - Frontend: `<app-chart-doughnut>` di `V_Dashboard.html`.
-
-- **FR-38** Panel **Surat Kritis**: 10 surat masuk terbaru dengan `is_kritis` = true.
-  - Backend: `dashSuratKritis_` (`09_DashboardApi.gs`).
-
-- **FR-39** Panel **Disposisi Jatuh Tempo**: 10 disposisi dengan `is_lewat_sla` = true, urut jatuh_tempo asc.
-  - Backend: `dashDisposisiLewatSla_` (`09_DashboardApi.gs`).
-
-## Konfigurasi (Script Properties)
-
-- **FR-40** `getConfigList_` / `saveConfigItem_` / `deleteConfigItem_`: whitelist key via `CoreLib.isAllowedConfigKey(key, ['ADMIN_EMAILS','VERIFIKATOR_EMAILS'])`.
-  - Backend: `02_AppLogic.gs`.
-
-- **FR-41** Default config: `app_title`, `app_version`, `instansi`, `kode_unit_singkat` (`SATPOL`), `format_nomor_surat`, `sla_disposisi_hari` (`2`).
-  - Backend: `getConfigList_` (`02_AppLogic.gs`).
-
-## Kepatuhan CoreLib-First (v1.0.0)
-
-- **FR-42** Delegasi penuh ke CoreLib: `normId`, `normStr`, `parseDate`, `whitelist`, `genUniqueCode`, `requireRole`, `checkRole`, `todayIsoLocal`, `dateKey10`, `paginate`, `matchSearch`, `dispatchAction`, `getDb`, `ensureSheet`, `initDatabase`, `executeAppSetup`. **Dilarang** menduplikasi di app.
-  - Backend: seluruh `.gs`.
-
-- **FR-43** Dispatcher `CoreLib.dispatchAction(payload, cfg)`; `cfg = getAppConfig_()` + `buildLocalHandlers_()`.
-  - Backend: `handleAction` (`02_AppLogic.gs`), `getAppConfig_` (`01_ConfigAndBridge.gs`).
-
-- **FR-44** `actionLevels` fail-closed: semua aksi didaftarkan eksplisit (viewer / user / verifikator / admin / super). Aksi tak dikenal = ditolak di gerbang auth.
-  - Backend: `getAppConfig_().actionLevels` (`01_ConfigAndBridge.gs`).
-
-- **FR-45** `localPreSaveHook_` (P1): generate id kosong (prefix per-sheet: `ref`, `pjb`, `tpl`, `sm`, `sk`, `nd`, `dp`, `ar`, `lmp`, `log`).
-  - Backend: `localPreSaveHook_` (`01_ConfigAndBridge.gs`).
-
-- **FR-46** Filter soft-delete otomatis di `getSheetData_` (parameter `{includeDeleted: true}` untuk audit).
-  - Backend: `getSheetData_` (`01_ConfigAndBridge.gs`).
-
-- **FR-47** SSO native CoreLib (`CoreLib.exchangePlatformTicket`, `CoreLib.checkAuth`, `CoreLib.logoutUser`) — tanpa fallback email aktif.
-  - Backend: via `CoreLib.dispatchAction`.
-
-## Kepatuhan CDN-First (v1.0.0)
-
-- **FR-48** Seluruh UI pakai kit CDN `@v2.8.1`: `<app-badge>`, `<app-modal>`, `<app-crud-table>`, `<app-filter-bar>`, `<app-stat-card>`, `<app-chart-bar>` / `<app-chart-doughnut>`, `<app-pegawai-picker>`, `<app-empty-state>`, `<app-skeleton>`, `<app-login>`, `<app-sidebar>`, `<app-header>`, `<app-settings>`.
-  - Frontend: seluruh `V_*.html`.
-
-- **FR-49** Tombol aksi tabel pakai `.btn-icon` / `.btn-icon-danger` (kit CDN v2.8.0/F2).
-  - Frontend: seluruh tabel.
-
-- **FR-50** Paginasi client-side pakai `AppCore.paginate` + `AppCore.pageCount`.
-  - Frontend: computed di `J_State.html`.
-
-- **FR-51** Library berat (chart, xlsx, jspdf) dimuat on-demand via `AppCore.loadLib()` — **tidak** dimuat di `<head>` `Index.html`.
-  - Frontend: `J_Export.html` + `V_Dashboard.html`.
-
-- **FR-52** Boot dark-mode pakai kunci `siarsip_dark` (baca ter-guard try/catch di `Index.html`).
-  - Frontend: `Index.html`.
-
-- **FR-53** Include wajib satu tingkat dari `Index.html`: `V_Modals` → `V_Dashboard` → `V_SuratMasuk` → `V_SuratKeluar` → `V_Disposisi` → `V_Master` → `V_Pengaturan`; `J_State` → `J_Helpers` → `J_Api` → `J_Actions` → `J_Export` → `J_App`.
-
-## Test (target v1.0.0)
-
-- **FR-54** `runLibraryTests()` — regression CoreLib pin 15 (target PASS 42 / FAIL 0 / SKIP 1).
-  - Backend: `99_TestSuite.gs`.
-
-- **FR-55** `testAdopsiG18d()` — verifikasi util CoreLib v2.3.0 (target 13/13).
-  - Backend: `99_TestSuite.gs`.
-
-- **FR-56** `testDispatcherRouting()` — registry handler + fail-closed (target ≥20/0).
-  - Backend: `99_TestSuite.gs`.
-
-- **FR-57** `runDomainTestsSIArsip()` — domain FIX MVP (surat masuk/keluar/disposisi + SIMPEG RO + hook) — target ≥15/0.
-- **FR-58** Logbook T7 otomatis: SETIAP aksi dokumen (simpan/ubah/hapus/ubah_status/
-  upload_lampiran/arsip) menulis baris `T_LOGBOOK` via `catatLogbook_` (00b);
-  gagal menulis logbook ≠ aksi gagal. AUDIT_LOGS tetap untuk audit sistem.
-- **FR-59** Export Excel multi-sheet laporan bulanan (`laporan_export_excel`, level user):
-  workbook 4 sheet (Ringkasan, Surat Masuk, Surat Keluar, Disposisi) difilter periode
-  YYYY-MM; file xlsx disimpan ke folder Drive 'SI-ARSIP Export', URL dikembalikan.
-- **FR-60** Upload lampiran biner ke Drive (`lmp_upload`, level user): base64 ≤ 5 MB,
-  mime whitelist; file ke folder 'SI-ARSIP Lampiran', baris `T_LAMPIRAN`
-  (jenis_bukti=file_drive) + logbook; field link manual tetap sebagai fallback.
-- **FR-61** Modal Detail Dokumen (sm/sk/nd): ringkasan field + daftar lampiran dengan
-  **preview inline** (iframe; link Drive otomatis dikonversi ke mode `/preview`).
-- **FR-62** Timeline disposisi bertingkat di modal detail: node berwarna per status
-  (amber=diteruskan, sky=diproses, emerald=selesai), tingkat 1..n, dari→ke, tenggat.
-- **FR-63** Notifikasi in-app: lonceng di slot `extra-actions` app-header + badge unread;
-  item = disposisi baru untuk penerima & SLA lewat (penerima + pengawas), umur ≤14 hari;
-  marker baca per-email di Script Properties (`NOTIF_READ_<email>`).
-- **FR-64** Quick action dropdown (⋮) di tabel surat masuk & surat keluar:
-  Detail & Lampiran / Ubah / transisi status / Disposisikan / Hapus.
-- **FR-65** Preset rentang tanggal (Bulan ini / Bulan lalu / 90 hari / Tahun ini / Semua)
-  di filter bar surat masuk, surat keluar, disposisi; mengisi tanggal_dari/sampai.
-- **FR-66** (v1.5 L4) Rekap per Klasifikasi lengkap: `lap_rekap_klasifikasi` (viewer) —
-  params `{tahun?: YYYY, search?}` → `{rekap: [{kode_klasifikasi, uraian, jml_masuk, jml_keluar, total, pct}], total_masuk, total_keluar, total_all}`; tally dari `T_SURAT_MASUK` + `T_SURAT_KELUAR` group by `kode_klasifikasi`; uraian dari `M_KLASIFIKASI`; sort total desc; filter tahun via `dateKey10`.
-  - Backend: `lapRekapKlasifikasi_` (`13_LaporanRekapApi.gs`).
-  - Frontend: tab Klasifikasi di `V_Laporan.html`.
-- **FR-67** (v1.5 L5) Rekap per Unit kerja: `lap_rekap_unit` (viewer) — params `{tahun?: YYYY}` →
-  `{disposisi_per_unit: [{unit_id, nama_unit, jumlah, pct}], keluar_per_unit: [...], total_disposisi, total_keluar}`; map `M_PEJABAT → PEGAWAI → UNIT_KERJA` via `_lapPejabatUnitMap_`; tally disposisi by `ke_pejabat_id` + surat keluar by `penandatangan_id`.
-  - Backend: `lapRekapUnit_` (`13_LaporanRekapApi.gs`).
-  - Frontend: tab Per Unit di `V_Laporan.html`.
-- **FR-68** (v1.5 L11) Laporan Kepatuhan JRA Tahunan: `lap_kepatuhan_jra` (viewer) — params `{tahun?: YYYY}` →
-  `{total, patuh, tidak_patuh, pct_patuh, rincian_tidak_patuh: [{id,judul,kode,tgl_arsip,tgl_retensi_habis,status_arsip,tindakan_akhir,alasan}]}`; hitung expected retensi via `arHitungRetensiHabis_` + cek `tindakan_akhir` vs `status_arsip` (permanen≠musnah); list tidak patuh max 100.
-  - Backend: `lapKepatuhanJra_` (`13_LaporanRekapApi.gs`).
-  - Frontend: tab Kepatuhan JRA di `V_Laporan.html` (4 stat-card + tabel tidak patuh).
-- **FR-69** (v1.5 L12) Laporan Bulanan Format Khas Satpol PP: `laporan_export_khas` (user) — params `{ym: YYYY-MM}` →
-  workbook 7 sheet: Format Satpol PP (cover KOP instansi + periode + ringkasan + top-5 klasifikasi bulan + rekap unit 10 + ttd), Ringkasan, Surat Masuk, Surat Keluar, Disposisi, Rekap Klasifikasi (full tahun), Rekap Unit (disposisi+keluar); reuse `laporanBulanData_` + `lapRekapKlasifikasi_`/`lapRekapUnit_`; file xlsx di folder Drive 'SI-ARSIP Export' via UrlFetch export + OAuth; temp spreadsheet di-trash.
-  - Backend: `laporanKhasData_` + `exportKhasBulanan_` (`10_LaporanApi.gs`).
-  - Frontend: tab Bulanan Khas di `V_Laporan.html` + export di Dashboard tetap hidup.
-  - Backend: `99_TestSuite.gs`.
-
----
-
-## Amendemen 2026-09-20 — Struktur berkas & modul (Gate 0)
-
-> Satu baris dok = satu item kode. Backend = pola starter-kit/si-lahar; frontend
-> cetak dari starter-kit (Index shell + include satu tingkat).
-
-### Backend (`src/*.gs`) — kondisi + rencana
-| Berkas | Status | Isi |
-|---|---|---|
-| `00_Utils.gs` | ADA | audit log lokal, self-check |
-| `00b_LocalHelpers.gs` | ADA | lock ber-timeout + write atomik ber-preSaveHook (kandidat CoreLib C9/C10; bertahan sampai promosi) |
-| `01_ConfigAndBridge.gs` | ADA | config, bridge CoreLib, normalisasi SIMPEG, preSaveHook prefix |
-| `02_AppLogic.gs` | ADA | doGet/handleAction + peta localHandlers (ping, profil, dashboard×5, SIMPEG×7, sm×5, sk×5, dp×6, master×9, config×3) |
-| `03_SuratMasukApi.gs` / `04_SuratKeluarApi.gs` / `05_DisposisiApi.gs` | ADA | CRUD + generator nomor + transisi + SLA |
-| `09_DashboardApi.gs` | ADA | ringkas, tren, klasifikasi, surat kritis, disposisi lewat SLA |
-| `99_TestSuite.gs` | ADA | runAllTestsSIArsip (adopsi CoreLib + registri handler + domain + guard SIMPEG + skema) |
-| `appsscript.json` | DITAMBAHKAN 2026-09-20 | manifest V8, CoreLib pin 15, timeZone Asia/Jakarta |
-| `06_KearsipanApi.gs` | RENCANA v1.1 | T5 arsip: retensi berjalan, daftar musnah/serah, pencarian global lintas T1/T2/T3 |
-
-### Frontend (`src/*.html`) — RENCANA v1 (cetak starter-kit)
-| Berkas | Tanggung jawab |
-|---|---|
-| `Index.html` | shell tipis: pin CDN v2.8.1, tema, include satu tingkat |
-| `J_State.html` | state global: token, currentPage, filter per modul, flag modal |
-| `J_Api.html` | wrapper callServer + loader per modul (sm/sk/dp/master/dash/arsip) |
-| `J_Actions.html` | aksi CRUD + transisi (sm_disposisi, sk_ubah_status, dp_teruskan/selesaikan) |
-| `J_Export.html` | exportExcelBulanan via aksi server `laporan_export_excel` (xlsx 4 sheet, link Drive); exportPDF = kandidat Fase 3 |
-| `J_Arsip.html` | logika domain kearsipan: retensi, musnah/serah, pencarian global |
-| `J_App.html` | bootstrap AppCore.create, menu, pageIcons, navigasi |
-| `V_Dashboard/SuratMasuk/SuratKeluar/NaskahDinas/Disposisi/Kearsipan/Pencarian/Master/Pengaturan.html` | 9 halaman sesuai 05_UIUX |
-| `V_Modals.html` | modal form bersama |
+> **Versi awal (v1.0.0)** — MVP: Surat Masuk + Surat Keluar + Disposisi sederhana +
+> Master + Dashboard dasar. Fase 2: Naskah Dinas, Kearsipan & Retensi, Pencarian Lintas,
+> TTE, Upload Drive, Integrasi SI-LAHAR.
+>
+> Rujukan: SRIKANDI (ANRI + KemenPANRB), Permendagri 78/2012 (Tata Naskah Dinas),
+> Perka ANRI (JRA).
+
+## P1 — Surat Masuk (T_SURAT_MASUK) — MVP
+- Story: staf menerima surat fisik/email dari luar → registrasi ke sistem; pimpinan/atasan tahu surat masuk yang perlu ditindaklanjuti.
+- AC:
+  - Form registrasi: tanggal_terima, nomor_surat, tanggal_surat, asal (instansi/pengirim), perihal, kode_klasifikasi (dari M1), jumlah_lampiran, sifat (biasa/segera/rahasia), lampiran_link (URL opsional), catatan.
+  - **Penomoran masuk** auto-generate: `<urut>/<asal_singkat>/<tahun>` (mis. `001/SATPOL/2026`) — bisa override manual.
+  - Validasi: nomor_surat wajib, kode_klasifikasi wajib (whitelist dari M1), tanggal_terima wajib WIB.
+  - Auto-inject `dicatat_oleh` (email user), `tgl_registrasi` (WIB).
+  - **Alert Surat Kritis**: kode klasifikasi `005.1` (UU) & `015` (SPK) ditandai badge khusus.
+  - Aksi: disposisi (ke P3), arsipkan (ke P5 fase 2), edit (pemilik/verifikator+), hapus (verifikator+ saja).
+  - List: filter tanggal/asal/klasifikasi/sifat; search nomor/perihal/asal; paginasi.
+  - Export Excel daftar surat masuk periode.
+- Modul backend: `03_SuratMasukApi.gs` (`smGetList_`, `smSave_`, `smDelete_`, `smDisposisi_`).
+- Modul frontend: `V_SuratMasuk.html`, modal di `V_Modals.html`.
+
+## P2 — Surat Keluar (T_SURAT_KELUAR) — MVP
+- Story: staf membuat draft surat → review → terbitkan dengan nomor resmi; pimpinan menandatangani (TTE di fase lanjut).
+- AC:
+  - Form: tanggal_surat, tujuan, perihal, kode_klasifikasi (dari M1), jumlah_lampiran, sifat, penandatangan (dari M2 — pilih pejabat), lampiran_link, catatan.
+  - **Penomoran keluar** auto-generate: `<kode_klasifikasi>/<urut>/<kode_unit>/<tahun>` (mis. `800/045/SATPOL/2026`) — bisa override manual.
+  - **Status workflow**: `draft` → `review` → `terkirim` (final).
+  - Validasi: tujuan wajib, perihal wajib, kode_klasifikasi wajib, penandatangan wajib.
+  - Auto-archive: saat status `terkirim`, buat baris di `T_ARSIP` (fase 2) dengan retensi dari M1.
+  - Aksi: edit (pemilik saat status draft), review (verifikator+), tandai terkirim (admin), hapus (admin hanya saat draft).
+  - List: filter tanggal/tujuan/klasifikasi/status; search nomor/perihal/tujuan; paginasi.
+  - Export Excel daftar surat keluar periode.
+- Modul backend: `04_SuratKeluarApi.gs` (`skGetList_`, `skSave_`, `skDelete_`, `skUbahStatus_`).
+- Modul frontend: `V_SuratKeluar.html`, modal di `V_Modals.html`.
+
+## P3 — Disposisi (T_DISPOSISI) — MVP sederhana
+- Story: atasan menerima surat masuk → memberikan disposisi ke bawahan; bawahan menindaklanjuti; status terpantau.
+- AC:
+  - Form disposisi: surat_id (auto dari aksi P1), dari_pejabat (dari M2), ke_pejabat (dari M2), instruksi (singkat), catatan, tgl_disposisi (WIB), jatuh_tempo (opsional).
+  - **Alur 1–2 jenjang**: Kasat → Kabid → Kasi; atau Sekretaris → Kasubbag. Serial, bukan paralel.
+  - **Status**: `diteruskan` → `diproses` → `selesai`.
+  - **SLA alert**: jika jatuh_tempo lewat & status ≠ selesai → badge merah + tampil di dashboard.
+  - Aksi: teruskan (verifikator+), tindak lanjut (user), selesaikan (pemilik disposisi atau verifikator+), hapus (admin).
+  - List: filter status/dari/ke/tanggal; sort tgl_disposisi desc; paginasi.
+  - Tampil di dashboard: jumlah disposisi menunggu + jatuh tempo.
+- Modul backend: `05_DisposisiApi.gs` (`dpGetList_`, `dpSave_`, `dpTeruskan_`, `dpSelesaikan_`, `dpDelete_`).
+- Modul frontend: `V_Disposisi.html`, modal di `V_Modals.html`.
+
+## P4 — Naskah Dinas (T_NASKAH_DINAS) — Fase 2
+- Story: staf membuat nota dinas, memo, atau laporan internal yang tidak termasuk surat masuk/keluar.
+- AC:
+  - Form: jenis_naskah (`nota_dinas` / `memo` / `laporan` / `lainnya`), nomor, tanggal, perihal, tujuan (unit/pejabat), isi, kode_klasifikasi, lampiran_link.
+  - **Penomoran internal** auto-generate sesuai jenis.
+  - Status: `draft` → `final` → `terarsip`.
+  - Aksi: edit (pemilik saat draft), tandai final (verifikator+), arsipkan (admin).
+  - List + filter + search.
+- Modul backend: `06_NaskahDinasApi.gs`.
+- Modul frontend: `V_NaskahDinas.html`, modal di `V_Modals.html`.
+
+## P5 — Kearsipan & Retensi (T_ARSIP) — Fase 2
+- Story: staf mengelola arsip (surat/naskah yang sudah selesai) dan masa retensinya.
+- AC:
+  - Auto-generate baris arsip saat: surat keluar status `terkirim`, surat masuk status `diselesaikan`, naskah status `final`.
+  - Field: arsip_id, jenis_asal (`surat_masuk` / `surat_keluar` / `naskah_dinas`), ref_id (surat/naskah ID), kode_klasifikasi, judul, tgl_arsip (WIB), lokasi_fisik, status_arsip (`aktif` / `inaktif` / `permanen` / `musnah`), tgl_retensi_habis.
+  - **Auto-set status & retensi** dari M1 (kode klasifikasi).
+  - **Daftar Akan Musnah**: arsip yang `tgl_retensi_habis` ≤ hari ini.
+  - **Daftar Permanen**: arsip dengan tindakan akhir = permanen.
+  - Aksi: ubah lokasi, tandai musnah (admin, butuh BA), tandai serah (admin).
+  - Export Daftar Inventaris Arsip (DIA).
+- Modul backend: `07_KearsipanApi.gs`.
+- Modul frontend: `V_Kearsipan.html`, modal di `V_Modals.html`.
+
+## P6 — Pencarian Lintas (Search) — Fase 2
+- Story: pegawai mencari surat/naskah/arsip dengan cepat lintas kategori.
+- AC:
+  - Satu search box → hasil dari `T_SURAT_MASUK`, `T_SURAT_KELUAR`, `T_NASKAH_DINAS`, `T_ARSIP`.
+  - Filter: jenis (semua/surat masuk/surat keluar/naskah/arsip), tahun, klasifikasi.
+  - Sorting: relevansi atau tanggal terbaru.
+  - Hasil tampil dengan badge jenis + aksi langsung (buka detail).
+- Modul backend: `08_PencarianApi.gs` (`searchAll_`).
+- Modul frontend: `V_Pencarian.html` (atau search bar di `V_Dashboard`).
+
+## P7 — Dashboard — Fase 1 (KPI dasar)
+- Story: pimpinan & staf memantau ringkasan surat & disposisi.
+- AC:
+  - 4 kartu KPI: Surat Masuk Bulan Ini, Surat Keluar Bulan Ini, Disposisi Menunggu, Disposisi Lewat Jatuh Tempo.
+  - Chart batang: volume surat masuk + keluar per bulan (12 bulan terakhir).
+  - Chart doughnut: distribusi surat per kode klasifikasi (top 5).
+  - Panel **Surat Kritis** — surat masuk dengan kode `005.1`, `015`, atau sifat `segera`/`rahasia`.
+  - Panel **Disposisi Jatuh Tempo** — list teratas.
+  - Footer info aplikasi.
+- Modul backend: `09_DashboardApi.gs` (`dashRingkas_`, `dashChartTren_`, `dashKlasifikasi_`).
+- Modul frontend: `V_Dashboard.html` (pakai `<app-stat-card>`, `<app-chart-bar>`, `<app-chart-doughnut>`).
+
+## P8 — Master (M_KLASIFIKASI, M_PEJAJAB, M_TEMPLATE) — MVP
+- Story: admin mengelola master kode klasifikasi ANRI, daftar pejabat (dari SIMPEG), dan template naskah.
+- AC:
+  - **Tab Klasifikasi**: CRUD kode (format `005.1`, `015`, dst), uraian, retensi_aktif_th, retensi_inaktif_th, tindakan_akhir (`musnah` / `permanen`), status_aktif.
+  - **Tab Pejabat**: sinkronisasi dari SIMPEG (pegawai_id + jabatan_id), tambah field lokal: tanda_tangan_url, urutan_hierarki.
+  - **Tab Template**: CRUD template (kode_template, nama, jenis_naskah, format_default).
+  - Filter + paginasi per tab.
+  - Aksi tabel: edit/hapus pakai `.btn-icon` / `.btn-icon-danger`.
+- Modul backend: `02_AppLogic.gs` (`masterHandlers_`) + `01_ConfigAndBridge.gs` (skema).
+- Modul frontend: `V_Master.html` (3 tab segmented).
+
+## P9 — Pengaturan (KONFIGURASI) — Fase 1
+- Story: admin mengelola konfigurasi aplikasi (Script Properties).
+- AC:
+  - Wrapper `<app-settings>` kit (self-contained).
+  - CRUD Script Properties dengan whitelist key (`CoreLib.isAllowedConfigKey`).
+  - Default key: `app_title`, `app_version`, `instansi`, `kode_unit_singkat`, `format_nomor_surat`, `sla_disposisi_hari`.
+- Modul frontend: `V_Pengaturan.html`.
+- Modul backend: `02_AppLogic.gs` (`getConfigList_`, `saveConfigItem_`, `deleteConfigItem_`).
+
+## Fitur khas Satpol PP (peta silang ke GAP_LIST)
+
+| # | Fitur | Fase | Status |
+|---|---|---|---|
+| 1 | **Integrasi SI-LAHAR** — surat tugas → entri e-Kinerja | 3 | 🔵 G36 ROADMAP |
+| 2 | **Template Surat Satpol PP** — Surat Tugas Patroli, SPK Penertiban, BA Pemeriksaan | 3 | 🔵 G37 ROADMAP (master M_TEMPLATE sudah ada sejak v1.1) |
+| 3 | **Dashboard KPI khas** — surat patroli, penertiban, Damkar | 3 | 🔵 G38 ROADMAP |
+| 4 | **Alert Surat Kritis** — highlight kode prioritas | 1 | ✅ HIDUP (v1.1 `is_kritis`; panel dashboard v1.2) |
+| 5 | **Export Excel format Satpol PP** — laporan bulanan | 3 | ✅ HIDUP v1.5 (G39 via FR-69, 7 sheet khas: Format Satpol PP KOP+top5+rekap unit+ttd) |
+
+## Luar scope v1 — status terkini (v1.5)
+
+- **TTE (BSrE / internal)** — tetap Fase 3 (G34/G35, ROADMAP).
+- **Upload file biner ke Drive** — ✅ SELESAI v1.3 (G28); link manual tetap fallback.
+- **Disposisi multi-level (>2 jenjang)** — digeser ke Fase 3 (G44, ROADMAP).
+- **Naskah Dinas** — ✅ SELESAI v1.1 (G19/G20). **Template Generator PDF** — kandidat B9 (IDE).
+- **Multi-kantor** — arsitektur siap, single-tenant dulu.
+- **Integrasi SRIKANDI nasional** — fase lanjut.
+- **Integrasi SIASN/SRIKANDI KemenPANRB** — fase lanjut.
+- **Laporan (L4/L5/L11/L12)** — ✅ SELESAI v1.5 (FR-66..69, suite 139/0/1, V_Laporan 4 tab).
+
+## P10a — Laporan Rekap v1.5 (KONTRAK BARU, TUTUP)
+
+> Promosi dari ROADMAP_OUTPUT L4/L5/L11/L12 → PRD KONTRAK per v1.5 karena paket hemat + bukti 139/0/1.
+
+- **P10a-L4**: Rekap per Klasifikasi lengkap (FR-66) — tabel full + pct + filter tahun.
+- **P10a-L5**: Rekap per Unit (FR-67) — disposisi per unit + keluar per unit via SIMPEG.
+- **P10a-L11**: Kepatuhan JRA Tahunan (FR-68) — % patuh + rincian tidak patuh.
+- **P10a-L12**: Format Khas Satpol PP (FR-69/G39) — 7 sheet khas.
+
+## Adopsi platform (v1.0.0)
+
+- **CoreLib-First**: dispatcher `CoreLib.dispatchAction` + `actionLevels` fail-closed; hook P1/P2 (gen-id + kunci field verifikasi); filter soft-delete otomatis di `getSheetData_`; `todayIsoLocal()` untuk tanggal WIB.
+- **CDN-First**: seluruh UI via `<app-*>`. Tombol aksi pakai `.btn-icon` / `.btn-icon-danger`.
+- **Struktur modular**: `V_*.html` per halaman + `J_*.html` per modul logika (pola si-kompetensi & si-lahar).
+- **Pin CoreLib 15** + **CDN `@v2.8.1`** + **Vue 3.5.42**.
+
+## P10 — Roadmap Fase 3 (OPSIONAL — status ROADMAP, BELUM KONTRAK)
+
+> Tangga status PRD: **KONTRAK** (P1–P9, semua TUTUP per v1.4) → **ROADMAP**
+> (P10) → **IDE** (P11). Item naik jadi kontrak kode hanya lewat keputusan
+> pemilik: masukkan ke sini sebagai komitmen, lalu beri nomor FR di FRD
+> (satu baris dok = satu item kode). Tanpa itu, ia tetap parkir di GAP_LIST.
+
+| G | Item | Story satu baris | Pemicu promosi |
+|---|---|---|---|
+| G34 | TTE BSrE | Pejabat menandatangani surat keluar secara elektronik tersertifikasi | Kewajiban/ksediaan BSrE |
+| G35 | TTE internal | Alternatif tanda tangan kriptografi lokal tanpa pihak ketiga | BSrE tak tersedia |
+| G36 | Integrasi SI-LAHAR | Surat tugas terbit → entri e-Kinerja Harian otomatis | Data surat tugas stabil |
+| G37 | Template Surat Satpol PP | Surat Tugas Patroli/SPK/BA lahir dari template M3 | Kebutuhan operasional |
+| G38 | Dashboard KPI khas | Pimpinan melihat patroli/penertiban/Damkar | Multi-data operasional |
+| G39 | Export format Satpol PP | Laporan bulanan format internal satuan | Permintaan pimpinan |
+| G40 | Multi-kantor | Satu deploy, banyak kantor, data terpisah | Organisasi melebar |
+| G41 | Integrasi SRIKANDI (ANRI) | Arsip tersambung registrasi nasional | Kewajiban ANRI |
+| G42 | Integrasi SIASN | Data pegawai otomatis dari KemenPANRB | Kebutuhan kepegawaian |
+| G43 | Pencarian suara | Cari arsip dengan ucapan | Eksperimental |
+| G44 | Disposisi multi-level | Rantai disposisi >2 jenjang paralel | Alur nyata bertingkat |
+| G45 | Role kustom | Arsiparis fungsional dengan hak khusus | Tim bertambah |
+
+## P11 — Kandidat ide (status IDE — BELUM MASUK KONTRAK)
+
+| B | Kandidat | Manfaat | Pemicu |
+|---|---|---|---|
+| B1 | Tanda tangan digital scan (upload scan ttd) | Jembatan antara manual & BSrE | Admin butuh verifikasi visual |
+| B2 | Auto-ingest email surat masuk | Hemat langkah registrasi | Email kantor terstruktur |
+| B3 | QR code surat keluar | Verifikasi asli/palsu cepat | Butuh verifikasi publik |
+| B4 | Enrich penandatangan dari SIMPEG | Pilih pejabat dari jabatan aktif | Sudah mungkin (M2) — murah dipromosikan |
+| B5 | Dashboard per-unit | Pimpinan unit memantau sendiri | Multi-kantor aktif |
+| B6 | Rekap bulanan PDF otomatis | Hemat kerja staf | Data stabil |
+| B7 | Export format SRIKANDI | Submit ke ANRI | Ada kewajiban |
+| B8 | Filter multi-tag | Analisa fleksibel | Kebutuhan analisa |
+| B9 | Template generator PDF | Form → PDF surat | Volume surat naik |
