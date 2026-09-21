@@ -1,0 +1,173 @@
+<!-- ============================================================
+     SI-ARSIP - V_Analisa.html (v1.7 — A3-A10 TUTUP, piramida Analisa 10/10)
+     Halaman Analisa: 8 tab
+       A3 Distribusi per Unit Kerja, A4 Top Pengirim/Penerima,
+       A5 Beban Kerja per Pejabat, A6 Proyeksi Retensi 5 Tahun,
+       A7 Korelasi Klasifikasi↔Unit, A8 Rasio TTE vs Non-TTE,
+       A9 SLA per Pejabat, A10 Kritis per Bulan
+     ============================================================ -->
+<section v-if="currentPage === 'analisa'" class="space-y-6 animate-fade-in">
+
+  <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+    <div>
+      <h2 class="text-2xl font-bold tracking-tight flex items-center gap-2 text-slate-800 dark:text-white">
+        <i class="fa-solid fa-chart-line text-indigo-600 dark:text-indigo-400"></i> Analisa
+      </h2>
+      <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+        A3 Distribusi Unit · A4 Top Pengirim · A5 Beban Pejabat · A6 Retensi 5th · A7 Klas↔Unit · A8 TTE · A9 SLA/Pejabat · A10 Kritis/Bulan.
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <input type="text" class="input w-28" placeholder="Tahun" v-model="analisaTahun">
+      <button class="btn btn-ghost" @click="loadAnalisaAll()" :disabled="analisaLoading">
+        <i class="fa-solid fa-rotate"></i> Segarkan
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabs row 1 -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+    <button class="btn" :class="analisaTab === 'unit' ? 'btn-primary' : 'btn-ghost'" @click="analisaTab='unit'; if(!analisaUnitData) loadAnalisaUnit()">
+      <i class="fa-solid fa-building"></i> A3 Unit
+    </button>
+    <button class="btn" :class="analisaTab === 'top' ? 'btn-primary' : 'btn-ghost'" @click="analisaTab='top'; if(!analisaTopData) loadAnalisaTop()">
+      <i class="fa-solid fa-ranking-star"></i> A4 Top
+    </button>
+    <button class="btn" :class="analisaTab === 'beban' ? 'btn-primary' : 'btn-ghost'" @click="analisaTab='beban'; if(!analisaBebanData) loadAnalisaBeban()">
+      <i class="fa-solid fa-user-clock"></i> A5 Beban
+    </button>
+    <button class="btn" :class="analisaTab === 'retensi' ? 'btn-primary' : 'btn-ghost'" @click="analisaTab='retensi'; if(!analisaRetensiData) loadAnalisaRetensi()">
+      <i class="fa-solid fa-box-archive"></i> A6 Retensi 5th
+    </button>
+  </div>
+  <!-- Tabs row 2 -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+    <button class="btn" :class="analisaTab === 'klasunit' ? 'btn-primary' : 'btn-ghost'" @click="analisaTab='klasunit'; if(!analisaKlasUnitData) loadAnalisaKlasUnit()">
+      <i class="fa-solid fa-table-cells"></i> A7 Klas↔Unit
+    </button>
+    <button class="btn" :class="analisaTab === 'tte' ? 'btn-primary' : 'btn-ghost'" @click="analisaTab='tte'; if(!analisaTteData) loadAnalisaTte()">
+      <i class="fa-solid fa-file-signature"></i> A8 TTE
+    </button>
+    <button class="btn" :class="analisaTab === 'sla' ? 'btn-primary' : 'btn-ghost'" @click="analisaTab='sla'; if(!analisaSlaData) loadAnalisaSla()">
+      <i class="fa-solid fa-clock"></i> A9 SLA/Pejabat
+    </button>
+    <button class="btn" :class="analisaTab === 'kritis' ? 'btn-primary' : 'btn-ghost'" @click="analisaTab='kritis'; if(!analisaKritisData) loadAnalisaKritis()">
+      <i class="fa-solid fa-triangle-exclamation"></i> A10 Kritis/Bln
+    </button>
+  </div>
+
+  <app-skeleton v-if="analisaLoading && !analisaUnitData && !analisaTopData && !analisaBebanData && !analisaRetensiData" type="cards"></app-skeleton>
+
+  <!-- A3 -->
+  <div v-if="analisaTab === 'unit'" class="card space-y-4">
+    <h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-building text-sky-500"></i> A3 Distribusi per Unit Kerja — {{ analisaUnitData ? analisaUnitData.tahun : analisaTahun }}</h3>
+    <div v-if="!analisaUnitData" class="text-xs text-slate-400 text-center py-6">Klik Segarkan.</div>
+    <div v-else>
+      <div class="grid grid-cols-3 gap-3 text-xs mb-4">
+        <div class="card !p-3 text-center"><div class="text-slate-400">Disposisi</div><div class="text-lg font-black">{{ analisaUnitData.total_disposisi }}</div></div>
+        <div class="card !p-3 text-center"><div class="text-slate-400">Keluar</div><div class="text-lg font-black">{{ analisaUnitData.total_keluar }}</div></div>
+        <div class="card !p-3 text-center"><div class="text-slate-400">Total Beban</div><div class="text-lg font-black">{{ analisaUnitData.total_all }}</div></div>
+      </div>
+      <div v-if="analisaUnitData.chart" class="card p-4 mb-4">
+        <app-chart-bar :labels="analisaUnitData.chart.labels" :datasets="[{ label: 'Disposisi', data: analisaUnitData.chart.disposisi }, { label: 'Keluar', data: analisaUnitData.chart.keluar }]" title="Distribusi Beban per Unit (top 8)" :height="260"></app-chart-bar>
+      </div>
+      <div class="overflow-x-auto"><table class="w-full text-xs"><thead class="text-slate-500 border-b"><tr><th class="text-left py-2 px-2">Unit</th><th class="text-right py-2 px-2">Disposisi</th><th class="text-right py-2 px-2">Keluar</th><th class="text-right py-2 px-2">Total</th><th class="text-right py-2 px-2">%</th></tr></thead><tbody class="divide-y divide-slate-100 dark:divide-slate-800"><tr v-for="u in analisaUnitData.distribusi" :key="u.unit_id+u.nama_unit"><td class="py-2 px-2">{{ u.nama_unit }}</td><td class="py-2 px-2 text-right">{{ u.jml_disposisi }}</td><td class="py-2 px-2 text-right">{{ u.jml_keluar }}</td><td class="py-2 px-2 text-right font-bold">{{ u.total }}</td><td class="py-2 px-2 text-right">{{ u.pct }}%</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- A4 -->
+  <div v-if="analisaTab === 'top'" class="card space-y-4">
+    <h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-ranking-star text-amber-500"></i> A4 Top Pengirim/Penerima — {{ analisaTopData ? analisaTopData.tahun : analisaTahun }}</h3>
+    <div v-if="!analisaTopData" class="text-xs text-slate-400 text-center py-6">Klik Segarkan.</div>
+    <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div><h4 class="text-xs font-bold mb-2">Top Pengirim Masuk ({{ analisaTopData.total_masuk }})</h4><div class="overflow-x-auto"><table class="w-full text-xs"><thead class="text-slate-500 border-b"><tr><th class="text-left py-2 px-2">Asal</th><th class="text-right py-2 px-2">Jml</th><th class="text-right py-2 px-2">%</th></tr></thead><tbody class="divide-y"><tr v-for="p in analisaTopData.pengirim_top" :key="p.asal"><td class="py-2 px-2 truncate max-w-[200px]">{{ p.asal }}</td><td class="py-2 px-2 text-right font-bold">{{ p.jumlah }}</td><td class="py-2 px-2 text-right">{{ p.pct }}%</td></tr></tbody></table></div></div>
+      <div><h4 class="text-xs font-bold mb-2">Top Penerima Keluar ({{ analisaTopData.total_keluar }})</h4><div class="overflow-x-auto"><table class="w-full text-xs"><thead class="text-slate-500 border-b"><tr><th class="text-left py-2 px-2">Tujuan</th><th class="text-right py-2 px-2">Jml</th><th class="text-right py-2 px-2">%</th></tr></thead><tbody class="divide-y"><tr v-for="p in analisaTopData.penerima_top" :key="p.tujuan"><td class="py-2 px-2 truncate max-w-[200px]">{{ p.tujuan }}</td><td class="py-2 px-2 text-right font-bold">{{ p.jumlah }}</td><td class="py-2 px-2 text-right">{{ p.pct }}%</td></tr></tbody></table></div></div>
+    </div>
+  </div>
+
+  <!-- A5 -->
+  <div v-if="analisaTab === 'beban'" class="card space-y-4">
+    <h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-user-clock text-rose-500"></i> A5 Beban Kerja per Pejabat — {{ analisaBebanData ? analisaBebanData.tahun : analisaTahun }}</h3>
+    <div v-if="!analisaBebanData" class="text-xs text-slate-400 text-center py-6">Klik Segarkan.</div>
+    <div v-else><div class="text-xs text-slate-500 mb-3">Total: {{ analisaBebanData.total_disposisi }} disposisi</div><div class="overflow-x-auto"><table class="w-full text-xs"><thead class="text-slate-500 border-b"><tr><th class="text-left py-2 px-2">Pejabat</th><th class="text-left py-2 px-2">Jabatan</th><th class="text-left py-2 px-2">Unit</th><th class="text-right py-2 px-2">Diteruskan</th><th class="text-right py-2 px-2">Diproses</th><th class="text-right py-2 px-2">Selesai</th><th class="text-right py-2 px-2">Lewat SLA</th><th class="text-right py-2 px-2">Total</th><th class="text-right py-2 px-2">Avg Hari</th><th class="text-right py-2 px-2">%</th></tr></thead><tbody class="divide-y"><tr v-for="b in analisaBebanData.beban" :key="b.pejabat_id"><td class="py-2 px-2 truncate max-w-[120px]">{{ b.nama_pejabat }}</td><td class="py-2 px-2 truncate max-w-[120px]">{{ b.nama_jabatan || '—' }}</td><td class="py-2 px-2 truncate max-w-[100px]">{{ b.nama_unit }}</td><td class="py-2 px-2 text-right">{{ b.jml_diteruskan }}</td><td class="py-2 px-2 text-right">{{ b.jml_diproses }}</td><td class="py-2 px-2 text-right font-bold text-emerald-600">{{ b.jml_selesai }}</td><td class="py-2 px-2 text-right"><span :class="b.jml_lewat_sla ? 'text-rose-600 font-bold' : ''">{{ b.jml_lewat_sla }}</span></td><td class="py-2 px-2 text-right font-black">{{ b.total }}</td><td class="py-2 px-2 text-right">{{ b.avg_hari_selesai }}</td><td class="py-2 px-2 text-right">{{ b.pct }}%</td></tr></tbody></table></div></div>
+  </div>
+
+  <!-- A6 -->
+  <div v-if="analisaTab === 'retensi'" class="card space-y-4">
+    <h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-box-archive text-sky-600"></i> A6 Proyeksi Retensi Habis 5 Tahun — mulai {{ analisaRetensiData ? analisaRetensiData.tahun_mulai : analisaTahun }}</h3>
+    <div v-if="!analisaRetensiData" class="text-xs text-slate-400 text-center py-6">Klik Segarkan.</div>
+    <div v-else>
+      <div class="card p-4 mb-4">
+        <app-chart-bar :labels="analisaRetensiData.chart.labels" :datasets="[{ label: 'Akan Musnah', data: analisaRetensiData.chart.musnah }, { label: 'Permanen', data: analisaRetensiData.chart.permanen }]" title="Proyeksi 5 Tahun" :height="240"></app-chart-bar>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mb-3">
+        <div class="card !p-3 text-center"><div class="text-slate-400">Total 5 Tahun</div><div class="text-lg font-black">{{ analisaRetensiData.total_5th }}</div></div>
+        <div class="card !p-3 text-center"><div class="text-slate-400">Tahun Mulai</div><div class="text-lg font-black">{{ analisaRetensiData.tahun_mulai }}</div></div>
+      </div>
+      <div class="overflow-x-auto"><table class="w-full text-xs"><thead class="text-slate-500 border-b"><tr><th class="text-left py-2 px-2">Tahun</th><th class="text-right py-2 px-2">Akan Musnah</th><th class="text-right py-2 px-2">Permanen</th><th class="text-right py-2 px-2">Total</th></tr></thead><tbody class="divide-y"><tr v-for="p in analisaRetensiData.proyeksi" :key="p.tahun"><td class="py-2 px-2 font-bold">{{ p.tahun }}</td><td class="py-2 px-2 text-right">{{ p.jml_akan_musnah }}</td><td class="py-2 px-2 text-right">{{ p.jml_permanen }}</td><td class="py-2 px-2 text-right font-black">{{ p.total }}</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- A7 -->
+  <div v-if="analisaTab === 'klasunit'" class="card space-y-4">
+    <h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-table-cells text-emerald-600"></i> A7 Korelasi Klasifikasi ↔ Unit — {{ analisaKlasUnitData ? analisaKlasUnitData.tahun : analisaTahun }}</h3>
+    <div v-if="!analisaKlasUnitData" class="text-xs text-slate-400 text-center py-6">Klik Segarkan.</div>
+    <div v-else>
+      <div class="text-xs text-slate-500 mb-3">Top {{ analisaKlasUnitData.klasifikasis.length }} klasifikasi × Top {{ analisaKlasUnitData.units.length }} unit — total {{ analisaKlasUnitData.total }} disposisi.</div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs">
+          <thead class="text-slate-500 border-b"><tr><th class="text-left py-2 px-2">Unit \ Klas</th><th v-for="k in analisaKlasUnitData.klasifikasis" :key="k" class="text-center py-2 px-2 font-mono">{{ k }}</th></tr></thead>
+          <tbody class="divide-y">
+            <tr v-for="(unit, i) in analisaKlasUnitData.units" :key="unit"><td class="py-2 px-2 font-bold truncate max-w-[160px]">{{ unit }}</td><td v-for="(k, j) in analisaKlasUnitData.klasifikasis" :key="k" class="text-center py-2 px-2"><span :class="analisaKlasUnitData.matrix[i][j] ? 'font-bold' : 'text-slate-300'">{{ analisaKlasUnitData.matrix[i][j] || '·' }}</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- A8 -->
+  <div v-if="analisaTab === 'tte'" class="card space-y-4">
+    <h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-file-signature text-amber-600"></i> A8 Rasio TTE vs Non-TTE — {{ analisaTteData ? analisaTteData.tahun : analisaTahun }}</h3>
+    <div v-if="!analisaTteData" class="text-xs text-slate-400 text-center py-6">Klik Segarkan.</div>
+    <div v-else>
+      <div class="grid grid-cols-3 gap-3 text-xs mb-3">
+        <div class="card !p-3 text-center"><div class="text-slate-400">Total Surat Keluar</div><div class="text-lg font-black">{{ analisaTteData.total }}</div></div>
+        <div class="card !p-3 text-center"><div class="text-slate-400">TTE</div><div class="text-lg font-black text-emerald-600">{{ analisaTteData.tte }} ({{ analisaTteData.pct_tte }}%)</div></div>
+        <div class="card !p-3 text-center"><div class="text-slate-400">Non-TTE</div><div class="text-lg font-black">{{ analisaTteData.non_tte }} ({{ analisaTteData.pct_non_tte }}%)</div></div>
+      </div>
+      <div class="card !bg-amber-50 dark:!bg-amber-950/30 !border-amber-200">
+        <div class="text-xs text-amber-800 dark:text-amber-200"><i class="fa-solid fa-circle-info"></i> {{ analisaTteData.catatan }}</div>
+      </div>
+      <div v-if="analisaTteData.total" class="card p-4 mt-3">
+        <app-chart-doughnut :labels="['TTE','Non-TTE']" :datasets="[{ data: [analisaTteData.tte, analisaTteData.non_tte] }]" title="Rasio TTE" :height="200" :colors="['#10b981','#94a3b8']"></app-chart-doughnut>
+      </div>
+    </div>
+  </div>
+
+  <!-- A9 -->
+  <div v-if="analisaTab === 'sla'" class="card space-y-4">
+    <h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-clock text-rose-500"></i> A9 Analisa SLA per Pejabat — {{ analisaSlaData ? analisaSlaData.tahun : analisaTahun }}</h3>
+    <div v-if="!analisaSlaData" class="text-xs text-slate-400 text-center py-6">Klik Segarkan.</div>
+    <div v-else>
+      <div class="text-xs text-slate-500 mb-3">Total lewat SLA tahun {{ analisaSlaData.tahun }}: <b class="text-rose-600">{{ analisaSlaData.total_lewat }}</b></div>
+      <div v-if="analisaSlaData.chart" class="card p-4 mb-4">
+        <app-chart-bar :labels="analisaSlaData.chart.labels" :datasets="[{ label: 'Lewat SLA', data: analisaSlaData.chart.lewat }]" title="Top 8 Lewat SLA per Pejabat" :height="240" :colors="['#f43f5e']"></app-chart-bar>
+      </div>
+      <div class="overflow-x-auto"><table class="w-full text-xs"><thead class="text-slate-500 border-b"><tr><th class="text-left py-2 px-2">Pejabat</th><th class="text-left py-2 px-2">Unit</th><th class="text-right py-2 px-2">Total</th><th class="text-right py-2 px-2">Lewat</th><th class="text-right py-2 px-2">% Lewat</th><th class="text-right py-2 px-2">Avg Telat Hari</th></tr></thead><tbody class="divide-y"><tr v-for="s in analisaSlaData.sla_per_pejabat" :key="s.pejabat_id"><td class="py-2 px-2 truncate max-w-[140px]">{{ s.nama_pejabat }}</td><td class="py-2 px-2 truncate max-w-[120px]">{{ s.nama_unit }}</td><td class="py-2 px-2 text-right">{{ s.total }}</td><td class="py-2 px-2 text-right font-bold text-rose-600">{{ s.lewat }}</td><td class="py-2 px-2 text-right">{{ s.pct_lewat }}%</td><td class="py-2 px-2 text-right">{{ s.avg_telat_hari }}</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- A10 -->
+  <div v-if="analisaTab === 'kritis'" class="card space-y-4">
+    <h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-triangle-exclamation text-rose-500"></i> A10 Volume Surat Kritis per Bulan — 12 bulan terakhir</h3>
+    <div v-if="!analisaKritisData" class="text-xs text-slate-400 text-center py-6">Klik Segarkan.</div>
+    <div v-else>
+      <div class="card p-4 mb-4">
+        <app-chart-bar :labels="analisaKritisData.labels" :datasets="[{ label: 'Surat Kritis', data: analisaKritisData.values }]" title="Kritis per Bulan (12 bulan)" :height="240" :colors="['#f43f5e']"></app-chart-bar>
+      </div>
+      <div class="text-xs text-slate-500">Total kritis 12 bulan: <b class="text-rose-600">{{ analisaKritisData.total_kritis }}</b></div>
+      <div class="overflow-x-auto mt-2"><table class="w-full text-xs"><thead class="text-slate-500 border-b"><tr><th class="text-left py-2 px-2">Bulan</th><th class="text-right py-2 px-2">Kritis</th></tr></thead><tbody class="divide-y"><tr v-for="(l, i) in analisaKritisData.labels" :key="l"><td class="py-2 px-2">{{ l }}</td><td class="py-2 px-2 text-right font-bold">{{ analisaKritisData.values[i] }}</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+</section>
