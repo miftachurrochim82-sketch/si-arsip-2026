@@ -15,8 +15,11 @@
         E1 SLA Disposisi · E2 SLA Keluar · E3 Kelengkapan · E4 Format Nomor · E5 JRA · E6 Musnah · E7 Fisik · E8 Alih Media.
       </p>
     </div>
-    <div class="flex items-center gap-2">
-      <input type="text" class="input w-28" placeholder="Tahun" v-model="evaluasiTahun">
+    <div class="flex flex-col sm:flex-row gap-2 items-end">
+      <div class="w-28">
+        <label class="text-[11px] text-slate-500">Tahun</label>
+        <input type="text" class="input w-full" placeholder="2026" v-model="evaluasiTahun">
+      </div>
       <button class="btn btn-ghost" @click="loadEvaluasiAll()" :disabled="evaluasiLoading">
         <i class="fa-solid fa-rotate"></i> Segarkan
       </button>
@@ -92,13 +95,13 @@
     <div v-if="!evaluasiKelengkapanData" class="text-xs text-slate-400 text-center py-6">Klik Segarkan.</div>
     <div v-else>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs mb-3">
-        <div class="card !p-3 text-center"><div class="text-slate-400">Masuk Total</div><div class="text-lg font-black">{{ evaluasiKelengkapanData.total_masuk }}</div><div class="text-[11px] text-emerald-600">{{ evaluasiKelengkapanData.pct_lengkap_masuk }}% lengkap</div></div>
-        <div class="card !p-3 text-center"><div class="text-slate-400">Masuk Tidak Lengkap</div><div class="text-lg font-black text-rose-600">{{ evaluasiKelengkapanData.tidak_lengkap_masuk }}</div></div>
-        <div class="card !p-3 text-center"><div class="text-slate-400">Keluar Total</div><div class="text-lg font-black">{{ evaluasiKelengkapanData.total_keluar }}</div><div class="text-[11px] text-emerald-600">{{ evaluasiKelengkapanData.pct_lengkap_keluar }}% lengkap</div></div>
-        <div class="card !p-3 text-center"><div class="text-slate-400">Keluar Tidak Lengkap</div><div class="text-lg font-black text-rose-600">{{ evaluasiKelengkapanData.tidak_lengkap_keluar }}</div></div>
+        <app-stat-card title="Masuk Total" :value="evaluasiKelengkapanData.total_masuk" icon="fa-solid fa-inbox" color="sky" :subtext="evaluasiKelengkapanData.pct_lengkap_masuk + '% lengkap'"></app-stat-card>
+        <app-stat-card title="Masuk Tidak Lengkap" :value="evaluasiKelengkapanData.tidak_lengkap_masuk" icon="fa-solid fa-triangle-exclamation" color="rose" subtext="perlu lengkapi"></app-stat-card>
+        <app-stat-card title="Keluar Total" :value="evaluasiKelengkapanData.total_keluar" icon="fa-solid fa-paper-plane" color="sky" :subtext="evaluasiKelengkapanData.pct_lengkap_keluar + '% lengkap'"></app-stat-card>
+        <app-stat-card title="Keluar Tidak Lengkap" :value="evaluasiKelengkapanData.tidak_lengkap_keluar" icon="fa-solid fa-triangle-exclamation" color="rose" subtext="perlu lengkapi"></app-stat-card>
       </div>
-      <div v-if="evaluasiKelengkapanData.rincian_masuk.length" class="overflow-x-auto mb-4"><h4 class="text-xs font-bold text-rose-600 mb-1">Masuk Tidak Lengkap ({{ evaluasiKelengkapanData.rincian_masuk.length }})</h4><table class="w-full text-xs"><thead class="border-b"><tr><th class="text-left py-1 px-2">Nomor</th><th class="text-left py-1 px-2">Missing</th></tr></thead><tbody class="divide-y"><tr v-for="r in evaluasiKelengkapanData.rincian_masuk" :key="r.id"><td class="py-1 px-2">{{ r.nomor }}</td><td class="py-1 px-2 text-rose-600">{{ r.missing.join(', ') }}</td></tr></tbody></table></div>
-      <div v-if="evaluasiKelengkapanData.rincian_keluar.length" class="overflow-x-auto"><h4 class="text-xs font-bold text-rose-600 mb-1">Keluar Tidak Lengkap ({{ evaluasiKelengkapanData.rincian_keluar.length }})</h4><table class="w-full text-xs"><thead class="border-b"><tr><th class="text-left py-1 px-2">Nomor</th><th class="text-left py-1 px-2">Missing</th></tr></thead><tbody class="divide-y"><tr v-for="r in evaluasiKelengkapanData.rincian_keluar" :key="r.id"><td class="py-1 px-2">{{ r.nomor }}</td><td class="py-1 px-2 text-rose-600">{{ r.missing.join(', ') }}</td></tr></tbody></table></div>
+      <div v-if="evaluasiKelengkapanData.rincian_masuk.length" class="table-scroll mb-4"><h4 class="text-xs font-bold text-rose-600 mb-1">Masuk Tidak Lengkap ({{ evaluasiKelengkapanData.rincian_masuk.length }})</h4><table class="w-full text-xs"><thead class="border-b"><tr><th class="text-left py-1 px-2">Nomor</th><th class="text-left py-1 px-2">Missing</th></tr></thead><tbody class="divide-y"><tr v-for="r in evaluasiKelengkapanData.rincian_masuk" :key="r.id"><td class="py-1 px-2">{{ r.nomor }}</td><td class="py-1 px-2 text-rose-600">{{ r.missing.join(', ') }}</td></tr></tbody></table></div>
+      <div v-if="evaluasiKelengkapanData.rincian_keluar.length" class="table-scroll"><h4 class="text-xs font-bold text-rose-600 mb-1">Keluar Tidak Lengkap ({{ evaluasiKelengkapanData.rincian_keluar.length }})</h4><table class="w-full text-xs"><thead class="border-b"><tr><th class="text-left py-1 px-2">Nomor</th><th class="text-left py-1 px-2">Missing</th></tr></thead><tbody class="divide-y"><tr v-for="r in evaluasiKelengkapanData.rincian_keluar" :key="r.id"><td class="py-1 px-2">{{ r.nomor }}</td><td class="py-1 px-2 text-rose-600">{{ r.missing.join(', ') }}</td></tr></tbody></table></div>
     </div>
   </div>
 
@@ -108,13 +111,13 @@
     <div v-if="!evaluasiFormatData" class="text-xs text-slate-400 text-center py-6">Klik Segarkan.</div>
     <div v-else>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs mb-3">
-        <div class="card !p-3 text-center"><div class="text-slate-400">Masuk Patuh</div><div class="text-lg font-black text-emerald-600">{{ evaluasiFormatData.pct_patuh_masuk }}%</div><div class="text-[11px]">{{ evaluasiFormatData.patuh_masuk }}/{{ evaluasiFormatData.total_masuk }}</div></div>
-        <div class="card !p-3 text-center"><div class="text-slate-400">Masuk Tidak Patuh</div><div class="text-lg font-black text-rose-600">{{ evaluasiFormatData.tidak_patuh_masuk }}</div></div>
-        <div class="card !p-3 text-center"><div class="text-slate-400">Keluar Patuh</div><div class="text-lg font-black text-emerald-600">{{ evaluasiFormatData.pct_patuh_keluar }}%</div><div class="text-[11px]">{{ evaluasiFormatData.patuh_keluar }}/{{ evaluasiFormatData.total_keluar }}</div></div>
-        <div class="card !p-3 text-center"><div class="text-slate-400">Keluar Tidak Patuh</div><div class="text-lg font-black text-rose-600">{{ evaluasiFormatData.tidak_patuh_keluar }}</div></div>
+        <app-stat-card title="Masuk Patuh" :value="evaluasiFormatData.pct_patuh_masuk + '%'" icon="fa-solid fa-check" color="emerald" :subtext="evaluasiFormatData.patuh_masuk + '/' + evaluasiFormatData.total_masuk"></app-stat-card>
+        <app-stat-card title="Masuk Tidak Patuh" :value="evaluasiFormatData.tidak_patuh_masuk" icon="fa-solid fa-triangle-exclamation" color="rose" subtext="format salah"></app-stat-card>
+        <app-stat-card title="Keluar Patuh" :value="evaluasiFormatData.pct_patuh_keluar + '%'" icon="fa-solid fa-check" color="emerald" :subtext="evaluasiFormatData.patuh_keluar + '/' + evaluasiFormatData.total_keluar"></app-stat-card>
+        <app-stat-card title="Keluar Tidak Patuh" :value="evaluasiFormatData.tidak_patuh_keluar" icon="fa-solid fa-triangle-exclamation" color="rose" subtext="format salah"></app-stat-card>
       </div>
       <div class="text-[11px] text-slate-400">Format masuk: {{ evaluasiFormatData.format_masuk }}, keluar: {{ evaluasiFormatData.format_keluar }}</div>
-      <div v-if="evaluasiFormatData.rincian_keluar.length" class="overflow-x-auto mt-2"><table class="w-full text-xs"><thead class="border-b"><tr><th class="text-left py-1 px-2">Nomor</th><th class="text-left py-1 px-2">Jenis</th></tr></thead><tbody class="divide-y"><tr v-for="r in evaluasiFormatData.rincian_keluar" :key="r.id"><td class="py-1 px-2 font-mono">{{ r.nomor }}</td><td class="py-1 px-2">{{ r.jenis }}</td></tr></tbody></table></div>
+      <div v-if="evaluasiFormatData.rincian_keluar.length" class="table-scroll mt-2"><table class="w-full text-xs"><thead class="border-b"><tr><th class="text-left py-1 px-2">Nomor</th><th class="text-left py-1 px-2">Jenis</th></tr></thead><tbody class="divide-y"><tr v-for="r in evaluasiFormatData.rincian_keluar" :key="r.id"><td class="py-1 px-2 font-mono">{{ r.nomor }}</td><td class="py-1 px-2">{{ r.jenis }}</td></tr></tbody></table></div>
     </div>
   </div>
 
@@ -128,7 +131,7 @@
         <app-stat-card title="Patuh" :value="evaluasiJraData.patuh" icon="fa-solid fa-check" color="emerald" :subtext="evaluasiJraData.pct_patuh + '%'"></app-stat-card>
         <app-stat-card title="Tidak Patuh" :value="evaluasiJraData.tidak_patuh" icon="fa-solid fa-triangle-exclamation" color="rose" subtext="perlu perbaikan"></app-stat-card>
       </div>
-      <div class="overflow-x-auto"><table class="w-full text-xs"><thead class="border-b"><tr><th class="text-left py-1 px-2">Kode</th><th class="text-right py-1 px-2">Total</th><th class="text-right py-1 px-2">Patuh</th><th class="text-right py-1 px-2">Tidak Patuh</th><th class="text-right py-1 px-2">% Patuh</th></tr></thead><tbody class="divide-y"><tr v-for="k in evaluasiJraData.per_klasifikasi" :key="k.kode_klasifikasi"><td class="py-1 px-2 font-mono">{{ k.kode_klasifikasi }}</td><td class="py-1 px-2 text-right">{{ k.total }}</td><td class="py-1 px-2 text-right text-emerald-600">{{ k.patuh }}</td><td class="py-1 px-2 text-right text-rose-600">{{ k.tidak_patuh }}</td><td class="py-1 px-2 text-right">{{ k.pct_patuh }}%</td></tr></tbody></table></div>
+      <div class="table-scroll"><table class="w-full text-xs"><thead class="border-b"><tr><th class="text-left py-1 px-2">Kode</th><th class="text-right py-1 px-2">Total</th><th class="text-right py-1 px-2">Patuh</th><th class="text-right py-1 px-2">Tidak Patuh</th><th class="text-right py-1 px-2">% Patuh</th></tr></thead><tbody class="divide-y"><tr v-for="k in evaluasiJraData.per_klasifikasi" :key="k.kode_klasifikasi"><td class="py-1 px-2 font-mono">{{ k.kode_klasifikasi }}</td><td class="py-1 px-2 text-right">{{ k.total }}</td><td class="py-1 px-2 text-right text-emerald-600">{{ k.patuh }}</td><td class="py-1 px-2 text-right text-rose-600">{{ k.tidak_patuh }}</td><td class="py-1 px-2 text-right">{{ k.pct_patuh }}%</td></tr></tbody></table></div>
     </div>
   </div>
 
@@ -137,12 +140,12 @@
     <h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-fire text-rose-600"></i> E6 Prosedur Pemusnahan — {{ evaluasiMusnahData ? evaluasiMusnahData.tahun : evaluasiTahun }}</h3>
     <div v-if="!evaluasiMusnahData" class="text-xs text-slate-400 text-center py-6">Klik Segarkan.</div>
     <div v-else>
-      <div class="grid grid-cols-3 gap-3 text-xs mb-3">
-        <div class="card !p-3 text-center"><div class="text-slate-400">Total Musnah</div><div class="text-lg font-black">{{ evaluasiMusnahData.total_musnah }}</div><div class="text-[11px]">{{ evaluasiMusnahData.pct_ba_lengkap }}% BA lengkap</div></div>
-        <div class="card !p-3 text-center"><div class="text-slate-400">Tanpa BA</div><div class="text-lg font-black text-rose-600">{{ evaluasiMusnahData.musnah_tanpa_ba }}</div></div>
-        <div class="card !p-3 text-center"><div class="text-slate-400">Retensi Habis Belum Musnah</div><div class="text-lg font-black text-amber-600">{{ evaluasiMusnahData.retensi_habis_belum_musnah }}</div></div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs mb-3">
+        <app-stat-card title="Total Musnah" :value="evaluasiMusnahData.total_musnah" icon="fa-solid fa-fire" color="sky" :subtext="evaluasiMusnahData.pct_ba_lengkap + '% BA lengkap'"></app-stat-card>
+        <app-stat-card title="Tanpa BA" :value="evaluasiMusnahData.musnah_tanpa_ba" icon="fa-solid fa-triangle-exclamation" color="rose" subtext="perlu BA"></app-stat-card>
+        <app-stat-card title="Retensi Habis Belum Musnah" :value="evaluasiMusnahData.retensi_habis_belum_musnah" icon="fa-solid fa-clock" color="amber" subtext="perlu tindak"></app-stat-card>
       </div>
-      <div v-if="evaluasiMusnahData.rincian_tanpa_ba.length" class="overflow-x-auto"><h4 class="text-xs font-bold text-rose-600">Musnah Tanpa BA ({{ evaluasiMusnahData.rincian_tanpa_ba.length }})</h4><table class="w-full text-xs"><thead class="border-b"><tr><th class="text-left py-1 px-2">Judul</th><th class="text-left py-1 px-2">Catatan</th></tr></thead><tbody class="divide-y"><tr v-for="r in evaluasiMusnahData.rincian_tanpa_ba" :key="r.id"><td class="py-1 px-2 truncate max-w-[200px]">{{ r.judul }}</td><td class="py-1 px-2">{{ r.catatan || '—' }}</td></tr></tbody></table></div>
+      <div v-if="evaluasiMusnahData.rincian_tanpa_ba.length" class="table-scroll"><h4 class="text-xs font-bold text-rose-600">Musnah Tanpa BA ({{ evaluasiMusnahData.rincian_tanpa_ba.length }})</h4><table class="w-full text-xs"><thead class="border-b"><tr><th class="text-left py-1 px-2">Judul</th><th class="text-left py-1 px-2">Catatan</th></tr></thead><tbody class="divide-y"><tr v-for="r in evaluasiMusnahData.rincian_tanpa_ba" :key="r.id"><td class="py-1 px-2 truncate max-w-[200px]">{{ r.judul }}</td><td class="py-1 px-2">{{ r.catatan || '—' }}</td></tr></tbody></table></div>
     </div>
   </div>
 
@@ -151,10 +154,10 @@
     <h3 class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-box-open text-sky-600"></i> E7 Kondisi Fisik Arsip — {{ evaluasiFisikData ? evaluasiFisikData.tahun : evaluasiTahun }}</h3>
     <div v-if="!evaluasiFisikData" class="text-xs text-slate-400 text-center py-6">Klik Segarkan.</div>
     <div v-else>
-      <div class="grid grid-cols-3 gap-3 text-xs mb-3">
-        <div class="card !p-3 text-center"><div class="text-slate-400">Total</div><div class="text-lg font-black">{{ evaluasiFisikData.total }}</div></div>
-        <div class="card !p-3 text-center"><div class="text-slate-400">Ada Lokasi</div><div class="text-lg font-black text-emerald-600">{{ evaluasiFisikData.ada_lokasi }} ({{ evaluasiFisikData.pct_ada_lokasi }}%)</div></div>
-        <div class="card !p-3 text-center"><div class="text-slate-400">Tanpa Lokasi</div><div class="text-lg font-black text-rose-600">{{ evaluasiFisikData.tanpa_lokasi }}</div></div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs mb-3">
+        <app-stat-card title="Total" :value="evaluasiFisikData.total" icon="fa-solid fa-box-archive" color="sky" subtext="arsip"></app-stat-card>
+        <app-stat-card title="Ada Lokasi" :value="evaluasiFisikData.ada_lokasi" icon="fa-solid fa-location-dot" color="emerald" :subtext="evaluasiFisikData.pct_ada_lokasi + '% ada'"></app-stat-card>
+        <app-stat-card title="Tanpa Lokasi" :value="evaluasiFisikData.tanpa_lokasi" icon="fa-solid fa-triangle-exclamation" color="rose" subtext="perlu lokasi"></app-stat-card>
       </div>
       <div class="card !bg-amber-50 dark:!bg-amber-950/30 !border-amber-200"><div class="text-xs text-amber-800 dark:text-amber-200"><i class="fa-solid fa-circle-info"></i> {{ evaluasiFisikData.catatan }}</div></div>
     </div>
@@ -171,7 +174,7 @@
         <app-stat-card title="Belum Digital" :value="evaluasiAlihMediaData.belum_digital" icon="fa-solid fa-file-circle-xmark" color="rose" subtext="perlu alih media"></app-stat-card>
         <app-stat-card title="File Drive" :value="evaluasiAlihMediaData.total_lampiran_file" icon="fa-solid fa-hard-drive" color="amber" subtext="T_LAMPIRAN file_drive"></app-stat-card>
       </div>
-      <div class="overflow-x-auto"><table class="w-full text-xs"><thead class="border-b"><tr><th class="text-left py-1 px-2">Jenis</th><th class="text-right py-1 px-2">Total</th><th class="text-right py-1 px-2">Digital</th><th class="text-right py-1 px-2">% Digital</th></tr></thead><tbody class="divide-y"><tr><td class="py-1 px-2">Surat Masuk</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.surat_masuk.total }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.surat_masuk.digital }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.surat_masuk.pct }}%</td></tr><tr><td class="py-1 px-2">Surat Keluar</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.surat_keluar.total }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.surat_keluar.digital }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.surat_keluar.pct }}%</td></tr><tr><td class="py-1 px-2">Naskah Dinas</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.naskah_dinas.total }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.naskah_dinas.digital }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.naskah_dinas.pct }}%</td></tr><tr><td class="py-1 px-2">Arsip</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.arsip.total }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.arsip.digital }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.arsip.pct }}%</td></tr></tbody></table></div>
+      <div class="table-scroll"><table class="w-full text-xs"><thead class="border-b"><tr><th class="text-left py-1 px-2">Jenis</th><th class="text-right py-1 px-2">Total</th><th class="text-right py-1 px-2">Digital</th><th class="text-right py-1 px-2">% Digital</th></tr></thead><tbody class="divide-y"><tr><td class="py-1 px-2">Surat Masuk</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.surat_masuk.total }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.surat_masuk.digital }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.surat_masuk.pct }}%</td></tr><tr><td class="py-1 px-2">Surat Keluar</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.surat_keluar.total }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.surat_keluar.digital }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.surat_keluar.pct }}%</td></tr><tr><td class="py-1 px-2">Naskah Dinas</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.naskah_dinas.total }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.naskah_dinas.digital }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.naskah_dinas.pct }}%</td></tr><tr><td class="py-1 px-2">Arsip</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.arsip.total }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.arsip.digital }}</td><td class="py-1 px-2 text-right">{{ evaluasiAlihMediaData.per_jenis.arsip.pct }}%</td></tr></tbody></table></div>
     </div>
   </div>
 
