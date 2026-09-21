@@ -39,12 +39,12 @@
       <table>
         <thead>
           <tr>
-            <th>Nomor / Tanggal</th>
-            <th>Perihal & Tujuan</th>
-            <th>Jenis</th>
-            <th>Klasifikasi</th>
-            <th>Status</th>
-            <th class="text-right">Aksi</th>
+            <th class="min-w-[160px]">Nomor / Tanggal</th>
+            <th class="min-w-[260px]">Perihal & Tujuan</th>
+            <th class="min-w-[110px]">Jenis</th>
+            <th class="min-w-[180px]">Klasifikasi</th>
+            <th class="min-w-[100px]">Status</th>
+            <th class="min-w-[140px] text-right">Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -61,7 +61,7 @@
             <td class="text-xs">{{ smLabelKlasifikasi(r.kode_klasifikasi) }}</td>
             <td>
               <app-badge size="sm"
-                         :status="r.status_naskah === 'terarsip' ? 'disetujui' : (r.status_naskah === 'final' ? 'proses' : '')"
+                         :status="r.status_naskah === 'terarsip' ? 'disetujui' : (r.status_naskah === 'final' ? 'proses' : 'draft')"
                          :label="r.status_naskah || 'draft'"></app-badge>
             </td>
             <td class="text-right whitespace-nowrap">
