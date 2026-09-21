@@ -127,6 +127,7 @@
   - Backend: `dashRingkas_` (`09_DashboardApi.gs`).
 
 - **FR-36** `dashChartTren_`: volume surat masuk + keluar per bulan, 12 bulan terakhir (termasuk bulan berjalan). Return 2 dataset.
+- **FR-36b** (amendemen v1.2, 2026-09-20): `dashChartDisposisi_` — chart ke-4: distribusi status disposisi (diteruskan/diproses/selesai) untuk doughnut dashboard.
   - Backend: `dashChartTren_` (`09_DashboardApi.gs`).
   - Frontend: `<app-chart-bar>` di `V_Dashboard.html`.
 
@@ -199,6 +200,26 @@
   - Backend: `99_TestSuite.gs`.
 
 - **FR-57** `runDomainTestsSIArsip()` — domain FIX MVP (surat masuk/keluar/disposisi + SIMPEG RO + hook) — target ≥15/0.
+- **FR-58** Logbook T7 otomatis: SETIAP aksi dokumen (simpan/ubah/hapus/ubah_status/
+  upload_lampiran/arsip) menulis baris `T_LOGBOOK` via `catatLogbook_` (00b);
+  gagal menulis logbook ≠ aksi gagal. AUDIT_LOGS tetap untuk audit sistem.
+- **FR-59** Export Excel multi-sheet laporan bulanan (`laporan_export_excel`, level user):
+  workbook 4 sheet (Ringkasan, Surat Masuk, Surat Keluar, Disposisi) difilter periode
+  YYYY-MM; file xlsx disimpan ke folder Drive 'SI-ARSIP Export', URL dikembalikan.
+- **FR-60** Upload lampiran biner ke Drive (`lmp_upload`, level user): base64 ≤ 5 MB,
+  mime whitelist; file ke folder 'SI-ARSIP Lampiran', baris `T_LAMPIRAN`
+  (jenis_bukti=file_drive) + logbook; field link manual tetap sebagai fallback.
+- **FR-61** Modal Detail Dokumen (sm/sk/nd): ringkasan field + daftar lampiran dengan
+  **preview inline** (iframe; link Drive otomatis dikonversi ke mode `/preview`).
+- **FR-62** Timeline disposisi bertingkat di modal detail: node berwarna per status
+  (amber=diteruskan, sky=diproses, emerald=selesai), tingkat 1..n, dari→ke, tenggat.
+- **FR-63** Notifikasi in-app: lonceng di slot `extra-actions` app-header + badge unread;
+  item = disposisi baru untuk penerima & SLA lewat (penerima + pengawas), umur ≤14 hari;
+  marker baca per-email di Script Properties (`NOTIF_READ_<email>`).
+- **FR-64** Quick action dropdown (⋮) di tabel surat masuk & surat keluar:
+  Detail & Lampiran / Ubah / transisi status / Disposisikan / Hapus.
+- **FR-65** Preset rentang tanggal (Bulan ini / Bulan lalu / 90 hari / Tahun ini / Semua)
+  di filter bar surat masuk, surat keluar, disposisi; mengisi tanggal_dari/sampai.
   - Backend: `99_TestSuite.gs`.
 
 ---
@@ -228,7 +249,7 @@
 | `J_State.html` | state global: token, currentPage, filter per modul, flag modal |
 | `J_Api.html` | wrapper callServer + loader per modul (sm/sk/dp/master/dash/arsip) |
 | `J_Actions.html` | aksi CRUD + transisi (sm_disposisi, sk_ubah_status, dp_teruskan/selesaikan) |
-| `J_Export.html` | exportExcel/exportPDF via AppCore.loadLib |
+| `J_Export.html` | exportExcelBulanan via aksi server `laporan_export_excel` (xlsx 4 sheet, link Drive); exportPDF = kandidat Fase 3 |
 | `J_Arsip.html` | logika domain kearsipan: retensi, musnah/serah, pencarian global |
 | `J_App.html` | bootstrap AppCore.create, menu, pageIcons, navigasi |
 | `V_Dashboard/SuratMasuk/SuratKeluar/NaskahDinas/Disposisi/Kearsipan/Pencarian/Master/Pengaturan.html` | 9 halaman sesuai 05_UIUX |
