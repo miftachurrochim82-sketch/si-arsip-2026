@@ -119,8 +119,8 @@ Skor = (Dampak × 3) + (Frekuensi × 2) - Effort
 | A6 | Proyeksi Retensi Habis 5 Tahun | Staf arsip | 1 | 8j | Perencanaan ruang | **11** | ✅ HIDUP v1.7 (analisa_retensi_5th, FR-73) |
 | A7 | Korelasi Klasifikasi ↔ Unit | Staf analisa | 4 | 3j | Evaluasi proses | **12** | ✅ HIDUP v1.7 (analisa_klasifikasi_unit matrix, FR-74) |
 | A8 | Rasio Surat TTE vs Non-TTE (setelah TTE) | Staf analisa | 12 | 1j | Adopsi TTE | **14** | ✅ HIDUP v1.7 (analisa_tte_ratio placeholder 0%, FR-75) |
-| A9 | Analisa Disposisi Lewat SLA (per pejabat) | Pimpinan | 12 | 1j | Evaluasi kinerja | **15** | ✅ HIDUP v1.7 (analisa_sla_per_pejabat + total_lewat, FR-76) — sebelumnya PARTIAL v1.2/v1.4 panel SLA |
-| A10 | Analisa Volume Surat Kritis per Bulan | Pimpinan | 12 | 1j | Kewaspadaan | **15** | ✅ HIDUP v1.7 (analisa_kritis_bulanan 12 labels, FR-77) — sebelumnya PARTIAL v1.2 panel kritis |
+| A9 | Analisa Disposisi Lewat SLA (per pejabat) | Pimpinan | 12 | 1j | Evaluasi kinerja | **17** | ✅ HIDUP v1.7 (analisa_sla_per_pejabat + total_lewat, FR-76) — sebelumnya PARTIAL v1.2/v1.4 panel SLA |
+| A10 | Analisa Volume Surat Kritis per Bulan | Pimpinan | 12 | 1j | Kewaspadaan | **17** | ✅ HIDUP v1.7 (analisa_kritis_bulanan 12 labels, FR-77) — sebelumnya PARTIAL v1.2 panel kritis |
 
 **Total hemat Analisa (10)**: **~144 jam/tahun** (~18 hari kerja) — **10/10 HIDUP v1.7**.
 
@@ -443,7 +443,7 @@ Dokumen ini **living document** — akan di-update setiap kali:
 **Preview:** preview_v1.10.html 217KB, LIVE PREVIEW /preview_v1.10.html
 **Backend:** tetap 203/0/1 hijau — tidak sentuh
 
-**Kandidat CDN v2.9.0:** C1 filter-bar-analytics + C2 progress-bar + C3 form-label-sm — dicatat di CDN_CANDIDATES_v2.9.0.md, tunggu cek cross-app (si-kompetensi, si-lahar) sebelum promosi.
+**Kandidat CDN v2.9.0:** C1 filter-bar-analytics + C2 progress-bar + C3 form-label-sm — dicatat di CDN_CANDIDATES_v2.9.0.md, tunggu cek cross-app (si-kompetensi, si-kinerja-harian) sebelum promosi.
 
 ## Ringkasan
 

@@ -7,7 +7,7 @@
 
 | # | File | Ukuran | Fungsi | Status |
 |---|---|---|---|---|
-| 1 | `Index.html` | 8.0K | Shell: CDN pin v2.8.1, Tailwind Play (warn allowed), 13 include V_*, 6 J_* (State→Helpers→Api→Actions→Export→App) | ✅ OK — pin v2.8.1, include V_Rtl ada |
+| 1 | `Index.html` | 8.0K | Shell: CDN pin v2.9.1, Tailwind Play (warn allowed), 13 include V_*, 6 J_* (State→Helpers→Api→Actions→Export→App) | ✅ OK — pin v2.9.1, include V_Rtl ada |
 | 2 | `J_App.html` | 4.9K | `AppCore.create` bootstrap, menu 9 Arsip Dinamis + 2 Kearsipan + 2 Sistem, brand SI-ARSIP, onNavigate rtl→loadRtl(1) | ✅ OK |
 | 3 | `J_State.html` | 8.4K | State: 14 field RTL (rtlList, rtlPage, rtlTotalPages, rtlTotalData, rtlLoading, rtlSaving, rtlFilters{status,sumber,tahun}, rtlSearch, showRtlForm, rtlForm{10 props}, rtlGenerateSumber/Tahun, rtlGenerating, showRtlStatusForm, rtlStatusTarget/Baru/Progress/Catatan) + legacy 11 modul | ✅ OK |
 | 4 | `J_Helpers.html` | 3.1K | fmtTgl WIB +7h fix, isoKeInput, labelSurat/Pegawai/Jabatan/Pejabat | ✅ OK — fmtTgl dipakai V_Rtl |
@@ -37,7 +37,7 @@
 - **Verifikasi**: `grep formatTanggal` sekarang 0.
 
 ### Bug #2 — Badge class invalid (kit tidak punya badge-sky/rose/amber/indigo/slate)
-- **Deteksi**: `grep badge-` across html vs `grep .badge- app-common.css` (kit CDN v2.8.1). Kit hanya punya `.badge-success/danger/warning/info/emerald/purple/aktif/selesai/disetujui/ditolak/batal/revisi/verifikasi/draft/belum/menunggu`.
+- **Deteksi**: `grep badge-` across html vs `grep .badge- app-common.css` (kit CDN v2.9.1). Kit hanya punya `.badge-success/danger/warning/info/emerald/purple/aktif/selesai/disetujui/ditolak/batal/revisi/verifikasi/draft/belum/menunggu`.
 - **Fix**: ganti `<span class="badge badge-sky">` dll → `<app-badge size="sm" :status :label>` dengan mapping:
   - status_rtl: baru=proses/info (sky), diproses=menunggu/warning (amber), selesai=disetujui/success (emerald), batal=ditolak/danger (rose)
   - sumber: E6=ditolak (rose, musnah kritis), E7=menunggu (amber, fisik), E8=proses (indigo, alih media), E5=proses (indigo, permanen), E3/A9=disetujui (emerald)
@@ -50,7 +50,7 @@
 
 ## 3. Kontrak CDN & CoreLib
 
-- Pin CDN: `v2.8.1` konsisten di semua HTML (Index pin check).
+- Pin CDN: `v2.9.1` konsisten di semua HTML (Index pin check).
 - Self-closing `<app-.../>`: 0 (scan `grep <app-.*/>` → none) ✅
 - Unknown kit tags: app-badge, app-chart-bar, app-chart-doughnut, app-empty-state, app-filter-bar, app-header, app-login, app-modal, app-settings, app-sidebar, app-skeleton, app-stat-card — semua di KIT_TAGS whitelist ✅
 - Tailwind Play CDN: ada di Index (allowed warn, hanya si-platform yang banned) — sesuai contract_check.py waiver logic.
@@ -84,7 +84,7 @@ Action names match 06_API_FLOW:
 ## 6. Kesimpulan
 
 - Frontend workspace **bersih** — 0 formatTanggal, 0 invalid badge, style object benar, app-badge pattern sesuai kit.
-- Kontrak CDN terpenuhi (pin v2.8.1, no self-closing, known tags, no CoreLib dupe, no CF).
+- Kontrak CDN terpenuhi (pin v2.9.1, no self-closing, known tags, no CoreLib dupe, no CF).
 - Integrasi RTL full-stack sinkron: Index→J_App→J_State→J_Api→V_Rtl→Backend 17_Rtl.
 - Piramida final 35/35 TUTUP: L4/L5/L11/L12 (4) + A3-A10 (8) + E1-E8 (8) + R1-R5 (5) + base 10 = 35 Level 3 (12+10+8+5).
 

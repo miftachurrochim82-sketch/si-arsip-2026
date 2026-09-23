@@ -175,7 +175,7 @@
 - **FR-48** Seluruh UI pakai kit CDN `@v2.9.1 (1 CSS+9 JS)`: `<app-badge>`, `<app-modal>`, `<app-crud-table>`, `<app-filter-bar>`, `<app-stat-card>`, `<app-chart-bar>` / `<app-chart-doughnut>`, `<app-pegawai-picker>`, `<app-empty-state>`, `<app-skeleton>`, `<app-login>`, `<app-sidebar>`, `<app-header>`, `<app-settings>`.
   - Frontend: seluruh `V_*.html`.
 
-- **FR-49** Tombol aksi tabel pakai `.btn-icon` / `.btn-icon-danger` (kit CDN v2.8.0/F2).
+- **FR-49** Tombol aksi tabel pakai `.btn-icon` / `.btn-icon-danger` (kit CDN v2.9.1/F2).
   - Frontend: seluruh tabel.
 
 - **FR-50** Paginasi client-side pakai `AppCore.paginate` + `AppCore.pageCount`.
@@ -194,7 +194,7 @@
 - **FR-54** `runLibraryTests()` — regression CoreLib pin 17 (target PASS 42 / FAIL 0 / SKIP 1).
   - Backend: `99_TestSuite.gs`.
 
-- **FR-55** `testAdopsiG18d()` — verifikasi util CoreLib v2.3.0 (target 13/13).
+- **FR-55** `testAdopsiG18d()` — verifikasi util CoreLib v2.4.0 (target 13/13).
   - Backend: `99_TestSuite.gs`.
 
 - **FR-56** `testDispatcherRouting()` — registry handler + fail-closed (target ≥20/0).
@@ -268,7 +268,7 @@
 
 ## Amendemen 2026-09-20 — Struktur berkas & modul (Gate 0)
 
-> Satu baris dok = satu item kode. Backend = pola starter-kit/si-lahar; frontend
+> Satu baris dok = satu item kode. Backend = pola starter-kit/si-kinerja-harian; frontend
 > cetak dari starter-kit (Index shell + include satu tingkat).
 
 ### Backend (`src/*.gs`) — kondisi + rencana
@@ -287,7 +287,7 @@
 ### Frontend (`src/*.html`) — RENCANA v1 (cetak starter-kit)
 | Berkas | Tanggung jawab |
 |---|---|
-| `Index.html` | shell tipis: pin CDN v2.8.1, tema, include satu tingkat |
+| `Index.html` | shell tipis: pin CDN v2.9.1, tema, include satu tingkat |
 | `J_State.html` | state global: token, currentPage, filter per modul, flag modal |
 | `J_Api.html` | wrapper callServer + loader per modul (sm/sk/dp/master/dash/arsip) |
 | `J_Actions.html` | aksi CRUD + transisi (sm_disposisi, sk_ubah_status, dp_teruskan/selesaikan) |

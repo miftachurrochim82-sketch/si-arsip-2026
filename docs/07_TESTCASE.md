@@ -7,11 +7,11 @@
 > Amendemen v1.5: suite 139/0/1 (routing 30 + domain 54 = +4 aksi rekap +6 asersi baru §4o).
 
 > Setiap TC dijalankan sebagai fungsi uji di `99_TestSuite.gs` (pola si-kompetensi v3.0.1
-> & si-lahar v2.1.0): actor `viewer`/`user`/`verifikator`/`admin`/`super`, assert
+> & si-kinerja-harian v2.1.0): actor `viewer`/`user`/`verifikator`/`admin`/`super`, assert
 > `success`/`code`. Satu baris TC = satu assert kelompok.
 >
 > **Target per 2026-09-20**:
-> - `runLibraryTests()` — **PASS 42 / FAIL 0 / SKIP 1** (CoreLib v2.3.0, pin 17).
+> - `runLibraryTests()` — **PASS 42 / FAIL 0 / SKIP 1** (CoreLib v2.4.0, pin 17).
 > - `testAdopsiG18d()` — **13 asersi PASS** (verifikasi delegasi util CoreLib).
 > - `testDispatcherRouting()` — **≥25 asersi PASS** (registry handler + fail-closed).
 > - `runDomainTestsSIArsip()` — **≥20 asersi PASS** (domain MVP: surat masuk, surat
@@ -151,12 +151,12 @@
 
 ### §1 Regression CoreLib
 
-- **TC-99** `runLibraryTests()` target: **PASS 42 / FAIL 0 / SKIP 1** (CoreLib v2.3.0, pin 17).
+- **TC-99** `runLibraryTests()` target: **PASS 42 / FAIL 0 / SKIP 1** (CoreLib v2.4.0, pin 17).
   - 38 test lama (Foundation + Gateway + v2.1 + v2.2 + v2.2.2) — tetap PASS.
-  - 4 test baru v2.3.0: `testTodayIsoLocalV230`, `testDateKey10V230`, `testPaginateV230`, `testMatchSearchV230`.
+  - 4 test baru v2.4.0: `testTodayIsoLocalV230`, `testDateKey10V230`, `testPaginateV230`, `testMatchSearchV230`.
   - SKIP wajar: `testCacheIsolation` (butuh `TEST_SPREADSHEET_ID_B` di Script Properties).
 
-### §2 Adopsi CoreLib v2.3.0 — `testAdopsiG18d()`
+### §2 Adopsi CoreLib v2.4.0 — `testAdopsiG18d()`
 
 Dijalankan sebagai `testAdopsiG18d()` di `99_TestSuite.gs` — **murni in-memory**.
 
@@ -253,11 +253,11 @@ RINGKASAN DOMAIN: PASS=20 / FAIL=0 / SKIP=0
 | App | Total asersi | Komposisi |
 |---|---|---|
 | **si-kompetensi** v6.0.1 | **85** | 42 + 13 + 16 + 14 |
-| **si-lahar** v2.1.0 | **68** | 42 + 13 + 13 |
+| **si-kinerja-harian** v2.1.0 | **68** | 42 + 13 + 13 |
 | **starter-kit** v2.0.1 | **~108** | 42 + 13 + 35 + 18 |
 | **SI-ARSIP** v1.0.0 | **~100** | 42 + 13 + 25 + 20 |
 
-**Konteks**: SI-ARSIP punya asersi lebih banyak dari si-kompetensi & si-lahar di Fase 1 karena domain surat-menyurat punya lebih banyak workflow (transisi status, ownership guard, disposisi berjenjang).
+**Konteks**: SI-ARSIP punya asersi lebih banyak dari si-kompetensi & si-kinerja-harian di Fase 1 karena domain surat-menyurat punya lebih banyak workflow (transisi status, ownership guard, disposisi berjenjang).
 
 ## Fase 2 (v1.1, 2026-09-20) — test terhitung di `runDomainTestsSIArsip()`
 

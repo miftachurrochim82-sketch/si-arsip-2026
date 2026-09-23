@@ -269,7 +269,7 @@ Fase 1 selesai bila semua berikut **TERPENUHI**:
 - ✅ Dark mode & mobile-friendly.
 
 **Non-fungsional**:
-- ✅ Pin CoreLib **15** (v2.3.0).
+- ✅ Pin CoreLib **17** (v2.4.0).
 - ✅ CDN **`@v2.9.1 (1 CSS+9 JS)`** (tag, bukan `@main`).
 - ✅ Vue **`3.5.42`**.
 - ✅ 10 sheet skema terbentuk via `initDatabase()`.

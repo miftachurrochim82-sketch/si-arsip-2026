@@ -4,7 +4,7 @@
 > Amendemen v1.8: E1-E8 TUTUP. v1.7: A6-A10. v1.6: A3-A5. v1.5: L4/L5/L11/L12 TUTUP (paket hemat). P10 G39 HIDUP via FR-69.
 
 > Modul & user story. Satu modul = satu "kamar" backend/frontend (pola si-kompetensi
-> & si-lahar: `V_*.html` per halaman + `J_*.html` per modul logika).
+> & si-kinerja-harian: `V_*.html` per halaman + `J_*.html` per modul logika).
 >
 > **Versi awal (v1.0.0)** — MVP: Surat Masuk + Surat Keluar + Disposisi sederhana +
 > Master + Dashboard dasar. Fase 2: Naskah Dinas, Kearsipan & Retensi, Pencarian Lintas,
@@ -193,8 +193,8 @@
 
 - **CoreLib-First**: dispatcher `CoreLib.dispatchAction` + `actionLevels` fail-closed; hook P1/P2 (gen-id + kunci field verifikasi); filter soft-delete otomatis di `getSheetData_`; `todayIsoLocal()` untuk tanggal WIB.
 - **CDN-First**: seluruh UI via `<app-*>`. Tombol aksi pakai `.btn-icon` / `.btn-icon-danger`.
-- **Struktur modular**: `V_*.html` per halaman + `J_*.html` per modul logika (pola si-kompetensi & si-lahar).
-- **Pin CoreLib 15** + **CDN `@v2.9.1 (1 CSS+9 JS)`** + **Vue 3.5.42**.
+- **Struktur modular**: `V_*.html` per halaman + `J_*.html` per modul logika (pola si-kompetensi & si-kinerja-harian).
+- **Pin CoreLib 17** + **CDN `@v2.9.1 (1 CSS+9 JS)`** + **Vue 3.5.42**.
 
 ## P10 — Roadmap Fase 3 (OPSIONAL — status ROADMAP, BELUM KONTRAK)
 

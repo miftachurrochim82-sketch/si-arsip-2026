@@ -4,7 +4,7 @@
 > Amendemen v1.9 rev2 (2026-09-21): +V_Rtl R1-R5 puncak (generate panel + filter bar + stat 4 card + tabel 7 kolom + progress bar + 2 modal), Index 13 include, menu 11 item (8 operasional incl Laporan+Analisa+Evaluasi+RTL +2 kearsipan+2 sistem), audit frontend V_Rtl badge invalid→app-badge + formatTanggal→fmtTgl + :style object fixed.
 > Shell & komponen kit dipertahankan: `<app-login>`/`<app-sidebar>`/`<app-header>`,
 > `<app-crud-table>`, `<app-filter-bar>`, `<app-badge>`, `<app-modal>`, toast, dark mode.
-> Halaman bisnis = view `V_*` (pola modular si-kompetensi & si-lahar). Modal dipusatkan
+> Halaman bisnis = view `V_*` (pola modular si-kompetensi & si-kinerja-harian). Modal dipusatkan
 > di `V_Modals.html`.
 >
 > Rujukan: SRIKANDI (ANRI), Permendagri 78/2012.
@@ -56,7 +56,7 @@ Semua modal pakai kit `<app-modal>`:
 ## Shell & arsitektur file
 
 `Index.html` = **shell tipis**:
-- Pin CDN `@v2.9.1 (1 CSS+9 JS)` (4 aset: `app-common.min.css`, `app-components.min.js`, `app-core.min.js`, `app-modules.min.js`).
+- Pin CDN `@v2.9.1 (1 CSS+9 JS)` (10 aset (1 CSS+9 JS): `app-common.min.css` + 9 JS (`app-core`, `app-components`, `app-modules`, `app-layout`, `app-ui`, `app-forms`, `app-data`, `app-charts`, `app-workflow`)).
 - Vue 3.5.42 + Font Awesome 6.5.2 + Tailwind Play.
 - Identitas tema `:root` (`--primary-*`) — **warna SI-ARSIP: biru tua** (khas kearsipan).
 - Boot dark-mode: kunci `siarsip_dark`.
@@ -100,9 +100,9 @@ Semua modal pakai kit `<app-modal>`:
 - **Modal v1.10**: migrasi dari `:show="showX"` → `v-if="showX" @close="showX=false"` + :title + size md/lg/2xl/3xl + @confirm + loading spinner `fa-spinner fa-spin`. Ukuran: konfirmasi md, form master lg, transaksi 2xl, detail panjang 3xl. Acceptance: :show= 0.
 
 - **Opsi waktu dinamis**: pemilih tahun/bulan SELALU computed (tahun ini ±2), **tidak pernah hardcode**.
-- **Tombol aksi tabel**: 32×32 pakai `.btn-icon` / `.btn-icon-danger` (kit CDN v2.8.0/F2).
+- **Tombol aksi tabel**: 32×32 pakai `.btn-icon` / `.btn-icon-danger` (kit CDN v2.9.1/F2).
 
-## Komponen kit yang dipakai (v2.8.1)
+## Komponen kit yang dipakai (v2.9.1)
 
 | Komponen | Dipakai di |
 |---|---|
@@ -119,7 +119,7 @@ Semua modal pakai kit `<app-modal>`:
 | `<app-pegawai-picker>` | Modal Form Pejabat (pilih pegawai dari SIMPEG) |
 | `<app-settings>` (modul kit) | `V_Pengaturan.html` |
 
-**Kelas CSS kit yang dipakai**: `.card`, `.btn*`, `.btn-icon`, `.btn-icon-danger`, `.btn-lg`, `.btn-aksi`, `.input`, `.form-label`, `.badge*`, `.toast-*`, `.modal-backdrop`, `.modal-content`, `.table-scroll`, `.animate-fade-in`, `.line-clamp-1/2` — semua dari `app-common.css` v2.8.1.
+**Kelas CSS kit yang dipakai**: `.card`, `.btn*`, `.btn-icon`, `.btn-icon-danger`, `.btn-lg`, `.btn-aksi`, `.input`, `.form-label`, `.badge*`, `.toast-*`, `.modal-backdrop`, `.modal-content`, `.table-scroll`, `.animate-fade-in`, `.line-clamp-1/2` — semua dari `app-common.css` v2.9.1.
 
 **Helper kit**:
 - `AppCore.paginate(list, page, perPage)` + `AppCore.pageCount(list, perPage)` — untuk paginasi client-side.
@@ -135,7 +135,7 @@ Semua modal pakai kit `<app-modal>`:
 - **Kartu detail surat** di dalam modal detail — layout khusus (2 kolom: info + disposisi timeline).
 - **Timeline disposisi** di modal Detail Surat — vertikal dengan ikon status.
 
-## Praktik baik yang diadopsi (dari si-kompetensi & si-lahar)
+## Praktik baik yang diadopsi (dari si-kompetensi & si-kinerja-harian)
 
 | # | Adopsi | Item kode |
 |---|---|---|

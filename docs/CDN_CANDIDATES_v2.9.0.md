@@ -5,14 +5,14 @@
 
 ## Ringkasan Pola Baru v1.10
 
-| Pola | Muncul di | Status di v2.8.1 | Usulan v2.9.0 |
+| Pola | Muncul di | Status di v2.9.1 | Usulan v2.9.0 |
 |---|---|---|---|
 | `min-w-[...]` di th + `table-scroll` wrapper | 11 V_* (59 hits) | `table-scroll` sudah ada, tapi `min-w` rule belum di doc | **Dokumentasi + contoh** di CDN_SNIPPET, bukan CSS baru — cukup panduan |
-| `app-stat-card` untuk KPI | 56 usage (Dashboard 4, Rtl 4, Laporan 7, Analisa 8, Evaluasi 28) | sudah ada di CDN v2.8.1 | **Tetap**, tidak perlu baru — hanya pastikan subtext prop dipakai konsisten |
+| `app-stat-card` untuk KPI | 56 usage (Dashboard 4, Rtl 4, Laporan 7, Analisa 8, Evaluasi 28) | sudah ada di CDN v2.9.1 | **Tetap**, tidak perlu baru — hanya pastikan subtext prop dipakai konsisten |
 | Badge mapping valid list | 15+ mapping di semua V_* | `app-badge` status sudah ada (aktif/disetujui/ditolak/menunggu/proses/draft/nonaktif dll) | **Tambah helper JS** `AppCore.badgeStatusMap` untuk mapping umum? Atau dokumentasi mapping |
 | Filter bar analytics (label text-[11px] + flex gap-2 items-end) | Laporan L4/L5/L11/L12, Analisa, Evaluasi, Rtl | `app-filter-bar` ada untuk transaksional, tapi untuk analitik masih custom flex | **Kandidat C1**: `.filter-bar-analytics` + `.filter-label` |
 | Progress bar RTL (w-16 h-2 bg-slate-200 rounded + inner emerald width %) | V_Rtl.html | belum ada komponen | **Kandidat C2**: `<app-progress-bar :value="pct" color="emerald" :show-label="true">` atau CSS `.progress-bar` |
-| Pagination btn-icon chevron | 6 halaman (Sm, Sk, Dp, Nd, Arsip, Rtl) | `.btn-icon` sudah ada v2.8.0 | **Tetap**, hanya dokumentasi |
+| Pagination btn-icon chevron | 6 halaman (Sm, Sk, Dp, Nd, Arsip, Rtl) | `.btn-icon` sudah ada v2.9.1 | **Tetap**, hanya dokumentasi |
 | Modal v-if + @close | 11 modal (9 V_Modals + 2 V_Rtl) | `<app-modal>` sudah dukung v-if (Vue) | **Update docs** — contoh migrasi :show→v-if |
 | Label `text-[11px] text-slate-500` | Rtl, Laporan, Analisa, Evaluasi | belum ada class util | **Kandidat C3**: `.form-label-sm` atau `.filter-label` |
 
@@ -47,7 +47,7 @@
 
 **Impact:** 4 file (Laporan, Analisa, Evaluasi, Rtl) bisa pakai class baru, kurangi duplikasi.
 
-**Status:** KANDIDAT — tunggu cek apakah si-lahar & si-kompetensi juga punya pola sama. Jika ya, promosi ke v2.9.0.
+**Status:** KANDIDAT — tunggu cek apakah si-kinerja-harian & si-kompetensi juga punya pola sama. Jika ya, promosi ke v2.9.0.
 
 ---
 
@@ -80,7 +80,7 @@ Props: value (0-100), color (emerald/sky/amber/rose), size (sm/md), show-label b
 
 **Rekomendasi:** Opsi A dulu (CSS ringan) untuk v2.9.0, Opsi B kalau ada ≥3 app butuh.
 
-**Status:** KANDIDAT — simpan dulu di si-arsip, jika si-kompetensi/si-lahar butuh progress, promosi.
+**Status:** KANDIDAT — simpan dulu di si-arsip, jika si-kompetensi/si-kinerja-harian butuh progress, promosi.
 
 ---
 
@@ -103,16 +103,16 @@ Atau pakai `.filter-label` dari C1 (sama).
 | Pola | Alasan tidak naik |
 |---|---|
 | `min-w-[...]` di th | Sudah best practice Tailwind, cukup dokumentasi di 05_UIUX — bukan CSS baru |
-| `table-scroll` | Sudah ada di app-common.css v2.8.1 (shadow/fade) |
-| `btn-icon` / `btn-icon-danger` | Sudah ada v2.8.0 (F2) |
-| `app-stat-card` | Sudah ada v2.8.1, hanya perlu pakai subtext prop |
+| `table-scroll` | Sudah ada di app-common.css v2.9.1 (shadow/fade) |
+| `btn-icon` / `btn-icon-danger` | Sudah ada v2.9.1 (F2) |
+| `app-stat-card` | Sudah ada v2.9.1, hanya perlu pakai subtext prop |
 | `app-badge` status valid | Sudah ada, hanya mapping di app yang perlu konsisten |
 | Modal v-if pattern | Pattern Vue, bukan CSS/JS CDN — cukup update docs |
 
 ## Rencana Promosi (sesuai mandat user: docs-now/code-later + stabilize dulu)
 
 1. **v1.10 ini:** kandidat C1-C3 tetap di si-arsip (tidak ubah CDN). Tandai sebagai kandidat di doc ini.
-2. **Langkah 2 (setelah frontend stabil):** cek si-kompetensi & si-lahar — apakah punya pola filter analytics & progress bar juga?
+2. **Langkah 2 (setelah frontend stabil):** cek si-kompetensi & si-kinerja-harian — apakah punya pola filter analytics & progress bar juga?
 3. **Jika YA (≥2 app butuh):** buat branch `feat/v2.9.0-c1-c3` di `libs/frontend-cdn`, tambah CSS di `app-common.css` + komponen di `app-components.js` jika perlu, `npm run build`, test harness 20/20 PASS, tag `v2.9.0`, update `Index.html` pin `@v2.9.0`.
 4. **Jika TIDAK:** biarkan sebagai pola lokal si-arsip, tidak naik CDN.
 
