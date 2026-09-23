@@ -56,7 +56,7 @@ Semua modal pakai kit `<app-modal>`:
 ## Shell & arsitektur file
 
 `Index.html` = **shell tipis**:
-- Pin CDN `@v2.8.1` (4 aset: `app-common.min.css`, `app-components.min.js`, `app-core.min.js`, `app-modules.min.js`).
+- Pin CDN `@v2.9.1 (1 CSS+9 JS)` (4 aset: `app-common.min.css`, `app-components.min.js`, `app-core.min.js`, `app-modules.min.js`).
 - Vue 3.5.42 + Font Awesome 6.5.2 + Tailwind Play.
 - Identitas tema `:root` (`--primary-*`) — **warna SI-ARSIP: biru tua** (khas kearsipan).
 - Boot dark-mode: kunci `siarsip_dark`.

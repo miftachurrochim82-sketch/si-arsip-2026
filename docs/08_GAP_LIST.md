@@ -52,7 +52,7 @@ skop **kantor Satpol PP & Damkar**, dengan kemungkinan perluasan ke SKPD lain di
 | G1 | Skema 10 sheet + initDatabase | Fondasi | ✅ TUTUP (v1.0) |
 | G2 | Bridge CoreLib + `getAppConfig_()` + hook P1/P2 | Fondasi | ✅ TUTUP (v1.0) |
 | G3 | Dispatcher `CoreLib.dispatchAction` + `actionLevels` | Fondasi | ✅ TUTUP (v1.0) |
-| G4 | Frontend shell (`Index.html` + kit CDN `@v2.8.1`) | Fondasi | ✅ TUTUP (v1.0) |
+| G4 | Frontend shell (`Index.html` + kit CDN `@v2.9.1 (1 CSS+9 JS)`) | Fondasi | ✅ TUTUP (v1.0) |
 | G5 | Auth SSO native CoreLib (login/logout/session) | Fondasi | ✅ TUTUP (v1.0) |
 | G6 | Master Klasifikasi (M1) — CRUD admin | Fitur | ✅ TUTUP (v1.0) |
 | G7 | Master Pejabat (M2) — CRUD admin + sinkron SIMPEG | Fitur | ✅ TUTUP (v1.0) |
@@ -194,8 +194,8 @@ skop **kantor Satpol PP & Damkar**, dengan kemungkinan perluasan ke SKPD lain di
 | **Multi-kantor belum siap** | Hanya 1 kantor bisa pakai | Arsitektur single-tenant dulu; multi-tenant di fase 3 |
 | **Integrasi SI-LAHAR belum ada** | Surat tugas harus input 2× (di SI-ARSIP & SI-LAHAR) | Integrasi di fase 3 |
 | **Kontaminasi Cloudflare saat paste** | Kode error misterius | Selalu cek ekor file; paste dari sumber tepercaya |
-| **Tag CDN salah / @main** | Versi tidak stabil | Selalu pakai tag `@v2.8.1` eksplisit |
-| **Pin CoreLib tidak sinkron** | `todayIsoLocal` not function | Cek pin 15 di `appsscript.json` |
+| **Tag CDN salah / @main** | Versi tidak stabil | Selalu pakai tag `@v2.9.1 (1 CSS+9 JS)` eksplisit |
+| **Pin CoreLib tidak sinkron** | `todayIsoLocal` not function | Cek pin 17 di `appsscript.json` |
 
 ---
 
@@ -270,7 +270,7 @@ Fase 1 selesai bila semua berikut **TERPENUHI**:
 
 **Non-fungsional**:
 - ✅ Pin CoreLib **15** (v2.3.0).
-- ✅ CDN **`@v2.8.1`** (tag, bukan `@main`).
+- ✅ CDN **`@v2.9.1 (1 CSS+9 JS)`** (tag, bukan `@main`).
 - ✅ Vue **`3.5.42`**.
 - ✅ 10 sheet skema terbentuk via `initDatabase()`.
 - ✅ Fail-closed dispatcher (aksi tak dikenal ditolak).
@@ -301,8 +301,8 @@ Fase 1 selesai bila semua berikut **TERPENUHI**:
 - **Total 35/35 TUTUP per v1.9**
 
 **Kesehatan keseluruhan**:
-- **Backend**: 100% akan pakai CoreLib-First (pin 15).
-- **Frontend**: 100% akan pakai CDN kit `@v2.8.1`.
+- **Backend**: 100% akan pakai CoreLib-First (pin 17).
+- **Frontend**: 100% akan pakai CDN kit `@v2.9.1 (1 CSS+9 JS)`.
 - **Dokumen**: 9 dokumen `docs/` (dalam proses penulisan — 8 selesai, 1 tersisa).
 - **Test**: target ~100 asersi untuk Fase 1.
 

@@ -15,7 +15,7 @@
 | Ukuran sukses (**diusulkan**) | (a) ≥90% surat masuk/keluar tercatat ≤1 hari kerja; (b) 0 surat tanpa nomor resmi; (c) pencarian surat ≤30 detik; (d) 100% surat ter-disposisi ≤2 hari kerja; (e) waktu buat laporan bulanan turun dari 4 jam → 10 menit |
 | BATAS | Tidak mengelola kepegawaian (SIMPEG), user/role (SI-PLATFORM), TTE (BSrE = fase lanjut); upload file biner ke Drive = fase 2 (v1 = link); integrasi SIASN = fase lanjut |
 | Wali data | Pemilik aplikasi (user) — perubahan skema wajib amendemen docs (Gate 0) |
-| App ekosistem | `si-platform` (SSO), SIMPEG (referensi pegawai & unit), **CoreLib pin 15**, **CDN v2.8.1**, `si-lahar` (integrasi fase 2) |
+| App ekosistem | `si-platform` (SSO), SIMPEG (referensi pegawai & unit), **CoreLib pin 17**, **CDN v2.8.1**, `si-lahar` (integrasi fase 2) |
 
 ## Nilai bisnis
 
@@ -44,7 +44,7 @@
 ## Kepatuhan platform (ekosistem)
 
 - **CoreLib First**: seluruh util generik (tanggal, paginasi, pencarian, whitelist, role)
-  pakai CoreLib v2.3.0 pin 15. Tanggal sadar-WIB: `todayIsoLocal()`, `dateKey10()`.
+  pakai CoreLib v2.3.0 pin 17. Tanggal sadar-WIB: `todayIsoLocal()`, `dateKey10()`.
 - **CDN kit v2.8.1**: seluruh UI pakai `<app-*>` kit. `.btn-icon`/`.btn-icon-danger` untuk
   aksi tabel.
 - **Struktur modular**: `V_*.html` per halaman + `J_*.html` per modul logika.

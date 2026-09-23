@@ -7,8 +7,8 @@ berbasis **Google Apps Script**, anggota ekosistem Pemkab Trenggalek.
 ## 📌 Dependensi ekosistem
 | Paket | Versi |
 |---|---|
-| CoreLib (library GAS) | pin **15** (v2.3.0) |
-| Frontend CDN jsDelivr | **@v2.8.1** |
+| CoreLib (library GAS) | pin **17** (v2.4.0) |
+| Frontend CDN jsDelivr | **@v2.9.1 (1 CSS+9 JS)** |
 | Blueprint struktur | starter-kit (Index shell + `V_*`/`J_*` modular) |
 | Portal SSO & master | si-platform + SIMPEG (referensi read-only) |
 

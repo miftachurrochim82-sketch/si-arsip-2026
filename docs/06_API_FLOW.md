@@ -366,7 +366,7 @@ dedup otomatis untuk aksi baca (`get_*`, `*_get_*`, `dashboard`, `analytics`).
 [Script Properties] terupdate
 ```
 
-## Adopsi CoreLib v2.3.0 (pin 15)
+## Adopsi CoreLib v2.3.0 (pin 17)
 
 Tidak ada aksi API baru karena pin sudah di 15. Yang dipakai:
 

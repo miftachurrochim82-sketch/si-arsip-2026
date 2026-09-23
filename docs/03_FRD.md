@@ -172,7 +172,7 @@
 
 ## Kepatuhan CDN-First (v1.0.0)
 
-- **FR-48** Seluruh UI pakai kit CDN `@v2.8.1`: `<app-badge>`, `<app-modal>`, `<app-crud-table>`, `<app-filter-bar>`, `<app-stat-card>`, `<app-chart-bar>` / `<app-chart-doughnut>`, `<app-pegawai-picker>`, `<app-empty-state>`, `<app-skeleton>`, `<app-login>`, `<app-sidebar>`, `<app-header>`, `<app-settings>`.
+- **FR-48** Seluruh UI pakai kit CDN `@v2.9.1 (1 CSS+9 JS)`: `<app-badge>`, `<app-modal>`, `<app-crud-table>`, `<app-filter-bar>`, `<app-stat-card>`, `<app-chart-bar>` / `<app-chart-doughnut>`, `<app-pegawai-picker>`, `<app-empty-state>`, `<app-skeleton>`, `<app-login>`, `<app-sidebar>`, `<app-header>`, `<app-settings>`.
   - Frontend: seluruh `V_*.html`.
 
 - **FR-49** Tombol aksi tabel pakai `.btn-icon` / `.btn-icon-danger` (kit CDN v2.8.0/F2).
@@ -191,7 +191,7 @@
 
 ## Test (target v1.0.0)
 
-- **FR-54** `runLibraryTests()` — regression CoreLib pin 15 (target PASS 42 / FAIL 0 / SKIP 1).
+- **FR-54** `runLibraryTests()` — regression CoreLib pin 17 (target PASS 42 / FAIL 0 / SKIP 1).
   - Backend: `99_TestSuite.gs`.
 
 - **FR-55** `testAdopsiG18d()` — verifikasi util CoreLib v2.3.0 (target 13/13).
@@ -281,7 +281,7 @@
 | `03_SuratMasukApi.gs` / `04_SuratKeluarApi.gs` / `05_DisposisiApi.gs` | ADA | CRUD + generator nomor + transisi + SLA |
 | `09_DashboardApi.gs` | ADA | ringkas, tren, klasifikasi, surat kritis, disposisi lewat SLA |
 | `99_TestSuite.gs` | ADA | runAllTestsSIArsip (adopsi CoreLib + registri handler + domain + guard SIMPEG + skema) |
-| `appsscript.json` | DITAMBAHKAN 2026-09-20 | manifest V8, CoreLib pin 15, timeZone Asia/Jakarta |
+| `appsscript.json` | DITAMBAHKAN 2026-09-20 | manifest V8, CoreLib pin 17, timeZone Asia/Jakarta |
 | `06_KearsipanApi.gs` | RENCANA v1.1 | T5 arsip: retensi berjalan, daftar musnah/serah, pencarian global lintas T1/T2/T3 |
 
 ### Frontend (`src/*.html`) — RENCANA v1 (cetak starter-kit)

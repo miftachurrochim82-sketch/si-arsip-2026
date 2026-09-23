@@ -122,7 +122,7 @@ Atau pakai `.filter-label` dari C1 (sama).
 - [ ] CSS baru tidak break existing (test harness PASS)
 - [ ] Docs CDN_SNIPPET.md update contoh pemakaian
 - [ ] Tag v2.9.0 + jsDelivr cache purge (tunggu 5 menit)
-- [ ] Semua app konsumen update pin dari `@v2.8.1` → `@v2.9.0` (Index.html)
+- [ ] Semua app konsumen update pin dari `@v2.9.1 (1 CSS+9 JS)` → `@v2.9.0` (Index.html)
 
 ## Catatan Tema
 

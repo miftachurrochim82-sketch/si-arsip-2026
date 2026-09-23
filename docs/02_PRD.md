@@ -194,7 +194,7 @@
 - **CoreLib-First**: dispatcher `CoreLib.dispatchAction` + `actionLevels` fail-closed; hook P1/P2 (gen-id + kunci field verifikasi); filter soft-delete otomatis di `getSheetData_`; `todayIsoLocal()` untuk tanggal WIB.
 - **CDN-First**: seluruh UI via `<app-*>`. Tombol aksi pakai `.btn-icon` / `.btn-icon-danger`.
 - **Struktur modular**: `V_*.html` per halaman + `J_*.html` per modul logika (pola si-kompetensi & si-lahar).
-- **Pin CoreLib 15** + **CDN `@v2.8.1`** + **Vue 3.5.42**.
+- **Pin CoreLib 15** + **CDN `@v2.9.1 (1 CSS+9 JS)`** + **Vue 3.5.42**.
 
 ## P10 — Roadmap Fase 3 (OPSIONAL — status ROADMAP, BELUM KONTRAK)
 

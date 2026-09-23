@@ -11,7 +11,7 @@
 > `success`/`code`. Satu baris TC = satu assert kelompok.
 >
 > **Target per 2026-09-20**:
-> - `runLibraryTests()` — **PASS 42 / FAIL 0 / SKIP 1** (CoreLib v2.3.0, pin 15).
+> - `runLibraryTests()` — **PASS 42 / FAIL 0 / SKIP 1** (CoreLib v2.3.0, pin 17).
 > - `testAdopsiG18d()` — **13 asersi PASS** (verifikasi delegasi util CoreLib).
 > - `testDispatcherRouting()` — **≥25 asersi PASS** (registry handler + fail-closed).
 > - `runDomainTestsSIArsip()` — **≥20 asersi PASS** (domain MVP: surat masuk, surat
@@ -151,7 +151,7 @@
 
 ### §1 Regression CoreLib
 
-- **TC-99** `runLibraryTests()` target: **PASS 42 / FAIL 0 / SKIP 1** (CoreLib v2.3.0, pin 15).
+- **TC-99** `runLibraryTests()` target: **PASS 42 / FAIL 0 / SKIP 1** (CoreLib v2.3.0, pin 17).
   - 38 test lama (Foundation + Gateway + v2.1 + v2.2 + v2.2.2) — tetap PASS.
   - 4 test baru v2.3.0: `testTodayIsoLocalV230`, `testDateKey10V230`, `testPaginateV230`, `testMatchSearchV230`.
   - SKIP wajar: `testCacheIsolation` (butuh `TEST_SPREADSHEET_ID_B` di Script Properties).

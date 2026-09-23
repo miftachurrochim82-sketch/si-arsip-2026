@@ -14,7 +14,7 @@
 //   - Call-site di 03/04 sudah pakai nama *_ (underscore), jadi wrapper
 //     menjaga konsistensi & menambah guard SIPMEG.
 //
-// Rujukan CoreLib v2.3.0 (pin 15) — signature terverifikasi dari kode asli:
+// Rujukan CoreLib v2.3.0 (pin 17) — signature terverifikasi dari kode asli:
 //   CoreLib.writeRecordNoLock(ssId, sheetName, record, isUpdate, actor,
 //                             headersMap, isRefSheetFunc, pkField)
 //     → TANPA lock, TANPA preSaveHook, cache AUTO-invalidate.
